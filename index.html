@@ -37971,6 +37971,72 @@ Easily access and review students' academic performance here. This section provi
                 </button>
             </div>
         </div>
+
+        <!-- HOD Password Panel -->
+        <div class="role-modal-selection" id="hodPasswordPanel" style="display: none; opacity: 0; transform: translateY(20px); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);">
+            <div class="role-modal-header">
+                <h2>Head of Department</h2>
+                <p>Enter your HOD password to login</p>
+            </div>
+
+            <div class="role-password-input-group" style="margin: 20px 0;">
+                <label for="hodPasswordInput">Password</label>
+                <input 
+                    type="password" 
+                    id="hodPasswordInput" 
+                    placeholder="Enter HOD password"
+                    onkeypress="if(event.key==='Enter') verifyHODPassword()"
+                    style="width: 100%; padding: 12px 16px; background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; color: #1f2937; font-size: 1rem; outline: none; transition: all 0.3s;"
+                />
+                <p id="hodPasswordError" style="color: #dc2626; font-size: 0.85rem; margin-top: 8px; display: none; font-weight: 600;"></p>
+            </div>
+
+            <div class="role-selection-footer">
+                <a onclick="backFromHODPassword()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    Back to roles
+                </a>
+                <button onclick="verifyHODPassword()" style="display: flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border: none; border-radius: 8px; padding: 10px 20px; font-size: 1rem; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); transition: all 0.3s;">
+                    <i class="fas fa-check"></i> Login
+                </button>
+            </div>
+        </div>
+
+        <!-- Admin Password Panel -->
+        <div class="role-modal-selection" id="adminPasswordPanel" style="display: none; opacity: 0; transform: translateY(20px); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);">
+            <div class="role-modal-header">
+                <h2>Principal / Administrator</h2>
+                <p>Enter your admin password to login</p>
+            </div>
+
+            <div class="role-password-input-group" style="margin: 20px 0;">
+                <label for="adminPasswordInput">Password</label>
+                <input 
+                    type="password" 
+                    id="adminPasswordInput" 
+                    placeholder="Enter admin password"
+                    onkeypress="if(event.key==='Enter') verifyAdminPassword()"
+                    style="width: 100%; padding: 12px 16px; background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; color: #1f2937; font-size: 1rem; outline: none; transition: all 0.3s;"
+                />
+                <p id="adminPasswordError" style="color: #dc2626; font-size: 0.85rem; margin-top: 8px; display: none; font-weight: 600;"></p>
+            </div>
+
+            <div class="role-selection-footer">
+                <a onclick="backFromAdminPassword()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    Back to roles
+                </a>
+                <button onclick="verifyAdminPassword()" style="display: flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; border: none; border-radius: 8px; padding: 10px 20px; font-size: 1rem; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3); transition: all 0.3s;">
+                    <i class="fas fa-check"></i> Login
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -50683,14 +50749,224 @@ function restoreTeacherZonePhoto() {
                 // For teacher role, show faculty users list with animation IN SAME MODAL
                 if (currentSelectedRole === 'teacher') {
                     showFacultyUserSelectionAnimated();
-                } else {
-                    // For other roles, show password modal
-                    document.getElementById('roleSelectionOverlay').classList.add('hidden');
-                    showRolePasswordModal();
+                } else if (currentSelectedRole === 'hod') {
+                    // For HOD role, show HOD password panel in same modal
+                    showHODPasswordPanel();
+                } else if (currentSelectedRole === 'admin') {
+                    // For Admin role, show Admin password panel in same modal
+                    showAdminPasswordPanel();
                 }
                 
                 continueBtn.disabled = false;
             }, 300);
+        }
+
+        function showHODPasswordPanel() {
+            try {
+                const roleSelectionPanel = document.getElementById('roleSelectionPanel');
+                const hodPasswordPanel = document.getElementById('hodPasswordPanel');
+                
+                if (!roleSelectionPanel || !hodPasswordPanel) {
+                    console.error('HOD password panel not found');
+                    return;
+                }
+                
+                // Animate role selection out
+                roleSelectionPanel.style.opacity = '0';
+                roleSelectionPanel.style.transform = 'translateY(-20px)';
+                
+                setTimeout(() => {
+                    roleSelectionPanel.style.display = 'none';
+                    hodPasswordPanel.style.display = 'block';
+                    
+                    // Clear and focus input
+                    document.getElementById('hodPasswordInput').value = '';
+                    document.getElementById('hodPasswordError').style.display = 'none';
+                    
+                    // Animate panel in
+                    setTimeout(() => {
+                        hodPasswordPanel.style.opacity = '1';
+                        hodPasswordPanel.style.transform = 'translateY(0)';
+                        document.getElementById('hodPasswordInput').focus();
+                    }, 50);
+                }, 400);
+            } catch (e) {
+                console.error('Error showing HOD password panel:', e);
+            }
+        }
+
+        function showAdminPasswordPanel() {
+            try {
+                const roleSelectionPanel = document.getElementById('roleSelectionPanel');
+                const adminPasswordPanel = document.getElementById('adminPasswordPanel');
+                
+                if (!roleSelectionPanel || !adminPasswordPanel) {
+                    console.error('Admin password panel not found');
+                    return;
+                }
+                
+                // Animate role selection out
+                roleSelectionPanel.style.opacity = '0';
+                roleSelectionPanel.style.transform = 'translateY(-20px)';
+                
+                setTimeout(() => {
+                    roleSelectionPanel.style.display = 'none';
+                    adminPasswordPanel.style.display = 'block';
+                    
+                    // Clear and focus input
+                    document.getElementById('adminPasswordInput').value = '';
+                    document.getElementById('adminPasswordError').style.display = 'none';
+                    
+                    // Animate panel in
+                    setTimeout(() => {
+                        adminPasswordPanel.style.opacity = '1';
+                        adminPasswordPanel.style.transform = 'translateY(0)';
+                        document.getElementById('adminPasswordInput').focus();
+                    }, 50);
+                }, 400);
+            } catch (e) {
+                console.error('Error showing Admin password panel:', e);
+            }
+        }
+
+        function backFromHODPassword() {
+            try {
+                const roleSelectionPanel = document.getElementById('roleSelectionPanel');
+                const hodPasswordPanel = document.getElementById('hodPasswordPanel');
+                
+                // Animate HOD panel out
+                hodPasswordPanel.style.opacity = '0';
+                hodPasswordPanel.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    hodPasswordPanel.style.display = 'none';
+                    roleSelectionPanel.style.display = 'block';
+                    
+                    // Animate role selection in
+                    setTimeout(() => {
+                        roleSelectionPanel.style.opacity = '1';
+                        roleSelectionPanel.style.transform = 'translateY(0)';
+                    }, 50);
+                }, 400);
+                
+                // Reset
+                currentRoleSelection = null;
+                const continueBtn = document.getElementById('continue-btn-role');
+                if (continueBtn) {
+                    continueBtn.classList.add('disabled');
+                    continueBtn.classList.remove('active');
+                }
+            } catch (e) {
+                console.error('Error in backFromHODPassword:', e);
+            }
+        }
+
+        function backFromAdminPassword() {
+            try {
+                const roleSelectionPanel = document.getElementById('roleSelectionPanel');
+                const adminPasswordPanel = document.getElementById('adminPasswordPanel');
+                
+                // Animate Admin panel out
+                adminPasswordPanel.style.opacity = '0';
+                adminPasswordPanel.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    adminPasswordPanel.style.display = 'none';
+                    roleSelectionPanel.style.display = 'block';
+                    
+                    // Animate role selection in
+                    setTimeout(() => {
+                        roleSelectionPanel.style.opacity = '1';
+                        roleSelectionPanel.style.transform = 'translateY(0)';
+                    }, 50);
+                }, 400);
+                
+                // Reset
+                currentRoleSelection = null;
+                const continueBtn = document.getElementById('continue-btn-role');
+                if (continueBtn) {
+                    continueBtn.classList.add('disabled');
+                    continueBtn.classList.remove('active');
+                }
+            } catch (e) {
+                console.error('Error in backFromAdminPassword:', e);
+            }
+        }
+
+        function verifyHODPassword() {
+            try {
+                const password = document.getElementById('hodPasswordInput').value;
+                const errorEl = document.getElementById('hodPasswordError');
+                
+                errorEl.style.display = 'none';
+                errorEl.textContent = '';
+                
+                if (!password) {
+                    errorEl.textContent = 'Please enter your password';
+                    errorEl.style.display = 'block';
+                    return;
+                }
+                
+                // HOD password verification
+                if (password !== 'hod123') {
+                    errorEl.textContent = 'Invalid HOD password';
+                    errorEl.style.display = 'block';
+                    document.getElementById('hodPasswordInput').value = '';
+                    return;
+                }
+                
+                // Password verified!
+                sessionStorage.setItem('userRole', 'hod');
+                
+                // Hide modal and show 2FA
+                document.getElementById('roleSelectionOverlay').classList.add('hidden');
+                
+                setTimeout(() => {
+                    show2FAModal();
+                }, 300);
+            } catch (e) {
+                console.error('Error verifying HOD password:', e);
+                document.getElementById('hodPasswordError').textContent = 'Error verifying password';
+                document.getElementById('hodPasswordError').style.display = 'block';
+            }
+        }
+
+        function verifyAdminPassword() {
+            try {
+                const password = document.getElementById('adminPasswordInput').value;
+                const errorEl = document.getElementById('adminPasswordError');
+                
+                errorEl.style.display = 'none';
+                errorEl.textContent = '';
+                
+                if (!password) {
+                    errorEl.textContent = 'Please enter your password';
+                    errorEl.style.display = 'block';
+                    return;
+                }
+                
+                // Admin password verification
+                if (password !== 'admin123') {
+                    errorEl.textContent = 'Invalid admin password';
+                    errorEl.style.display = 'block';
+                    document.getElementById('adminPasswordInput').value = '';
+                    return;
+                }
+                
+                // Password verified!
+                sessionStorage.setItem('userRole', 'admin');
+                
+                // Hide modal and show 2FA
+                document.getElementById('roleSelectionOverlay').classList.add('hidden');
+                
+                setTimeout(() => {
+                    show2FAModal();
+                }, 300);
+            } catch (e) {
+                console.error('Error verifying Admin password:', e);
+                document.getElementById('adminPasswordError').textContent = 'Error verifying password';
+                document.getElementById('adminPasswordError').style.display = 'block';
+            }
         }
 
         function showFacultyUserSelectionAnimated() {
