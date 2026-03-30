@@ -717,6 +717,15 @@ app.post('/api/qr-checkins', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ============================================================
+// START SERVER
+// ============================================================
+app.listen(PORT, () => {
+    console.log(`✅ Server running on port ${PORT}`);
+    console.log(`📍 URL: http://localhost:${PORT}`);
+    console.log(`🗄️  Database: ${process.env.DATABASE_URL ? '✓ Connected' : '✗ Not configured'}`);
+});
+
 // GET /api/qr-checkins/:sessionId  – all check-ins for a session
 app.get('/api/qr-checkins/:sessionId', async (req, res) => {
     try {
