@@ -1,0 +1,3093 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Management System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Railway API Integration (No Supabase) -->
+    <script>
+        // Railway API Configuration
+        const RAILWAY_CONFIG = {
+            api_base: (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+                ? `http://localhost:${window.location.port || 3000}/api`
+                : 'https://jss-railway-fresh-production.up.railway.app/api',
+            version: '1.0.0'
+        };
+
+        console.log('🚂 Railway API configured:', RAILWAY_CONFIG.api_base);
+
+        // Helper function to get API reference
+        window.getRailwayAPI = function() {
+            return RAILWAY_CONFIG.api_base;
+        };
+
+        // Test Railway connection on load
+        async function testRailwayConnection() {
+            try {
+                const response = await fetch(`${RAILWAY_CONFIG.api_base}/students`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                if (response.ok) {
+                    console.log('✅ Railway API connection successful');
+                    window.railwayConnected = true;
+                } else {
+                    console.warn('⚠️ Railway API responded with status:', response.status);
+                    window.railwayConnected = false;
+                }
+            } catch (error) {
+                console.warn('⚠️ Railway API connection failed:', error.message);
+                window.railwayConnected = false;
+            }
+        }
+
+        // Test connection on load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', testRailwayConnection);
+        } else {
+            testRailwayConnection();
+        }
+
+        // Authentication constants - make them globally accessible
+        window.CORRECT_PIN = '575953';
+        window.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    </script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5a67d8;
+            --primary-light: #7c3aed;
+            --secondary: #f093fb;
+            --secondary-dark: #f5576c;
+            --accent: #4facfe;
+            --accent-dark: #00f2fe;
+            --success: #00d4aa;
+            --success-dark: #00b894;
+            --danger: #ff6b6b;
+            --danger-dark: #ee5a52;
+            --warning: #feca57;
+            --warning-dark: #ff9ff3;
+            --info: #48cae4;
+            --info-dark: #0077b6;
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #1a1a1a;
+            --bg-tertiary: #2a2a2a;
+            --bg-glass: rgba(255, 255, 255, 0.08);
+            --bg-glass-dark: rgba(0, 0, 0, 0.3);
+            --text-primary: #ffffff;
+            --text-secondary: #b8bcc8;
+            --text-muted: #6c7293;
+            --border: rgba(255, 255, 255, 0.1);
+            --border-light: rgba(255, 255, 255, 0.05);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.4);
+            --shadow-xl: 0 30px 60px rgba(0, 0, 0, 0.5);
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-accent: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --gradient-success: linear-gradient(135deg, #00d4aa 0%, #00b894 100%);
+            --gradient-danger: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            --gradient-warning: linear-gradient(135deg, #feca57 0%, #ff9ff3 100%);
+            --gradient-bg: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(240, 147, 251, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(79, 172, 254, 0.1) 0%, transparent 50%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            color: white;
+            padding: 30px 0;
+            box-shadow: var(--shadow-xl);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            border-right: 1px solid var(--border);
+            left: 0;
+            top: 0;
+            z-index: 100;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar-header {
+            padding: 0 30px 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+
+        .sidebar-header p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .sidebar-menu {
+            margin-top: 30px;
+        }
+
+        .menu-item {
+            padding: 15px 30px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 1rem;
+            border-left: 4px solid transparent;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            position: relative;
+            margin: 5px 15px;
+            border-radius: 12px;
+        }
+
+        .menu-item:hover {
+            background: var(--bg-glass);
+            border-left-color: var(--primary);
+            transform: translateX(5px);
+        }
+
+        .menu-item.active {
+            background: var(--gradient-primary);
+            border-left-color: var(--primary-light);
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .menu-item i {
+            font-size: 1.2rem;
+            width: 24px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 40px;
+        }
+
+        .content-section {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-header {
+            margin-bottom: 30px;
+        }
+
+        .section-header h1 {
+            font-size: 2rem;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .section-header p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* Card Styles */
+        .card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--border);
+            margin-bottom: 30px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--gradient-primary);
+            opacity: 0.3;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .card-header h3 {
+            font-size: 1.3rem;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .card-header i {
+            font-size: 1.5rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .form-group label i {
+            margin-right: 8px;
+            color: var(--primary);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid var(--border-light);
+            border-radius: 16px;
+            font-size: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: var(--bg-glass);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            color: var(--text-primary);
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            touch-action: manipulation;
+            position: relative;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--bg-glass-dark);
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2), 0 8px 25px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.6;
+        }
+
+        textarea.form-input {
+            resize: vertical;
+            min-height: 120px;
+            font-family: inherit;
+        }
+
+        /* Button Styles */
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-success {
+            background: var(--gradient-success);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 212, 170, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 212, 170, 0.5);
+        }
+
+        .btn-secondary {
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: var(--text-primary);
+            border: 2px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-glass-dark);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        /* Status Buttons */
+        .status-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .status-btn {
+            padding: 20px;
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        .status-btn i {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .status-btn span {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: block;
+        }
+
+        .status-btn.present {
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .status-btn.present:hover,
+        .status-btn.present.selected {
+            background: var(--gradient-success);
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0, 212, 170, 0.3);
+        }
+
+        .status-btn.absent {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .status-btn.absent:hover,
+        .status-btn.absent.selected {
+            background: var(--gradient-danger);
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.3);
+        }
+
+        /* Current Date Time Display */
+        .datetime-display {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .datetime-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .datetime-item i {
+            font-size: 1.3rem;
+        }
+
+        /* Success Message */
+        .success-message {
+            background: linear-gradient(135deg, var(--success) 0%, var(--success-dark) 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            display: none;
+            align-items: center;
+            gap: 15px;
+            animation: slideIn 0.3s ease;
+        }
+
+        .success-message.show {
+            display: flex;
+        }
+
+        .success-message i {
+            font-size: 2rem;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Recent Records */
+        .recent-records {
+            margin-top: 30px;
+        }
+
+        .record-item {
+            background: var(--bg-glass);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 25px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--border-light);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .record-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--gradient-primary);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .record-item:hover {
+            border-color: var(--primary);
+            transform: translateX(8px);
+            background: var(--bg-glass-dark);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .record-item:hover::before {
+            opacity: 1;
+        }
+
+        .record-info h4 {
+            margin-bottom: 5px;
+            color: var(--text-primary);
+        }
+
+        .record-info p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .record-status {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .record-status.present {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 2px solid var(--success);
+        }
+
+        .record-status.absent {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 2px solid var(--danger);
+        }
+
+        .record-status.pending {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+            border: 2px solid var(--warning);
+        }
+
+        .record-status.approved {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 2px solid var(--success);
+        }
+
+        .record-status.rejected {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 2px solid var(--danger);
+        }
+
+        /* Leave Type Selection */
+        .leave-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .leave-type-btn {
+            padding: 20px;
+            border: 2px solid var(--border-light);
+            border-radius: 16px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+            color: var(--text-primary);
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .leave-type-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--gradient-primary);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .leave-type-btn:hover {
+            border-color: var(--primary);
+            background: var(--bg-glass-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+        }
+
+        .leave-type-btn:hover::before {
+            transform: scaleX(1);
+        }
+
+        .leave-type-btn.selected {
+            border-color: var(--primary);
+            background: var(--gradient-primary);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .leave-type-btn.selected::before {
+            transform: scaleX(1);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .leave-type-btn i {
+            font-size: 1.8rem;
+            display: block;
+            margin-bottom: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .leave-type-btn:hover i {
+            transform: scale(1.1);
+        }
+
+        .leave-type-btn span {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        /* Attachment Section */
+        .attachment-section {
+            margin-top: 10px;
+        }
+
+        .attachment-dropzone {
+            border: 2px dashed var(--border-light);
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .attachment-dropzone:hover {
+            border-color: var(--primary);
+            background: var(--bg-glass-dark);
+            transform: translateY(-2px);
+        }
+
+        .attachment-dropzone.dragover {
+            border-color: var(--success);
+            background: rgba(0, 212, 170, 0.1);
+            transform: scale(1.02);
+        }
+
+        .dropzone-content i {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .dropzone-content p {
+            color: var(--text-primary);
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+
+        .browse-link {
+            color: var(--primary);
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .dropzone-content small {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .attachment-list {
+            margin-top: 20px;
+            display: grid;
+            gap: 12px;
+        }
+
+        .attachment-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .attachment-item:hover {
+            background: var(--bg-glass-dark);
+            transform: translateX(5px);
+        }
+
+        .attachment-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: white;
+        }
+
+        .attachment-icon.pdf {
+            background: var(--gradient-danger);
+        }
+
+        .attachment-icon.doc {
+            background: var(--gradient-primary);
+        }
+
+        .attachment-icon.image {
+            background: var(--gradient-success);
+        }
+
+        .attachment-info {
+            flex: 1;
+        }
+
+        .attachment-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            margin-bottom: 2px;
+        }
+
+        .attachment-size {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        .attachment-remove {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .attachment-remove:hover {
+            color: var(--danger);
+            background: rgba(255, 107, 107, 0.1);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+
+        /* Mobile Menu Toggle */
+        .mobile-menu-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .mobile-menu-toggle:active {
+            transform: scale(0.95);
+        }
+
+        .mobile-menu-toggle i {
+            font-size: 1.5rem;
+        }
+
+        /* Mobile Overlay */
+        .mobile-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 99;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .mobile-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Tablet Responsive (769px - 1024px) */
+        @media (max-width: 1024px) and (min-width: 769px) {
+            .sidebar {
+                width: 240px;
+            }
+
+            .main-content {
+                margin-left: 240px;
+                padding: 30px;
+            }
+
+            .section-header h1 {
+                font-size: 1.75rem;
+            }
+
+            .card {
+                padding: 25px;
+            }
+
+            .status-buttons {
+                gap: 15px;
+            }
+
+            .leave-types {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Mobile Responsive (up to 768px) */
+        @media (max-width: 768px) {
+            body {
+                padding-top: 0;
+            }
+
+            .container {
+                flex-direction: column;
+            }
+
+            /* Mobile Menu Toggle */
+            .mobile-menu-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .mobile-overlay {
+                display: block;
+            }
+
+            /* Sidebar Mobile */
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -100%;
+                width: 280px;
+                height: 100vh;
+                z-index: 1000;
+                transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                overflow-y: auto;
+                transform: translateX(0);
+                will-change: left;
+            }
+
+            .sidebar.active {
+                left: 0 !important;
+                transform: translateX(0);
+            }
+
+            .sidebar-header {
+                padding: 20px;
+                padding-top: 80px;
+            }
+
+            .sidebar-header h2 {
+                font-size: 1.3rem;
+            }
+
+            /* Main Content Mobile */
+            .main-content {
+                margin-left: 0;
+                padding: 80px 15px 20px;
+                width: 100%;
+            }
+
+            /* Section Header */
+            .section-header {
+                margin-bottom: 20px;
+            }
+
+            .section-header h1 {
+                font-size: 1.5rem;
+                flex-wrap: wrap;
+            }
+
+            .section-header h1 i {
+                font-size: 1.3rem;
+            }
+
+            .section-header p {
+                font-size: 0.9rem;
+            }
+
+            /* DateTime Display */
+            .datetime-display {
+                flex-direction: column;
+                gap: 12px;
+                padding: 15px;
+                margin-bottom: 20px;
+            }
+
+            .datetime-item {
+                font-size: 1rem;
+                justify-content: center;
+            }
+
+            /* Card Styles */
+            .card {
+                padding: 20px;
+                margin-bottom: 20px;
+                border-radius: 12px;
+            }
+
+            .card-header {
+                margin-bottom: 20px;
+                padding-bottom: 12px;
+            }
+
+            .card-header h3 {
+                font-size: 1.1rem;
+            }
+
+            .card-header i {
+                font-size: 1.3rem;
+            }
+
+            /* Form Groups */
+            .form-group {
+                margin-bottom: 20px;
+            }
+
+            .form-group label {
+                font-size: 0.9rem;
+                margin-bottom: 6px;
+            }
+
+            .form-input {
+                padding: 14px;
+                font-size: 16px; /* Prevents iOS zoom */
+                border-radius: 8px;
+            }
+
+            textarea.form-input {
+                min-height: 100px;
+            }
+
+            /* Status Buttons */
+            .status-buttons {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .status-btn {
+                padding: 18px;
+            }
+
+            .status-btn i {
+                font-size: 2.2rem;
+            }
+
+            .status-btn span {
+                font-size: 1rem;
+            }
+
+            /* Leave Types */
+            .leave-types {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .leave-type-btn {
+                padding: 12px;
+            }
+
+            .leave-type-btn i {
+                font-size: 1.3rem;
+                margin-bottom: 6px;
+            }
+
+            .leave-type-btn span {
+                font-size: 0.85rem;
+            }
+
+            /* Button Group */
+            .btn-group {
+                flex-direction: column;
+                gap: 12px;
+                margin-top: 25px;
+            }
+
+            .btn {
+                width: 100%;
+                padding: 16px 24px;
+                font-size: 1rem;
+            }
+
+            /* Success Message */
+            .success-message {
+                padding: 15px;
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+
+            .success-message i {
+                font-size: 1.5rem;
+            }
+
+            /* Record Items */
+            .record-item {
+                flex-direction: column;
+                gap: 12px;
+                padding: 15px;
+                align-items: flex-start;
+            }
+
+            .record-info h4 {
+                font-size: 1rem;
+            }
+
+            .record-info p {
+                font-size: 0.85rem;
+            }
+
+            .record-status {
+                align-self: flex-start;
+                padding: 6px 12px;
+                font-size: 0.85rem;
+            }
+
+            /* Empty State */
+            .empty-state {
+                padding: 40px 15px;
+            }
+
+            .empty-state i {
+                font-size: 3rem;
+            }
+
+            .empty-state h3 {
+                font-size: 1.1rem;
+            }
+
+            .empty-state p {
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Small Mobile (up to 480px) */
+        @media (max-width: 480px) {
+            .mobile-menu-toggle {
+                width: 45px;
+                height: 45px;
+                top: 15px;
+                left: 15px;
+            }
+
+            .mobile-menu-toggle i {
+                font-size: 1.3rem;
+            }
+
+            .sidebar {
+                width: 260px;
+            }
+
+            .main-content {
+                padding: 70px 12px 15px;
+            }
+
+            .section-header h1 {
+                font-size: 1.3rem;
+            }
+
+            .card {
+                padding: 15px;
+            }
+
+            .card-header h3 {
+                font-size: 1rem;
+            }
+
+            .datetime-display {
+                padding: 12px;
+            }
+
+            .datetime-item {
+                font-size: 0.9rem;
+            }
+
+            .form-input {
+                padding: 12px;
+            }
+
+            .status-btn {
+                padding: 15px;
+            }
+
+            .status-btn i {
+                font-size: 2rem;
+            }
+
+            .leave-types {
+                grid-template-columns: 1fr;
+            }
+
+            .btn {
+                padding: 14px 20px;
+                font-size: 0.95rem;
+            }
+
+            .record-item {
+                padding: 12px;
+            }
+        }
+
+        /* Touch Device Optimizations */
+        @media (hover: none) and (pointer: coarse) {
+            .menu-item:hover {
+                background: transparent;
+            }
+
+            .menu-item:active {
+                background: rgba(255, 255, 255, 0.15);
+            }
+
+            .btn:hover {
+                transform: none;
+            }
+
+            .btn:active {
+                transform: scale(0.98);
+                opacity: 0.9;
+            }
+
+            .status-btn:hover {
+                transform: none;
+            }
+
+            .status-btn:active {
+                transform: scale(0.98);
+            }
+
+            .leave-type-btn:hover {
+                background: #0f172a;
+                border-color: var(--border);
+            }
+
+            .leave-type-btn:active {
+                transform: scale(0.98);
+            }
+
+            .record-item:hover {
+                transform: none;
+            }
+
+            .record-item:active {
+                transform: translateX(3px);
+            }
+        }
+
+        /* Landscape Mobile */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .main-content {
+                padding-top: 70px;
+            }
+
+            .datetime-display {
+                flex-direction: row;
+                gap: 20px;
+            }
+
+            .status-buttons {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .leave-types {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        /* ========== LOGIN SCREEN STYLES ========== */
+        #loginScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: var(--bg-primary);
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(240, 147, 251, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(79, 172, 254, 0.15) 0%, transparent 50%);
+            z-index: 9999;
+            overflow: hidden;
+        }
+
+        #loginScreen.hidden {
+            display: none;
+        }
+
+        #loginScreen::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: moveBackground 20s linear infinite;
+            z-index: 0;
+        }
+
+        @keyframes moveBackground {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .login-container {
+            position: relative;
+            z-index: 1;
+            max-width: 450px;
+            width: 100%;
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 50px 40px;
+            box-shadow: var(--shadow-xl);
+            border: 1px solid var(--border);
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .login-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .login-icon i {
+            font-size: 2.5rem;
+            color: white;
+        }
+
+        .login-header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+
+        .login-header p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .pin-section {
+            margin-bottom: 30px;
+        }
+
+        .pin-section.hidden {
+            display: none;
+        }
+
+        .pin-label {
+            display: block;
+            margin-bottom: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        .pin-label i {
+            color: var(--primary);
+            margin-right: 8px;
+        }
+
+        .pin-inputs {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+
+        .pin-input {
+            width: 60px;
+            height: 70px;
+            text-align: center;
+            font-size: 2rem;
+            font-weight: bold;
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: var(--text-primary);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            -webkit-text-fill-color: var(--text-primary);
+            text-shadow: 0 0 1px rgba(255, 255, 255, 0.5);
+        }
+
+        .pin-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--bg-glass-dark);
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+            transform: scale(1.05);
+            color: var(--text-primary);
+            -webkit-text-fill-color: var(--text-primary);
+        }
+
+        .pin-input.filled {
+            border-color: var(--success);
+            background: rgba(0, 212, 170, 0.2);
+            color: var(--text-primary);
+            -webkit-text-fill-color: var(--text-primary);
+        }
+
+        .pin-input.error {
+            border-color: var(--danger);
+            background: rgba(255, 107, 107, 0.1);
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .biometric-section {
+            display: none;
+            text-align: center;
+            animation: fadeInBio 0.5s ease;
+        }
+
+        .biometric-section.active {
+            display: block;
+        }
+
+        @keyframes fadeInBio {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .biometric-icon {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.5);
+            animation: biometricPulse 1.5s ease-in-out infinite;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .biometric-icon:active {
+            transform: scale(0.95);
+        }
+
+        @keyframes biometricPulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 10px 40px rgba(99, 102, 241, 0.5);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 15px 50px rgba(99, 102, 241, 0.7);
+            }
+        }
+
+        .biometric-icon i {
+            font-size: 3.5rem;
+            color: white;
+        }
+
+        .biometric-text {
+            margin-bottom: 20px;
+        }
+
+        .biometric-text h3 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+
+        .biometric-text p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .login-btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .login-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .login-btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .login-btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .login-btn-secondary {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 2px solid var(--border);
+            margin-top: 15px;
+        }
+
+        .login-btn-secondary:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .login-error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 2px solid var(--danger);
+            color: var(--danger);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            animation: slideDownMsg 0.3s ease;
+        }
+
+        .login-error-message.show {
+            display: flex;
+        }
+
+        @keyframes slideDownMsg {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-error-message i {
+            font-size: 1.3rem;
+        }
+
+        .login-success-message {
+            background: rgba(0, 212, 170, 0.1);
+            border: 2px solid var(--success);
+            color: var(--success);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            animation: slideDownMsg 0.3s ease;
+            box-shadow: 0 0 20px rgba(0, 212, 170, 0.2);
+        }
+
+        .login-success-message.show {
+            display: flex;
+        }
+
+        .login-success-message i {
+            font-size: 1.3rem;
+        }
+
+        .login-loading-spinner {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(99, 102, 241, 0.2);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spinLoader 0.8s linear infinite;
+            margin: 20px auto;
+        }
+
+        .login-loading-spinner.show {
+            display: block;
+        }
+
+        @keyframes spinLoader {
+            to { transform: rotate(360deg); }
+        }
+
+        #mainApp {
+            display: none;
+        }
+
+        #mainApp.active {
+            display: block;
+            animation: portalIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Portal Animation Styles */
+        .portal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-primary);
+            z-index: 10000;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .portal-overlay .portal-text {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-align: center;
+            opacity: 0;
+            animation: portalTextFade 0.3s ease 0.1s forwards;
+        }
+
+        @keyframes portalTextFade {
+            0% {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .portal-overlay.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .portal-overlay::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            animation: portalPulse 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.05s forwards;
+        }
+
+        .portal-overlay::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.6) 0%, transparent 70%);
+            border-radius: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            animation: portalPulse 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.1s forwards;
+        }
+
+        @keyframes portalPulse {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 0;
+            }
+        }
+
+        @keyframes portalIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.95) translateY(10px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        /* Mobile Login Responsive */
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 40px 25px;
+            }
+
+            .login-header h1 {
+                font-size: 1.6rem;
+            }
+
+            .pin-inputs {
+                gap: 10px;
+            }
+
+            .pin-input {
+                width: 50px;
+                height: 60px;
+                font-size: 1.8rem;
+            }
+
+            .biometric-icon {
+                width: 100px;
+                height: 100px;
+            }
+
+            .biometric-icon i {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen">
+        <div class="login-container">
+            <div class="login-header">
+                <div class="login-icon">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                </div>
+                <h1>Teacher Portal</h1>
+                <p>JSS Polytechnic Management System</p>
+            </div>
+
+            <!-- Error Message -->
+            <div class="login-error-message" id="loginErrorMessage">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="loginErrorText">Invalid PIN. Please try again.</span>
+            </div>
+
+            <!-- Success Message -->
+            <div class="login-success-message" id="loginSuccessMessage">
+                <i class="fas fa-check-circle"></i>
+                <span>PIN Verified Successfully!</span>
+            </div>
+
+            <!-- PIN Input Section -->
+            <div class="pin-section" id="pinSection">
+                <label class="pin-label">
+                    <i class="fas fa-lock"></i>
+                    Enter 6-Digit PIN
+                </label>
+                <div class="pin-inputs">
+                    <input type="password" class="pin-input" maxlength="1" id="pin1" inputmode="numeric" pattern="[0-9]">
+                    <input type="password" class="pin-input" maxlength="1" id="pin2" inputmode="numeric" pattern="[0-9]">
+                    <input type="password" class="pin-input" maxlength="1" id="pin3" inputmode="numeric" pattern="[0-9]">
+                    <input type="password" class="pin-input" maxlength="1" id="pin4" inputmode="numeric" pattern="[0-9]">
+                    <input type="password" class="pin-input" maxlength="1" id="pin5" inputmode="numeric" pattern="[0-9]">
+                    <input type="password" class="pin-input" maxlength="1" id="pin6" inputmode="numeric" pattern="[0-9]">
+                </div>
+                <button class="login-btn login-btn-primary" id="verifyPinBtn" disabled>
+                    <i class="fas fa-check"></i>
+                    Verify PIN
+                </button>
+            </div>
+
+            <!-- Biometric Section (Mobile Only) -->
+            <div class="biometric-section" id="biometricSection">
+                <div class="biometric-icon" id="biometricIcon">
+                    <i class="fas fa-fingerprint"></i>
+                </div>
+                <div class="biometric-text">
+                    <h3>Biometric Authentication</h3>
+                    <p>Tap the fingerprint icon to authenticate</p>
+                    <p style="font-size: 0.85rem; opacity: 0.7; margin-top: 10px;">
+                        <i class="fas fa-shield-alt"></i> Uses real fingerprint on HTTPS
+                    </p>
+                </div>
+                <div class="login-loading-spinner" id="loginLoadingSpinner"></div>
+                <button class="login-btn login-btn-secondary" id="skipBiometricBtn">
+                    <i class="fas fa-times"></i>
+                    Skip Biometric
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp">
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" onclick="closeMobileMenu()"></div>
+
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-chalkboard-teacher"></i> Teacher Portal</h2>
+                <p>Management System</p>
+            </div>
+            <nav class="sidebar-menu">
+                <div class="menu-item active" onclick="showSection('attendance')">
+                    <i class="fas fa-clipboard-check"></i>
+                    <span>Mark Attendance</span>
+                </div>
+                <div class="menu-item" onclick="showSection('leave')">
+                    <i class="fas fa-calendar-times"></i>
+                    <span>Apply Leave</span>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Attendance Section -->
+            <section id="attendance" class="content-section active">
+                <div class="section-header">
+                    <h1><i class="fas fa-clipboard-check"></i> Mark Attendance</h1>
+                    <p>Record your daily attendance</p>
+                </div>
+
+                <div class="datetime-display">
+                    <div class="datetime-item">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span id="currentDate">Loading...</span>
+                    </div>
+                    <div class="datetime-item">
+                        <i class="fas fa-clock"></i>
+                        <span id="currentTime">Loading...</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-user-check"></i>
+                        <h3>Attendance Form</h3>
+                    </div>
+
+                    <form id="attendanceForm">
+                        <div class="form-group">
+                            <label><i class="fas fa-user"></i> Teacher Name</label>
+                            <input type="text" class="form-input" id="teacherName" placeholder="Enter your full name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-graduation-cap"></i> Branch</label>
+                            <select class="form-input" id="attendanceBranch" required>
+                                <option value="">Select your branch...</option>
+                                <option value="Mechanical">Mechanical</option>
+                                <option value="Electronics & Communication">Electronics & Communication</option>
+                                <option value="Computer Science">Computer Science</option>
+                                <option value="Civil">Civil</option>
+                                <option value="Information Science">Information Science</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-check-circle"></i> Attendance Status</label>
+                            <div class="status-buttons">
+                                <div class="status-btn present" onclick="selectStatus('present', this)">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Present</span>
+                                </div>
+                                <div class="status-btn absent" onclick="selectStatus('absent', this)">
+                                    <i class="fas fa-times-circle"></i>
+                                    <span>Absent</span>
+                                </div>
+                            </div>
+                            <input type="hidden" id="attendanceStatus" required>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-check"></i>
+                                Submit Attendance
+                            </button>
+                            <button type="reset" class="btn btn-secondary" onclick="resetAttendanceForm()">
+                                <i class="fas fa-redo"></i>
+                                Reset
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="success-message" id="attendanceSuccess">
+                        <i class="fas fa-check-circle"></i>
+                        <div>
+                            <strong>Attendance Marked Successfully!</strong>
+                            <p>Your attendance has been recorded.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card recent-records">
+                    <div class="card-header">
+                        <i class="fas fa-history"></i>
+                        <h3>Recent Attendance Records</h3>
+                    </div>
+                    <div id="recentAttendance">
+                        <div class="empty-state">
+                            <i class="fas fa-clipboard-list"></i>
+                            <h3>No Records Yet</h3>
+                            <p>Your attendance records will appear here</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Leave Section -->
+            <section id="leave" class="content-section">
+                <div class="section-header">
+                    <h1><i class="fas fa-calendar-times"></i> Apply for Leave</h1>
+                    <p>Submit your leave application</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-file-alt"></i>
+                        <h3>Leave Application Form</h3>
+                    </div>
+
+                    <form id="leaveForm">
+                        <div class="form-group">
+                            <label><i class="fas fa-user"></i> Teacher Name</label>
+                            <input type="text" class="form-input" id="leaveTeacherName" placeholder="Enter your full name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-tag"></i> Leave Type</label>
+                            <div class="leave-types">
+                                <div class="leave-type-btn" onclick="selectLeaveType('sick', this)">
+                                    <i class="fas fa-notes-medical"></i>
+                                    <span>Sick Leave</span>
+                                </div>
+                                <div class="leave-type-btn" onclick="selectLeaveType('casual', this)">
+                                    <i class="fas fa-coffee"></i>
+                                    <span>Casual Leave</span>
+                                </div>
+                                <div class="leave-type-btn" onclick="selectLeaveType('emergency', this)">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <span>Emergency</span>
+                                </div>
+                                <div class="leave-type-btn" onclick="selectLeaveType('other', this)">
+                                    <i class="fas fa-ellipsis-h"></i>
+                                    <span>Other</span>
+                                </div>
+                            </div>
+                            <input type="hidden" id="leaveType" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-calendar-day"></i> From Date</label>
+                            <input type="date" class="form-input" id="leaveFromDate" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-calendar-day"></i> To Date</label>
+                            <input type="date" class="form-input" id="leaveToDate" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-comment-alt"></i> Reason for Leave</label>
+                            <textarea class="form-input" id="leaveReason" placeholder="Please provide a detailed reason for your leave..." required></textarea>
+                        </div>
+
+                        <!-- Attachment Section -->
+                        <div class="form-group">
+                            <label><i class="fas fa-paperclip"></i> Supporting Documents (Optional)</label>
+                            <div class="attachment-section">
+                                <div class="attachment-dropzone" id="attachmentDropzone">
+                                    <div class="dropzone-content">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <p>Drag & drop files here or <span class="browse-link">browse</span></p>
+                                        <small>PDF, DOC, DOCX, JPG, PNG (Max 10MB each)</small>
+                                    </div>
+                                    <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" style="display: none;">
+                                </div>
+                                <div class="attachment-list" id="attachmentList"></div>
+                            </div>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i>
+                                Submit Application
+                            </button>
+                            <button type="reset" class="btn btn-secondary" onclick="resetLeaveForm()">
+                                <i class="fas fa-redo"></i>
+                                Reset
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="success-message" id="leaveSuccess">
+                        <i class="fas fa-check-circle"></i>
+                        <div>
+                            <strong>Leave Application Submitted!</strong>
+                            <p>Your leave request has been sent for approval.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card recent-records">
+                    <div class="card-header">
+                        <i class="fas fa-history"></i>
+                        <h3>Recent Leave Applications</h3>
+                    </div>
+                    <div id="recentLeaves">
+                        <div class="empty-state">
+                            <i class="fas fa-calendar-check"></i>
+                            <h3>No Applications Yet</h3>
+                            <p>Your leave applications will appear here</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    </div><!-- End mainApp -->
+
+    <script>
+        // ========== LOGIN AUTHENTICATION SCRIPT ==========
+        const loginPinInputs = document.querySelectorAll('.pin-input');
+        const verifyPinBtn = document.getElementById('verifyPinBtn');
+        const pinSection = document.getElementById('pinSection');
+        const biometricSection = document.getElementById('biometricSection');
+        const biometricIcon = document.getElementById('biometricIcon');
+        const loginLoadingSpinner = document.getElementById('loginLoadingSpinner');
+        const loginErrorMessage = document.getElementById('loginErrorMessage');
+        const loginSuccessMessage = document.getElementById('loginSuccessMessage');
+        const skipBiometricBtn = document.getElementById('skipBiometricBtn');
+        const loginScreen = document.getElementById('loginScreen');
+        const mainApp = document.getElementById('mainApp');
+
+        // Setup PIN inputs
+        loginPinInputs.forEach((input, index) => {
+            // Auto-focus next input
+            input.addEventListener('input', function(e) {
+                const value = e.target.value;
+                
+                // Only allow numbers
+                if (!/^\d$/.test(value)) {
+                    e.target.value = '';
+                    return;
+                }
+
+                // Add filled class
+                if (value) {
+                    e.target.classList.add('filled');
+                    // Move to next input
+                    if (index < loginPinInputs.length - 1) {
+                        loginPinInputs[index + 1].focus();
+                    }
+                } else {
+                    e.target.classList.remove('filled');
+                }
+
+                // Check if all inputs are filled
+                checkPinComplete();
+            });
+
+            // Handle backspace
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                    loginPinInputs[index - 1].focus();
+                    loginPinInputs[index - 1].value = '';
+                    loginPinInputs[index - 1].classList.remove('filled');
+                    checkPinComplete();
+                }
+            });
+
+            // Handle paste
+            input.addEventListener('paste', function(e) {
+                e.preventDefault();
+                const pastedData = e.clipboardData.getData('text').trim();
+                if (/^\d{6}$/.test(pastedData)) {
+                    pastedData.split('').forEach((digit, i) => {
+                        if (loginPinInputs[i]) {
+                            loginPinInputs[i].value = digit;
+                            loginPinInputs[i].classList.add('filled');
+                        }
+                    });
+                    checkPinComplete();
+                }
+            });
+        });
+
+        // Check if PIN is complete
+        function checkPinComplete() {
+            const allFilled = Array.from(loginPinInputs).every(input => input.value !== '');
+            verifyPinBtn.disabled = !allFilled;
+        }
+
+        // Get entered PIN
+        function getEnteredPin() {
+            return Array.from(loginPinInputs).map(input => input.value).join('');
+        }
+
+        // Verify PIN button click
+        verifyPinBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            // Always verify when button is clicked (user intent)
+            verifyPin();
+        });
+
+        // Also allow Enter key to verify PIN
+        loginPinInputs.forEach(input => {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    verifyPin();
+                }
+            });
+        });
+
+        // Verify PIN function
+        function verifyPin() {
+            const enteredPin = getEnteredPin();
+            
+            // Get CORRECT_PIN from window object (fallback to default if not set)
+            const CORRECT_PIN = window.CORRECT_PIN || '575953';
+            const isMobile = window.isMobile || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            
+            console.log('Verifying PIN. Entered:', enteredPin, 'Expected:', CORRECT_PIN);
+            
+            // Check if all inputs are filled
+            const allFilled = Array.from(loginPinInputs).every(input => input.value !== '' && input.value !== null);
+            if (!allFilled) {
+                if (loginErrorMessage) {
+                    const errorText = document.getElementById('loginErrorText');
+                    if (errorText) {
+                        errorText.textContent = 'Please enter all 6 digits of the PIN.';
+                    }
+                    loginErrorMessage.classList.add('show');
+                }
+                // Highlight empty inputs
+                loginPinInputs.forEach(input => {
+                    if (!input.value) {
+                        input.classList.add('error');
+                    }
+                });
+                return;
+            }
+            
+            // Hide previous messages
+            if (loginErrorMessage) loginErrorMessage.classList.remove('show');
+            if (loginSuccessMessage) loginSuccessMessage.classList.remove('show');
+
+            // Trim and ensure it's exactly 6 digits
+            const cleanEnteredPin = enteredPin.trim();
+            const cleanCorrectPin = CORRECT_PIN.trim();
+
+            if (cleanEnteredPin === cleanCorrectPin && cleanEnteredPin.length === 6) {
+                // PIN is correct - immediate success animation
+                loginSuccessMessage.classList.add('show');
+                loginPinInputs.forEach(input => {
+                    input.classList.remove('error');
+                    input.classList.add('filled');
+                    // Add immediate success glow effect
+                    input.style.borderColor = 'var(--success)';
+                    input.style.boxShadow = '0 0 15px rgba(0, 212, 170, 0.4)';
+                    input.style.transform = 'scale(1.05)';
+                });
+
+                // Add immediate success glow to verify button
+                verifyPinBtn.style.background = 'var(--gradient-success)';
+                verifyPinBtn.style.boxShadow = '0 0 20px rgba(0, 212, 170, 0.5)';
+                verifyPinBtn.style.transform = 'scale(1.05)';
+
+                // Add success pulse to login container
+                const loginContainer = document.querySelector('.login-container');
+                loginContainer.style.boxShadow = '0 0 30px rgba(0, 212, 170, 0.4)';
+
+                // Check if mobile device
+                if (isMobile) {
+                    // Show biometric authentication for mobile with very fast timing
+                    setTimeout(() => {
+                        pinSection.classList.add('hidden');
+                        biometricSection.classList.add('active');
+                    }, 300);
+                } else {
+                    // Desktop - show main app directly with very fast timing
+                    setTimeout(() => {
+                        showMainApp();
+                    }, 500);
+                }
+            } else {
+                // PIN is incorrect
+                console.log('PIN mismatch. Entered:', cleanEnteredPin, 'Expected:', cleanCorrectPin);
+                if (loginErrorMessage) {
+                    loginErrorMessage.classList.add('show');
+                }
+                loginPinInputs.forEach(input => {
+                    input.classList.add('error');
+                    input.classList.remove('filled');
+                });
+
+                // Shake animation and clear after delay
+                setTimeout(() => {
+                    loginPinInputs.forEach(input => {
+                        input.classList.remove('error');
+                        input.value = '';
+                    });
+                    if (loginPinInputs[0]) {
+                        loginPinInputs[0].focus();
+                    }
+                    verifyPinBtn.disabled = true;
+                }, 1000);
+            }
+        }
+
+        // Real biometric authentication with WebAuthn API (HTTPS required)
+        biometricIcon.addEventListener('click', authenticateBiometric);
+        skipBiometricBtn.addEventListener('click', showMainApp);
+
+        async function authenticateBiometric() {
+            // Show loading
+            loginLoadingSpinner.classList.add('show');
+            biometricIcon.style.pointerEvents = 'none';
+            loginErrorMessage.classList.remove('show');
+            loginSuccessMessage.classList.remove('show');
+
+            try {
+                // Check if WebAuthn is supported
+                if (!window.PublicKeyCredential) {
+                    throw new Error('WebAuthn not supported on this device');
+                }
+
+                console.log('🔒 Attempting real biometric authentication...');
+                
+                // Check if biometric is available
+                const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+                
+                if (!available) {
+                    throw new Error('Biometric authentication not available on this device');
+                }
+
+                // Generate challenge
+                const challenge = new Uint8Array(32);
+                window.crypto.getRandomValues(challenge);
+
+                // Create credential options for authentication
+                const publicKeyCredentialRequestOptions = {
+                    challenge: challenge,
+                    timeout: 60000,
+                    userVerification: 'required',
+                    authenticatorSelection: {
+                        authenticatorAttachment: 'platform',
+                        userVerification: 'required'
+                    }
+                };
+
+                // Try to get existing credential first, if not create new one
+                let credential;
+                try {
+                    // Try to authenticate with existing credential
+                    credential = await navigator.credentials.get({
+                        publicKey: publicKeyCredentialRequestOptions
+                    });
+                } catch (getError) {
+                    console.log('📝 No existing credential, creating new one...');
+                    
+                    // Create new credential
+                    const publicKeyCredentialCreationOptions = {
+                        challenge: challenge,
+                        rp: {
+                            name: "JSS Polytechnic Teacher Portal",
+                            id: window.location.hostname
+                        },
+                        user: {
+                            id: new Uint8Array(16),
+                            name: "teacher@jsspolytechnic.edu",
+                            displayName: "Teacher"
+                        },
+                        pubKeyCredParams: [
+                            { alg: -7, type: "public-key" },  // ES256
+                            { alg: -257, type: "public-key" } // RS256
+                        ],
+                        authenticatorSelection: {
+                            authenticatorAttachment: "platform",
+                            userVerification: "required"
+                        },
+                        timeout: 60000,
+                        attestation: "none"
+                    };
+
+                    credential = await navigator.credentials.create({
+                        publicKey: publicKeyCredentialCreationOptions
+                    });
+                }
+
+                // Real biometric authentication succeeded!
+                console.log('✅ Real biometric authentication successful!');
+                authenticateSuccess();
+
+            } catch (error) {
+                console.error('❌ Biometric authentication error:', error);
+                authenticateError(error);
+            }
+        }
+
+        // Success handler
+        function authenticateSuccess() {
+            loginLoadingSpinner.classList.remove('show');
+            biometricIcon.style.pointerEvents = 'auto';
+            loginErrorMessage.classList.remove('show');
+            
+            // Show success message with enhanced animation
+            loginSuccessMessage.classList.add('show');
+            
+            // Add immediate success glow effect to biometric icon
+            biometricIcon.style.background = 'var(--gradient-success)';
+            biometricIcon.style.boxShadow = '0 0 30px rgba(0, 212, 170, 0.6)';
+            biometricIcon.style.transform = 'scale(1.1)';
+            
+            // Show main app after success with very fast timing
+            setTimeout(() => {
+                showMainApp();
+            }, 300);
+        }
+
+        // Error handler
+        function authenticateError(error) {
+            loginLoadingSpinner.classList.remove('show');
+            biometricIcon.style.pointerEvents = 'auto';
+            
+            // Show error message
+            loginErrorMessage.classList.add('show');
+            
+            if (error.name === 'NotAllowedError') {
+                document.getElementById('loginErrorText').textContent = 'Biometric authentication was cancelled. Please try again.';
+            } else if (error.message && error.message.includes('not supported')) {
+                document.getElementById('loginErrorText').textContent = 'Biometric not supported. Please use Skip button.';
+            } else if (error.message && error.message.includes('not available')) {
+                document.getElementById('loginErrorText').textContent = 'No biometric sensor detected. Please use Skip button.';
+            } else {
+                document.getElementById('loginErrorText').textContent = 'Biometric authentication failed. Please try again or skip.';
+            }
+            
+            // Auto-hide error after 5 seconds
+            setTimeout(() => {
+                loginErrorMessage.classList.remove('show');
+            }, 5000);
+        }
+
+        // Show main app with fast portal animation
+        function showMainApp() {
+            // Create portal animation
+            const portalOverlay = document.createElement('div');
+            portalOverlay.className = 'portal-overlay';
+            portalOverlay.innerHTML = '<div class="portal-text">Welcome to Teacher Portal</div>';
+            document.body.appendChild(portalOverlay);
+            
+            // Start portal animation immediately
+            setTimeout(() => {
+                portalOverlay.classList.add('active');
+            }, 10);
+            
+            // Hide login screen and show main app very quickly
+            setTimeout(() => {
+                loginScreen.classList.add('hidden');
+                mainApp.classList.add('active');
+                
+                // Remove portal overlay quickly
+                setTimeout(() => {
+                    portalOverlay.remove();
+                }, 400);
+            }, 200);
+        }
+
+        // Focus first input on load
+        window.addEventListener('load', () => {
+            loginPinInputs[0].focus();
+        });
+
+        // Attachment System
+        let attachments = [];
+
+        function initializeAttachmentSystem() {
+            const dropzone = document.getElementById('attachmentDropzone');
+            const fileInput = document.getElementById('fileInput');
+            const browseLink = document.querySelector('.browse-link');
+
+            // Click to browse files
+            dropzone.addEventListener('click', () => fileInput.click());
+            browseLink.addEventListener('click', (e) => {
+                e.stopPropagation();
+                fileInput.click();
+            });
+
+            // File input change
+            fileInput.addEventListener('change', handleFileSelect);
+
+            // Drag and drop events
+            dropzone.addEventListener('dragover', handleDragOver);
+            dropzone.addEventListener('dragleave', handleDragLeave);
+            dropzone.addEventListener('drop', handleDrop);
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('dragover');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('dragover');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('dragover');
+            const files = Array.from(e.dataTransfer.files);
+            processFiles(files);
+        }
+
+        function handleFileSelect(e) {
+            const files = Array.from(e.target.files);
+            processFiles(files);
+        }
+
+        function processFiles(files) {
+            files.forEach(file => {
+                if (validateFile(file)) {
+                    attachments.push(file);
+                    displayAttachment(file);
+                }
+            });
+        }
+
+        function validateFile(file) {
+            const maxSize = 10 * 1024 * 1024; // 10MB
+            const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/jpeg', 'image/jpg', 'image/png'];
+
+            if (file.size > maxSize) {
+                alert(`File ${file.name} is too large. Maximum size is 10MB.`);
+                return false;
+            }
+
+            if (!allowedTypes.includes(file.type)) {
+                alert(`File type ${file.type} is not supported.`);
+                return false;
+            }
+
+            return true;
+        }
+
+        function displayAttachment(file) {
+            const attachmentList = document.getElementById('attachmentList');
+            const attachmentItem = document.createElement('div');
+            attachmentItem.className = 'attachment-item';
+            attachmentItem.dataset.fileName = file.name;
+
+            const fileIcon = getFileIcon(file.type);
+            const fileSize = formatFileSize(file.size);
+
+            attachmentItem.innerHTML = `
+                <div class="attachment-icon ${fileIcon.class}">
+                    <i class="${fileIcon.icon}"></i>
+                </div>
+                <div class="attachment-info">
+                    <div class="attachment-name">${file.name}</div>
+                    <div class="attachment-size">${fileSize}</div>
+                </div>
+                <button class="attachment-remove" onclick="removeAttachment('${file.name}')">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+
+            attachmentList.appendChild(attachmentItem);
+        }
+
+        function getFileIcon(fileType) {
+            if (fileType === 'application/pdf') {
+                return { class: 'pdf', icon: 'fas fa-file-pdf' };
+            } else if (fileType.includes('word') || fileType.includes('document')) {
+                return { class: 'doc', icon: 'fas fa-file-word' };
+            } else if (fileType.includes('image')) {
+                return { class: 'image', icon: 'fas fa-file-image' };
+            } else {
+                return { class: 'doc', icon: 'fas fa-file' };
+            }
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function removeAttachment(fileName) {
+            attachments = attachments.filter(file => file.name !== fileName);
+            const attachmentItem = document.querySelector(`[data-file-name="${fileName}"]`);
+            if (attachmentItem) {
+                attachmentItem.remove();
+            }
+        }
+
+        // ========== MAIN APP SCRIPT ==========
+        // Global variables
+        let selectedStatus = null;
+        let selectedLeaveType = null;
+        let supabaseReady = false;
+
+        // Helper function to get Supabase client
+        function getSupabaseClient() {
+            if (window.supabaseClient) {
+                return window.supabaseClient;
+            }
+            // Try to initialize if not already done
+            if (typeof window.supabase !== 'undefined') {
+                const SUPABASE_CONFIG = {
+                    url: 'https://ihxoblmddvrstcjsqsbx.supabase.co',
+                    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImloeG9ibG1kZHZyc3RjanNxc2J4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxNzExNTEsImV4cCI6MjA3Mzc0NzE1MX0.wPCwFvqd_05I4-o81LCa_7abnrEMAeQxkfelCFkloAw'
+                };
+                window.supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+                return window.supabaseClient;
+            }
+            return null;
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', async function() {
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+            setMinDate();
+            
+            // Test Supabase connection
+            await testSupabaseConnection();
+            
+            // Load data
+            await loadRecentAttendance();
+            await loadRecentLeaves();
+            
+            // Setup real-time subscriptions
+            setupRealtimeSubscriptions();
+            
+            // Initialize attachment system
+            initializeAttachmentSystem();
+            
+            // Refresh data every 5 seconds
+            setInterval(async () => {
+                await loadRecentAttendance();
+                await loadRecentLeaves();
+            }, 5000);
+        });
+
+        // Test Supabase connection
+        async function testSupabaseConnection() {
+            try {
+                const supabase = getSupabaseClient();
+                
+                if (!supabase) {
+                    throw new Error('Supabase client not initialized');
+                }
+                
+                const { data, error } = await supabase.from('teacher_attendance').select('count', { count: 'exact', head: true });
+                if (error) throw error;
+                supabaseReady = true;
+                console.log('✅ Supabase connected successfully!');
+            } catch (error) {
+                console.error('❌ Supabase connection failed:', error.message);
+                console.log('📝 Falling back to localStorage');
+                supabaseReady = false;
+            }
+        }
+
+        // Setup real-time subscriptions for live updates
+        function setupRealtimeSubscriptions() {
+            if (!supabaseReady) return;
+
+            const supabase = getSupabaseClient();
+            if (!supabase) {
+                console.warn('⚠️ Supabase client not available for real-time subscriptions');
+                return;
+            }
+
+            // Subscribe to teacher attendance changes
+            supabase
+                .channel('teacher_attendance_changes')
+                .on('postgres_changes', 
+                    { event: '*', schema: 'public', table: 'teacher_attendance' },
+                    (payload) => {
+                        console.log('🔄 Attendance change detected:', payload);
+                        loadRecentAttendance();
+                    }
+                )
+                .subscribe();
+
+            // Subscribe to teacher leave changes
+            supabase
+                .channel('teacher_leave_changes')
+                .on('postgres_changes',
+                    { event: '*', schema: 'public', table: 'teacher_leave' },
+                    (payload) => {
+                        console.log('🔄 Leave change detected:', payload);
+                        loadRecentLeaves();
+                    }
+                )
+                .subscribe();
+
+            console.log('🔔 Real-time subscriptions active');
+        }
+
+        // Update date and time
+        function updateDateTime() {
+            const now = new Date();
+            
+            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', dateOptions);
+            
+            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+            document.getElementById('currentTime').textContent = now.toLocaleTimeString('en-US', timeOptions);
+        }
+
+        // Set minimum date for leave application
+        function setMinDate() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('leaveFromDate').setAttribute('min', today);
+            document.getElementById('leaveToDate').setAttribute('min', today);
+            
+            // Update "To Date" minimum when "From Date" changes
+            document.getElementById('leaveFromDate').addEventListener('change', function() {
+                document.getElementById('leaveToDate').setAttribute('min', this.value);
+            });
+        }
+
+        // Show section
+        function showSection(section) {
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+            
+            // Show selected section
+            document.getElementById(section).classList.add('active');
+            event.target.closest('.menu-item').classList.add('active');
+            
+            // Close mobile menu on mobile devices
+            if (window.innerWidth <= 768) {
+                closeMobileMenu();
+            }
+        }
+
+        // Toggle mobile menu
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.mobile-overlay');
+            const menuToggle = document.querySelector('.mobile-menu-toggle');
+            
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+            
+            // Change icon
+            const icon = menuToggle.querySelector('i');
+            if (sidebar.classList.contains('active')) {
+                icon.className = 'fas fa-times';
+                document.body.style.overflow = 'hidden';
+            } else {
+                icon.className = 'fas fa-bars';
+                document.body.style.overflow = '';
+            }
+        }
+
+        // Close mobile menu
+        function closeMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.mobile-overlay');
+            const menuToggle = document.querySelector('.mobile-menu-toggle');
+            
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+            
+            // Reset icon
+            const icon = menuToggle.querySelector('i');
+            icon.className = 'fas fa-bars';
+            document.body.style.overflow = '';
+        }
+
+        // Select attendance status
+        function selectStatus(status, element) {
+            selectedStatus = status;
+            document.getElementById('attendanceStatus').value = status;
+            
+            // Update UI
+            document.querySelectorAll('.status-btn').forEach(btn => btn.classList.remove('selected'));
+            
+            // Find the button element
+            const btn = element || (event && event.target ? event.target.closest('.status-btn') : null);
+            if (btn) {
+                btn.classList.add('selected');
+            }
+        }
+
+        // Select leave type
+        function selectLeaveType(type, element) {
+            selectedLeaveType = type;
+            document.getElementById('leaveType').value = type;
+            
+            // Update UI
+            document.querySelectorAll('.leave-type-btn').forEach(btn => btn.classList.remove('selected'));
+            
+            // Find the button element
+            const btn = element || (event && event.target ? event.target.closest('.leave-type-btn') : null);
+            if (btn) {
+                btn.classList.add('selected');
+            }
+        }
+
+        // Handle attendance form submission
+        document.getElementById('attendanceForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const teacherName = document.getElementById('teacherName').value.trim();
+            const branch = document.getElementById('attendanceBranch').value;
+            const status = document.getElementById('attendanceStatus').value;
+            
+            if (!teacherName) {
+                alert('Please enter your name');
+                return;
+            }
+            
+            if (!branch) {
+                alert('Please select your branch');
+                return;
+            }
+            
+            if (!status) {
+                alert('Please select attendance status (Present or Absent)');
+                return;
+            }
+            
+            const now = new Date();
+            const attendanceRecord = {
+                teacher_name: teacherName,
+                branch: branch,
+                status: status,
+                date: now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+                time: now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }),
+                timestamp: now.toISOString(),
+                created_at: now.toISOString()
+            };
+            
+            try {
+                // Save to Railway app_settings
+                const API_BASE = RAILWAY_CONFIG.api_base;
+                
+                // Fetch existing attendance data
+                const existingRes = await fetch(`${API_BASE}/settings/teacher_attendance`).then(r => r.json()).catch(() => ({ success: false, data: {} }));
+                const allAttendance = (existingRes.success && existingRes.data) ? existingRes.data : {};
+                
+                // Add new record
+                if (!allAttendance.records) allAttendance.records = [];
+                allAttendance.records.unshift(attendanceRecord);
+                
+                // Keep only recent 100 records
+                allAttendance.records = allAttendance.records.slice(0, 100);
+                
+                // Save to Railway
+                const saveRes = await fetch(`${API_BASE}/settings/teacher_attendance`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ value: allAttendance })
+                });
+                
+                if (!saveRes.ok) {
+                    throw new Error(`Railway API error: ${saveRes.status}`);
+                }
+                
+                console.log('✅ Attendance saved to Railway:', attendanceRecord);
+                
+                // Show success message
+                const successMsg = document.getElementById('attendanceSuccess');
+                successMsg.classList.add('show');
+                setTimeout(() => successMsg.classList.remove('show'), 5000);
+                
+                // Reset form
+                resetAttendanceForm();
+                
+                // Reload recent records
+                await loadRecentAttendance();
+                
+            } catch (error) {
+                console.error('❌ Error saving attendance:', error);
+                alert('Error saving attendance. Please try again. Error: ' + error.message);
+            }
+        });
+
+        // Handle leave form submission
+        document.getElementById('leaveForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const teacherName = document.getElementById('leaveTeacherName').value.trim();
+            const leaveType = document.getElementById('leaveType').value;
+            const fromDate = document.getElementById('leaveFromDate').value;
+            const toDate = document.getElementById('leaveToDate').value;
+            const reason = document.getElementById('leaveReason').value.trim();
+            
+            if (!teacherName) {
+                alert('Please enter your name');
+                return;
+            }
+            
+            if (!leaveType) {
+                alert('Please select leave type');
+                return;
+            }
+            
+            if (!fromDate || !toDate) {
+                alert('Please select both From Date and To Date');
+                return;
+            }
+            
+            // Validate dates
+            if (new Date(toDate) < new Date(fromDate)) {
+                alert('To Date cannot be before From Date');
+                return;
+            }
+            
+            if (!reason) {
+                alert('Please provide a reason for leave');
+                return;
+            }
+            
+            const now = new Date();
+            const leaveRecord = {
+                teacher_name: teacherName,
+                leave_type: leaveType.charAt(0).toUpperCase() + leaveType.slice(1),
+                from_date: fromDate,
+                to_date: toDate,
+                from_date_formatted: new Date(fromDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
+                to_date_formatted: new Date(toDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
+                reason: reason,
+                status: 'pending',
+                applied_date: now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+                applied_time: now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }),
+                timestamp: now.toISOString(),
+                created_at: now.toISOString()
+            };
+            
+            try {
+                // Save to Railway app_settings
+                const API_BASE = RAILWAY_CONFIG.api_base;
+                
+                // Fetch existing leave data
+                const existingRes = await fetch(`${API_BASE}/settings/teacher_leave`).then(r => r.json()).catch(() => ({ success: false, data: {} }));
+                const allLeaves = (existingRes.success && existingRes.data) ? existingRes.data : {};
+                
+                // Add new record
+                if (!allLeaves.records) allLeaves.records = [];
+                allLeaves.records.unshift(leaveRecord);
+                
+                // Keep only recent 100 records
+                allLeaves.records = allLeaves.records.slice(0, 100);
+                
+                // Save to Railway
+                const saveRes = await fetch(`${API_BASE}/settings/teacher_leave`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ value: allLeaves })
+                });
+                
+                if (!saveRes.ok) {
+                    throw new Error(`Railway API error: ${saveRes.status}`);
+                }
+                
+                console.log('✅ Leave application saved to Railway:', leaveRecord);
+                
+                // Show success message
+                const successMsg = document.getElementById('leaveSuccess');
+                successMsg.classList.add('show');
+                setTimeout(() => successMsg.classList.remove('show'), 5000);
+                
+                // Reset form
+                resetLeaveForm();
+                
+                // Reload recent records
+                await loadRecentLeaves();
+                
+            } catch (error) {
+                console.error('❌ Error saving leave application:', error);
+                alert('Error saving leave application. Please try again. Error: ' + error.message);
+            }
+        });
+
+        // Reset attendance form
+        function resetAttendanceForm() {
+            document.getElementById('attendanceForm').reset();
+            document.querySelectorAll('.status-btn').forEach(btn => btn.classList.remove('selected'));
+            selectedStatus = null;
+        }
+
+        // Reset leave form
+        function resetLeaveForm() {
+            document.getElementById('leaveForm').reset();
+            document.querySelectorAll('.leave-type-btn').forEach(btn => btn.classList.remove('selected'));
+            selectedLeaveType = null;
+        }
+
+        // Load recent attendance records
+        async function loadRecentAttendance() {
+            const container = document.getElementById('recentAttendance');
+            let records = [];
+            
+            try {
+                const API_BASE = RAILWAY_CONFIG.api_base;
+                
+                // Fetch from Railway
+                const response = await fetch(`${API_BASE}/settings/teacher_attendance`).then(r => r.json()).catch(() => ({ success: false, data: {} }));
+                
+                if (response.success && response.data && response.data.records) {
+                    records = response.data.records.slice(0, 10);
+                }
+                
+                if (records.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-clipboard-list"></i>
+                            <h3>No Records Yet</h3>
+                            <p>Your attendance records will appear here</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = records.map(record => `
+                    <div class="record-item">
+                        <div class="record-info">
+                            <h4>${record.teacher_name}</h4>
+                            <p><i class="fas fa-calendar"></i> ${record.date} at ${record.time}</p>
+                        </div>
+                        <div class="record-status ${record.status}">
+                            ${record.status.toUpperCase()}
+                        </div>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                console.error('❌ Error loading attendance:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Error Loading Data</h3>
+                        <p>Railway API connection failed. Please refresh.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Load recent leave applications
+        async function loadRecentLeaves() {
+            const container = document.getElementById('recentLeaves');
+            let records = [];
+            
+            try {
+                const API_BASE = RAILWAY_CONFIG.api_base;
+                
+                // Fetch from Railway
+                const response = await fetch(`${API_BASE}/settings/teacher_leave`).then(r => r.json()).catch(() => ({ success: false, data: {} }));
+                
+                if (response.success && response.data && response.data.records) {
+                    records = response.data.records.slice(0, 10);
+                }
+                
+                if (records.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-calendar-check"></i>
+                            <h3>No Applications Yet</h3>
+                            <p>Your leave applications will appear here</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = records.map(record => `
+                    <div class="record-item">
+                        <div class="record-info">
+                            <h4>${record.teacher_name} - ${record.leave_type}</h4>
+                            <p><i class="fas fa-calendar"></i> ${record.from_date_formatted} to ${record.to_date_formatted}</p>
+                            <p><i class="fas fa-comment"></i> ${record.reason}</p>
+                            <p style="font-size: 0.85rem; opacity: 0.7;"><i class="fas fa-clock"></i> Applied on ${record.applied_date}</p>
+                        </div>
+                        <div class="record-status ${record.status}">
+                            ${record.status.toUpperCase()}
+                        </div>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                console.error('❌ Error loading leave applications:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Error Loading Data</h3>
+                        <p>Railway API connection failed. Please refresh.</p>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
