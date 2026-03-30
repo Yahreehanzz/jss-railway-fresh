@@ -37938,10 +37938,43 @@ Easily access and review students' academic performance here. This section provi
                 </a>
             </div>
         </div>
+
+        <!-- Faculty User Password Panel -->
+        <div class="role-modal-selection" id="facultyUserPasswordPanel" style="display: none; opacity: 0; transform: translateY(20px); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);">
+            <div class="role-modal-header">
+                <h2>Enter Password</h2>
+                <p id="facultyUserPasswordDesc">Verify your credentials to login</p>
+            </div>
+
+            <div class="role-password-input-group" style="margin: 20px 0;">
+                <label for="facultyUserPasswordInput">Password</label>
+                <input 
+                    type="password" 
+                    id="facultyUserPasswordInput" 
+                    placeholder="Enter your password"
+                    onkeypress="if(event.key==='Enter') verifyFacultyUserPassword()"
+                    style="width: 100%; padding: 12px 16px; background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; color: #1f2937; font-size: 1rem; outline: none; transition: all 0.3s;"
+                />
+                <p id="facultyUserPasswordError" style="color: #dc2626; font-size: 0.85rem; margin-top: 8px; display: none; font-weight: 600;"></p>
+            </div>
+
+            <div class="role-selection-footer">
+                <a onclick="backFromFacultyUserPassword()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    Back to accounts
+                </a>
+                <button onclick="verifyFacultyUserPassword()" style="display: flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; border-radius: 8px; padding: 10px 20px; font-size: 1rem; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); transition: all 0.3s;">
+                    <i class="fas fa-check"></i> Login
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
-<!-- Role Password Modal -->
+<!-- Role Password Modal (for HOD/Admin) -->
 <div class="hidden overlay-base" id="rolePasswordOverlay" style="z-index:999998;">
     <div class="role-password-modal" id="rolePasswordModal">
         <h2 id="rolePasswordTitle">Enter Password</h2>
@@ -50832,63 +50865,115 @@ function restoreTeacherZonePhoto() {
                 const facultyUsers = JSON.parse(localStorage.getItem('faculty_users') || '{}');
                 const username = facultyUsers[teacherId][userIndex].username;
                 
-                // Hide faculty users panel and role selection overlay, show password modal
-                const roleSelectionOverlay = document.getElementById('roleSelectionOverlay');
-                const rolePasswordOverlay = document.getElementById('rolePasswordOverlay');
+                const facultyUsersPanel = document.getElementById('facultyUsersPanel');
+                const facultyUserPasswordPanel = document.getElementById('facultyUserPasswordPanel');
+                
+                if (!facultyUsersPanel || !facultyUserPasswordPanel) return;
+                
+                // Animate users panel out
+                facultyUsersPanel.style.opacity = '0';
+                facultyUsersPanel.style.transform = 'translateY(-20px)';
                 
                 setTimeout(() => {
-                    roleSelectionOverlay.classList.add('hidden');
-                    rolePasswordOverlay.classList.remove('hidden');
+                    facultyUsersPanel.style.display = 'none';
+                    facultyUserPasswordPanel.style.display = 'block';
                     
-                    document.getElementById('rolePasswordTitle').textContent = `Enter Password for "${username}"`;
-                    document.getElementById('rolePasswordDesc').textContent = `Verify your credentials`;
+                    // Update password panel header
+                    document.getElementById('facultyUserPasswordDesc').textContent = `Enter password for "${username}"`;
                     
-                    // Clear password input
-                    document.getElementById('rolePasswordInput').value = '';
-                    const errorEl = document.getElementById('rolePasswordError');
+                    // Clear password input and error
+                    document.getElementById('facultyUserPasswordInput').value = '';
+                    const errorEl = document.getElementById('facultyUserPasswordError');
                     errorEl.textContent = '';
-                    errorEl.classList.remove('show');
+                    errorEl.style.display = 'none';
                     
-                    // Focus on password input
+                    // Animate password panel in
                     setTimeout(() => {
-                        document.getElementById('rolePasswordInput').focus();
-                    }, 100);
-                }, 100);
+                        facultyUserPasswordPanel.style.opacity = '1';
+                        facultyUserPasswordPanel.style.transform = 'translateY(0)';
+                        document.getElementById('facultyUserPasswordInput').focus();
+                    }, 50);
+                }, 400);
             } catch (e) {
                 console.error('Error selecting faculty user:', e);
             }
         }
-        
-        function selectFacultyUser(teacherId, userIndex) {
-            try {
-                selectedFacultyTeacherId = teacherId;
-                selectedFacultyUserIndex = userIndex;
+
+        function backFromFacultyUserPassword() {
+            const facultyUsersPanel = document.getElementById('facultyUsersPanel');
+            const facultyUserPasswordPanel = document.getElementById('facultyUserPasswordPanel');
+            
+            if (!facultyUsersPanel || !facultyUserPasswordPanel) return;
+            
+            // Animate password panel out
+            facultyUserPasswordPanel.style.opacity = '0';
+            facultyUserPasswordPanel.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                facultyUserPasswordPanel.style.display = 'none';
+                facultyUsersPanel.style.display = 'block';
                 
-                // Hide faculty user selection and show password modal
-                document.getElementById('facultyUserSelectionOverlay').classList.add('hidden');
-                
-                const facultyUsers = JSON.parse(localStorage.getItem('faculty_users') || '{}');
-                const username = facultyUsers[teacherId][userIndex].username;
-                
-                // Show password modal
+                // Animate users panel in
                 setTimeout(() => {
-                    document.getElementById('rolePasswordOverlay').classList.remove('hidden');
-                    document.getElementById('rolePasswordTitle').textContent = `Enter Password for "${username}"`;
-                    document.getElementById('rolePasswordDesc').textContent = `Verify your credentials`;
-                    
-                    // Clear password input
-                    document.getElementById('rolePasswordInput').value = '';
-                    const errorEl = document.getElementById('rolePasswordError');
-                    errorEl.textContent = '';
-                    errorEl.classList.remove('show');
-                    
-                    // Focus on password input
-                    setTimeout(() => {
-                        document.getElementById('rolePasswordInput').focus();
-                    }, 100);
+                    facultyUsersPanel.style.opacity = '1';
+                    facultyUsersPanel.style.transform = 'translateY(0)';
+                }, 50);
+            }, 400);
+            
+            // Reset selections
+            selectedFacultyTeacherId = null;
+            selectedFacultyUserIndex = null;
+            document.getElementById('facultyUserPasswordInput').value = '';
+        }
+
+        function verifyFacultyUserPassword() {
+            try {
+                const password = document.getElementById('facultyUserPasswordInput').value;
+                const errorEl = document.getElementById('facultyUserPasswordError');
+                
+                errorEl.style.display = 'none';
+                errorEl.textContent = '';
+                
+                if (!password) {
+                    errorEl.textContent = 'Please enter your password';
+                    errorEl.style.display = 'block';
+                    return;
+                }
+                
+                if (!selectedFacultyTeacherId || selectedFacultyUserIndex === null) {
+                    errorEl.textContent = 'No user selected';
+                    errorEl.style.display = 'block';
+                    return;
+                }
+                
+                // Verify password
+                const facultyUsers = JSON.parse(localStorage.getItem('faculty_users') || '{}');
+                const user = facultyUsers[selectedFacultyTeacherId][selectedFacultyUserIndex];
+                const storedPasswordEncoded = user.password;
+                const decodedPassword = atob(storedPasswordEncoded);
+                
+                if (password !== decodedPassword) {
+                    errorEl.textContent = 'Invalid password';
+                    errorEl.style.display = 'block';
+                    document.getElementById('facultyUserPasswordInput').value = '';
+                    return;
+                }
+                
+                // Password verified!
+                sessionStorage.setItem('userRole', 'teacher');
+                sessionStorage.setItem('facultyTeacherId', selectedFacultyTeacherId);
+                sessionStorage.setItem('facultyUserIndex', selectedFacultyUserIndex);
+                
+                // Hide modal and show 2FA
+                document.getElementById('roleSelectionOverlay').classList.add('hidden');
+                
+                setTimeout(() => {
+                    show2FAModal();
                 }, 300);
             } catch (e) {
-                console.error('Error selecting faculty user:', e);
+                console.error('Error verifying password:', e);
+                document.getElementById('facultyUserPasswordError').textContent = 'Error verifying password';
+                document.getElementById('facultyUserPasswordError').style.display = 'block';
             }
         }
 
