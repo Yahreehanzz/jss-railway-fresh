@@ -37905,14 +37905,6 @@ Easily access and review students' academic performance here. This section provi
                     </svg>
                     Back to login
                 </a>
-                
-                <button id="continue-btn-role" class="disabled" onclick="continueToRole()">
-                    Continue
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                        <polyline points="12 5 19 12 12 19"></polyline>
-                    </svg>
-                </button>
             </div>
 
         </div>
@@ -50709,7 +50701,6 @@ function restoreTeacherZonePhoto() {
             const roleTeacher = document.getElementById('role-teacher');
             const roleHod = document.getElementById('role-hod');
             const roleAdmin = document.getElementById('role-admin');
-            const continueBtn = document.getElementById('continue-btn-role');
             
             // Remove selected class from all
             roleTeacher.classList.remove('selected');
@@ -50725,9 +50716,10 @@ function restoreTeacherZonePhoto() {
                 roleAdmin.classList.add('selected');
             }
 
-            // Enable continue button
-            continueBtn.classList.remove('disabled');
-            continueBtn.classList.add('active');
+            // Automatically proceed to next step after brief delay
+            setTimeout(() => {
+                continueToRole();
+            }, 300);
         }
 
         function continueToRole() {
