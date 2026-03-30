@@ -1,6 +1,6 @@
 {
   "name": "student-management-system",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Student Management System API with Railway PostgreSQL",
   "main": "server.js",
   "scripts": {
@@ -20,3 +20,4 @@
     "node": ">=18.0.0"
   }
 }
+
