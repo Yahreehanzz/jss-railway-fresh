@@ -44505,7 +44505,7 @@ function restoreTeacherZonePhoto() {
         // Syncs all data to Railway PostgreSQL. Falls back to localStorage.
         // -----------------------------------------------------------
         window.API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-            `http://localhost:${window.location.port || 3000}/api`
+            ? `http://localhost:${window.location.port || 3000}/api`
             : `/api`;
         console.log('Global API_BASE set to:', window.API_BASE);
         let apiConnected = false;
@@ -75060,9 +75060,9 @@ document.addEventListener('DOMContentLoaded', function() {
 let facultyFeeData = [];
 
 // Ensure API_BASE is accessible
-const FACULTY_API_BASE = (typeof API_BASE !== 'undefined') API_BASE : 
+const FACULTY_API_BASE = (typeof API_BASE !== 'undefined') ? API_BASE : 
     (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-        `http://localhost:${window.location.port || 3000}/api`
+        ? `http://localhost:${window.location.port || 3000}/api`
         : `/api`;
 
 async function loadFacultyFeeManagement() {
@@ -75186,7 +75186,7 @@ async function fmLoadGeneralFeeCourses() {
     try {
         // Try to load from API first
         const _API = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-            `http://localhost:${window.location.port || 3000}/api`
+            ? `http://localhost:${window.location.port || 3000}/api`
             : `${window.location.protocol}//${window.location.host}/api`;
         
         const response = await fetch(_API + '/settings/general_fee_courses');
@@ -79608,7 +79608,7 @@ Govt. Polytechnic, Beelagi`;
         
         try {
             const _API = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-                `http://localhost:${window.location.port || 3000}/api`
+                ? `http://localhost:${window.location.port || 3000}/api`
                 : `${window.location.protocol}//${window.location.host}/api`;
             
             const response = await fetch(_API + '/settings/general_fee_courses');
@@ -79616,7 +79616,7 @@ Govt. Polytechnic, Beelagi`;
             
             if (response.ok) {
                 const data = await response.json();
-                courses = Array.isArray(data.data) data.data : [];
+                courses = Array.isArray(data.data) ? data.data : [];
             }
             
             grid.innerHTML = '';
@@ -79714,7 +79714,7 @@ Govt. Polytechnic, Beelagi`;
         
         try {
             const _API = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-                `http://localhost:${window.location.port || 3000}/api`
+                ? `http://localhost:${window.location.port || 3000}/api`
                 : `${window.location.protocol}//${window.location.host}/api`;
             
             const response = await fetch(_API + '/settings/general_fee_courses');
@@ -79722,7 +79722,7 @@ Govt. Polytechnic, Beelagi`;
             
             if (response.ok) {
                 const data = await response.json();
-                courses = Array.isArray(data.data) data.data : [];
+                courses = Array.isArray(data.data) ? data.data : [];
             } else {
                 const cached = localStorage.getItem('fmGeneralFee_courses');
                 courses = cached JSON.parse(cached) : [];
@@ -81290,7 +81290,7 @@ document.addEventListener('input', function(e) {
 
     // Compute API base (same logic as main script)
     const _API = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-        `http://localhost:${window.location.port || 3000}/api`
+        ? `http://localhost:${window.location.port || 3000}/api`
         : `${window.location.protocol}//${window.location.host}/api`;
 
     window.fmSwitchTab = function(tab, btn) {
@@ -81518,7 +81518,7 @@ document.addEventListener('input', function(e) {
             
             // Get API base
             const _API = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-                `http://localhost:${window.location.port || 3000}/api`
+                ? `http://localhost:${window.location.port || 3000}/api`
                 : `${window.location.protocol}//${window.location.host}/api`;
             
             // Send to API
