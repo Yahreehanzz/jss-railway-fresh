@@ -43580,50 +43580,364 @@ function restoreTeacherZonePhoto() {
     </div>
 </div>
 
-<div class="hidden overlay-base" id="teacherProfileOverlay">
-<div class="popup-box" style="max-width: 600px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 0; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden;">
-<!-- Header with gradient background -->
-<div class="close-btn" onclick="closeTeacherProfile()" style="position: absolute; top: 15px; right: 15px; font-size: 28px; color: white; z-index: 10; cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.2); border-radius: 50%; transition: all 0.3s ease;">×</div>
+<style>
+/* Professional Profile Modal Styles */
+.admin-profile-modal {
+    font-family: 'Inter', 'Outfit', sans-serif;
+    background-color: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.admin-profile-container {
+    max-width: 1200px;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+    padding: 1.5rem;
+}
+.admin-profile-sidebar {
+    width: 250px;
+    flex-shrink: 0;
+}
+.admin-profile-title {
+    font-size: 1.65rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 2.5rem;
+    line-height: 1.2;
+}
+.admin-profile-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+.admin-profile-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1.25rem;
+    border-radius: 9999px;
+    border: none;
+    background: transparent;
+    color: #6b7280;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+    font-size: 0.95rem;
+}
+.admin-profile-btn.active {
+    background: rgba(107, 114, 128, 0.2);
+    color: #111827;
+    font-weight: 600;
+}
+.admin-profile-btn:hover {
+    color: #1f2937;
+    background: #f3f4f6;
+}
+.admin-profile-main {
+    flex: 1;
+    background: white;
+    border-radius: 2rem;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.02);
+    border: 1px solid rgba(0,0,0,0.05);
+    padding: 2rem;
+    min-height: 600px;
+}
+.admin-profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+.admin-profile-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+}
+.admin-profile-buttons {
+    display: flex;
+    gap: 0.75rem;
+}
+.admin-profile-btn-edit, .admin-profile-btn-save {
+    padding: 0.5rem 1.25rem;
+    border-radius: 9999px;
+    border: 1px solid #d1d5db;
+    background: white;
+    color: #4b5563;
+    font-weight: 500;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.admin-profile-btn-save {
+    background: #111827;
+    color: white;
+    border: none;
+}
+.admin-profile-btn-save:hover {
+    background: #1f2937;
+}
+.admin-profile-btn-edit:hover {
+    border-color: #9ca3af;
+}
+.admin-profile-avatar {
+    position: relative;
+    width: 6rem;
+    height: 6rem;
+    border-radius: 9999px;
+    border: 1px solid #d1d5db;
+    overflow: hidden;
+    background: #f3f4f6;
+    margin-bottom: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.admin-profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.admin-profile-avatar::after {
+    content: '🔒';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 1.75rem;
+    height: 1.75rem;
+    background: rgba(0,0,0,0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    border-radius: 50%;
+    color: white;
+}
+.admin-profile-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+.admin-profile-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+.admin-profile-field-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+.admin-profile-field-value {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #111827;
+}
+.admin-profile-section-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 1.5rem;
+}
+.admin-profile-divider {
+    border-top: 1px solid #e5e7eb;
+    margin: 2rem 0;
+}
+.admin-profile-delete-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.admin-profile-delete-btn {
+    padding: 0.625rem 1.5rem;
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+    border: none;
+    border-radius: 9999px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+}
+.admin-profile-delete-btn:hover {
+    background: #dc2626;
+    color: white;
+}
+.admin-profile-tab-content {
+    display: none;
+}
+.admin-profile-tab-content.active {
+    display: block;
+    animation: fadeIn 0.4s ease-out;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.admin-profile-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: #f3f4f6;
+    border: none;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+.admin-profile-close:hover {
+    background: #e5e7eb;
+}
+</style>
+<div class="hidden overlay-base admin-profile-modal" id="teacherProfileOverlay">
+<div style="position: relative; width: 100%; max-width: 1400px;">
+    <button class="admin-profile-close" onclick="closeTeacherProfile()">×</button>
+    
+    <div class="admin-profile-container">
+        <!-- Sidebar Navigation -->
+        <aside class="admin-profile-sidebar">
+            <h1 class="admin-profile-title">User profile<br>management</h1>
+            <nav class="admin-profile-nav">
+                <button class="admin-profile-btn active" onclick="switchAdminTab('personal')" id="nav-admin-personal">
+                    <span>👤</span> Personal Info
+                </button>
+                <button class="admin-profile-btn" onclick="switchAdminTab('subjects')" id="nav-admin-subjects">
+                    <span>📚</span> Subjects Assigned
+                </button>
+                <button class="admin-profile-btn" onclick="switchAdminTab('user')" id="nav-admin-user">
+                    <span>🛡️</span> User Details
+                </button>
+            </nav>
+        </aside>
 
-<div class="profile-cover" style="padding: 40px 30px 20px; text-align: center;">
-  <div style="position: relative; margin-bottom: 15px;">
-    <img class="profile-photo" id="teacher-profile-photo" 
-         style="width: 120px; height: 120px; border-radius: 60px; border: 5px solid white; object-fit: cover; box-shadow: 0 10px 25px rgba(0,0,0,0.2);"/>
-  </div>
-  <h2 id="teacher-profile-name" style="color: white; margin: 15px 0 5px 0; font-size: 24px; font-weight: 700;">Teacher Name</h2>
-  <p id="teacher-profile-id" style="color: rgba(255,255,255,0.8); margin: 0; font-size: 13px; letter-spacing: 1px; text-transform: uppercase;">IS2003</p>
-</div>
+        <!-- Main Content Area -->
+        <main class="admin-profile-main">
+            <!-- Personal Info Tab -->
+            <div id="admin-content-personal" class="admin-profile-tab-content active">
+                <div class="admin-profile-header">
+                    <h2>Personal information</h2>
+                    <div class="admin-profile-buttons">
+                        <button class="admin-profile-btn-edit" onclick="toggleAdminEditMode()" id="admin-edit-btn">
+                            ✏️ Edit
+                        </button>
+                        <button class="admin-profile-btn-save hidden" id="admin-save-btn" onclick="toggleAdminEditMode()">
+                            ✓ Save Changes
+                        </button>
+                    </div>
+                </div>
 
-<!-- Content Section -->
-<div style="background: white; padding: 30px; color: #1f2937;">
-  <div class="profile-details" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px;">
-    <div style="background: #f3f4f6; padding: 15px; border-radius: 12px; border-left: 4px solid #667eea;">
-      <p style="font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 5px 0;">📧 Email</p>
-      <p id="teacher-profile-email" style="margin: 0; font-weight: 600; color: #1f2937; text-overflow: ellipsis; overflow: hidden;">N/A</p>
+                <div class="admin-profile-avatar">
+                    <img id="admin-profile-photo" src="" alt="Profile Photo" />
+                </div>
+
+                <!-- View Mode -->
+                <div id="admin-view-mode" class="admin-profile-grid">
+                    <div class="admin-profile-field">
+                        <p class="admin-profile-field-label">First Name</p>
+                        <p class="admin-profile-field-value" id="admin-fname-view">-</p>
+                    </div>
+                    <div class="admin-profile-field">
+                        <p class="admin-profile-field-label">Last Name</p>
+                        <p class="admin-profile-field-value" id="admin-lname-view">-</p>
+                    </div>
+                    <div class="admin-profile-field">
+                        <p class="admin-profile-field-label">Email Address</p>
+                        <p class="admin-profile-field-value" id="admin-email-view">-</p>
+                    </div>
+                    <div class="admin-profile-field">
+                        <p class="admin-profile-field-label">Phone Number</p>
+                        <p class="admin-profile-field-value" id="admin-phone-view">-</p>
+                    </div>
+                    <div class="admin-profile-field">
+                        <p class="admin-profile-field-label">Staff ID</p>
+                        <p class="admin-profile-field-value" id="admin-id-view">-</p>
+                    </div>
+                    <div class="admin-profile-field">
+                        <p class="admin-profile-field-label">Department</p>
+                        <p class="admin-profile-field-value" id="admin-dept-view">-</p>
+                    </div>
+                </div>
+
+                <!-- Edit Mode -->
+                <div id="admin-edit-mode" class="hidden admin-profile-grid" style="display: none;">
+                    <div class="admin-profile-field">
+                        <label class="admin-profile-field-label">First Name</label>
+                        <input type="text" id="admin-fname-edit" style="padding: 0.625rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 0.95rem;">
+                    </div>
+                    <div class="admin-profile-field">
+                        <label class="admin-profile-field-label">Last Name</label>
+                        <input type="text" id="admin-lname-edit" style="padding: 0.625rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 0.95rem;">
+                    </div>
+                    <div class="admin-profile-field">
+                        <label class="admin-profile-field-label">Email Address</label>
+                        <input type="email" id="admin-email-edit" style="padding: 0.625rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 0.95rem;">
+                    </div>
+                    <div class="admin-profile-field">
+                        <label class="admin-profile-field-label">Phone Number</label>
+                        <input type="text" id="admin-phone-edit" style="padding: 0.625rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 0.95rem;">
+                    </div>
+                </div>
+
+                <div class="admin-profile-divider"></div>
+
+                <div class="admin-profile-delete-section">
+                    <h3 class="admin-profile-section-title">Delete Account</h3>
+                    <button class="admin-profile-delete-btn" onclick="showConfirm('Are you sure you want to delete this teacher?', () => deleteTeacherFromProfile())">
+                        Delete
+                    </button>
+                </div>
+            </div>
+
+            <!-- Subjects Assigned Tab -->
+            <div id="admin-content-subjects" class="admin-profile-tab-content">
+                <h2 class="admin-profile-section-title">Subjects Assigned</h2>
+                <p style="color: #6b7280; margin-bottom: 2rem; font-size: 0.95rem;">View the subjects currently assigned to this teacher.</p>
+                <div id="admin-subjects-list" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.25rem;">
+                    <!-- Subjects populated by JS -->
+                </div>
+            </div>
+
+            <!-- User Details Tab -->
+            <div id="admin-content-user" class="admin-profile-tab-content">
+                <h2 class="admin-profile-section-title">User Account Details</h2>
+                <p style="color: #6b7280; margin-bottom: 2rem; font-size: 0.95rem;">System-level information and roles associated with this profile.</p>
+                <div style="background: #f9fafb; border-radius: 2rem; border: 1px solid #e5e7eb; padding: 2rem;">
+                    <div class="admin-profile-grid">
+                        <div class="admin-profile-field">
+                            <p class="admin-profile-field-label">Staff ID</p>
+                            <p class="admin-profile-field-value" id="admin-id-detail">-</p>
+                        </div>
+                        <div class="admin-profile-field">
+                            <p class="admin-profile-field-label">Primary Role</p>
+                            <p class="admin-profile-field-value">Teacher / Faculty</p>
+                        </div>
+                        <div class="admin-profile-field">
+                            <p class="admin-profile-field-label">Department</p>
+                            <p class="admin-profile-field-value" id="admin-dept-detail">-</p>
+                        </div>
+                        <div class="admin-profile-field">
+                            <p class="admin-profile-field-label">Account Status</p>
+                            <p class="admin-profile-field-value" style="color: #059669;">Active</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
-    <div style="background: #f3f4f6; padding: 15px; border-radius: 12px; border-left: 4px solid #667eea;">
-      <p style="font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 5px 0;">☎️ Phone</p>
-      <p id="teacher-profile-phone" style="margin: 0; font-weight: 600; color: #1f2937;">N/A</p>
-    </div>
-  </div>
-
-  <div style="background: #f9fafb; padding: 15px; border-radius: 12px; margin-bottom: 25px; border-left: 4px solid #003366;">
-    <p style="font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 8px 0;">📚 Subjects</p>
-    <p id="teacher-profile-subjects" style="margin: 0; font-weight: 600; color: #1f2937; line-height: 1.6;">N/A</p>
-  </div>
-
-  <!-- Action Buttons -->
-  <div class="profile-section" style="display: flex; gap: 10px; justify-content: center;">
-    <button onclick="showEditTeacherForm()" 
-            style="flex: 1; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-      <i class="fas fa-edit"></i> EDIT PROFILE
-    </button>
-    <button onclick="showConfirm('Are you sure you want to delete this teacher?', () => deleteTeacherFromProfile())" 
-            style="flex: 1; background: #ef4444; color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-      <i class="fas fa-trash"></i> DELETE
-    </button>
-  </div>
-</div>
 </div>
 </div>
 <div class="hidden overlay-base" id="editTeacherForm">
@@ -60766,15 +61080,121 @@ function renderAttendance() {
                 return;
             }
 
-            document.getElementById("teacher-profile-photo").src = profileData.photo || defaultTeacherAvatar;
-            document.getElementById("teacher-profile-name").textContent = profileData.name;
-            document.getElementById("teacher-profile-id").textContent = profileData.id;
-            document.getElementById("teacher-profile-email").textContent = profileData.email || 'N/A';
-            document.getElementById("teacher-profile-phone").textContent = profileData.phone || 'N/A';
-            document.getElementById("teacher-profile-subjects").textContent = profileData.subjects ? profileData.subjects.join(', ') : 'N/A';
+            // Populate avatar and basic info
+            document.getElementById("admin-profile-photo").src = profileData.photo || defaultTeacherAvatar;
+            
+            // Parse name into first and last name
+            const nameParts = (profileData.name || '').split(' ');
+            const firstName = nameParts[0] || '';
+            const lastName = nameParts.slice(1).join(' ') || '';
+            
+            // Populate view mode
+            document.getElementById("admin-fname-view").textContent = firstName || '-';
+            document.getElementById("admin-lname-view").textContent = lastName || '-';
+            document.getElementById("admin-email-view").textContent = profileData.email || 'N/A';
+            document.getElementById("admin-phone-view").textContent = profileData.phone || 'N/A';
+            document.getElementById("admin-id-view").textContent = profileData.id || 'N/A';
+            document.getElementById("admin-dept-view").textContent = profileData.department || 'N/A';
+            
+            // Also update detail view
+            document.getElementById("admin-id-detail").textContent = profileData.id || 'N/A';
+            document.getElementById("admin-dept-detail").textContent = profileData.department || 'N/A';
 
+            // Populate edit mode fields
+            document.getElementById("admin-fname-edit").value = firstName;
+            document.getElementById("admin-lname-edit").value = lastName;
+            document.getElementById("admin-email-edit").value = profileData.email || '';
+            document.getElementById("admin-phone-edit").value = profileData.phone || '';
+
+            // Populate subjects list
+            const subjectsList = document.getElementById("admin-subjects-list");
+            subjectsList.innerHTML = '';
+            if (profileData.subjects && profileData.subjects.length > 0) {
+                profileData.subjects.forEach((subject, index) => {
+                    const card = document.createElement('div');
+                    card.style.cssText = 'padding: 1.5rem; border: 1px solid #e5e7eb; border-radius: 1.5rem; background: white; box-shadow: 0 2px 12px rgba(0,0,0,0.02);';
+                    card.innerHTML = `
+                        <div style="width: 3rem; height: 3rem; border-radius: 50%; background: #eff6ff; display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem; font-size: 1.5rem;">
+                            📚
+                        </div>
+                        <h3 style="font-size: 1.125rem; font-weight: 700; color: #111827; margin-bottom: 0.375rem;">${subject}</h3>
+                        <p style="font-size: 0.875rem; color: #6b7280; margin-bottom: 1.25rem;">Academic Year</p>
+                        <span style="display: inline-flex; align-items: center; gap: 0.375rem; color: #059669; background: #ecfdf5; padding: 0.375rem 0.75rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">
+                            ✓ Active
+                        </span>
+                    `;
+                    subjectsList.appendChild(card);
+                });
+            } else {
+                subjectsList.innerHTML = '<p style="color: #6b7280;">No subjects assigned</p>';
+            }
+
+            // Show modal
             document.getElementById("teacherProfileOverlay").classList.remove("hidden");
+            
+            // Reset to personal tab
+            switchAdminTab('personal');
+            
             hideLoader();
+        }
+
+        function switchAdminTab(tabId) {
+            // Hide all tabs
+            document.querySelectorAll('.admin-profile-tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Deactivate all nav buttons
+            document.querySelectorAll('[id^="nav-admin-"]').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show active tab
+            document.getElementById(`admin-content-${tabId}`).classList.add('active');
+            
+            // Activate nav button
+            document.getElementById(`nav-admin-${tabId}`).classList.add('active');
+        }
+
+        let adminProfileEditMode = false;
+        function toggleAdminEditMode() {
+            adminProfileEditMode = !adminProfileEditMode;
+            
+            const viewMode = document.getElementById('admin-view-mode');
+            const editMode = document.getElementById('admin-edit-mode');
+            const editBtn = document.getElementById('admin-edit-btn');
+            const saveBtn = document.getElementById('admin-save-btn');
+
+            if (adminProfileEditMode) {
+                viewMode.style.display = 'none';
+                editMode.style.display = 'grid';
+                editBtn.classList.add('hidden');
+                editBtn.style.display = 'none';
+                saveBtn.classList.remove('hidden');
+                saveBtn.style.display = 'inline-block';
+            } else {
+                viewMode.style.display = 'grid';
+                editMode.style.display = 'none';
+                editBtn.classList.remove('hidden');
+                editBtn.style.display = 'inline-block';
+                saveBtn.classList.add('hidden');
+                saveBtn.style.display = 'none';
+                
+                // Save changes
+                const profileData = teachers.find(t => t.id === activeTeacherId && t.branch === selectedBranch);
+                if (profileData) {
+                    const fname = document.getElementById('admin-fname-edit').value;
+                    const lname = document.getElementById('admin-lname-edit').value;
+                    profileData.name = `${fname} ${lname}`.trim();
+                    profileData.email = document.getElementById('admin-email-edit').value;
+                    profileData.phone = document.getElementById('admin-phone-edit').value;
+                    
+                    localStorage.setItem("teachers", JSON.stringify(teachers));
+                    syncSettingToRailway('teachers_data', teachers);
+                    showTeacherProfile(profileData);
+                    renderTeacherDashboard();
+                }
+            }
         }
 
         function closeTeacherProfile() {
