@@ -61641,114 +61641,122 @@ function renderAttendance() {
         }
         
         function showTeacherProfile(teacher) {
-            showLoader('Loading teacher profile...');
-            activeTeacherId = teacher.id;
-            const profileData = teachers.find(t => t.id === activeTeacherId && t.branch === selectedBranch);
-            if (!profileData) {
-                hideLoader();
-                return;
-            }
-
-            // Populate avatar and basic info
-            document.getElementById("admin-profile-photo").src = profileData.photo || defaultTeacherAvatar;
-            
-            // Parse name into first and last name
-            const nameParts = (profileData.name || '').split(' ');
-            const firstName = nameParts[0] || '';
-            const lastName = nameParts.slice(1).join(' ') || '';
-            
-            // Populate view mode
-            document.getElementById("admin-fname-view").textContent = firstName || '-';
-            document.getElementById("admin-lname-view").textContent = lastName || '-';
-            document.getElementById("admin-email-view").textContent = profileData.email || 'N/A';
-            document.getElementById("admin-phone-view").textContent = profileData.phone || 'N/A';
-            document.getElementById("admin-id-view").textContent = profileData.id || 'N/A';
-            document.getElementById("admin-dept-view").textContent = profileData.department || 'N/A';
-
-            // Populate edit mode fields
-            document.getElementById("admin-fname-edit").value = firstName;
-            document.getElementById("admin-lname-edit").value = lastName;
-            document.getElementById("admin-email-edit").value = profileData.email || '';
-            document.getElementById("admin-phone-edit").value = profileData.phone || '';
-
-            // Populate subjects list
-            const subjectsList = document.getElementById("admin-subjects-list");
-            subjectsList.innerHTML = '';
-            if (profileData.subjects && profileData.subjects.length > 0) {
-                profileData.subjects.forEach((subject, index) => {
-                    // Handle both string and object formats
-                    let subjectName = subject;
-                    let semester = '';
-                    let type = 'Theory';
-                    let typeColor = 'bg-blue-50 text-blue-700';
-                    let typeIcon = '📖';
-                    
-                    // Check if subject is an object with properties
-                    if (typeof subject === 'object' && subject.name) {
-                        subjectName = subject.name;
-                        semester = subject.semester || '';
-                        type = subject.type || 'Theory';
-                    } else if (typeof subject === 'string') {
-                        // Try to parse from string format like "Mathematics - Sem 1 - Theory"
-                        const parts = subject.split(' - ');
-                        if (parts.length >= 2) {
-                            subjectName = parts[0];
-                            if (parts[1]) semester = parts[1];
-                            if (parts[2]) type = parts[2];
-                        }
-                    }
-                    
-                    // Set color and icon based on type
-                    if (type.toLowerCase().includes('practical')) {
-                        typeColor = 'bg-green-50 text-green-700';
-                        typeIcon = '🔧';
-                    } else if (type.toLowerCase().includes('audit')) {
-                        typeColor = 'bg-purple-50 text-purple-700';
-                        typeIcon = '✓';
-                    } else if (type.toLowerCase().includes('lab')) {
-                        typeColor = 'bg-orange-50 text-orange-700';
-                        typeIcon = '⚗️';
-                    }
-                    
-                    const card = `
-                        <div class="prof-subject-card">
-                            <div class="prof-subject-icon">${typeIcon}</div>
-                            <div class="prof-subject-name">${subjectName}</div>
-                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.75rem;">
-                                ${semester ? `<span style="display: inline-flex; align-items: center; gap: 0.25rem; color: #4b5563; background: #f1f5f9; padding: 0.25rem 0.625rem; border-radius: 0.375rem; font-size: 0.65rem; font-weight: 700; text-transform: uppercase;">📅 ${semester}</span>` : ''}
-                                <span style="display: inline-flex; align-items: center; gap: 0.25rem; color: #059669; background: #ecfdf5; padding: 0.25rem 0.625rem; border-radius: 0.375rem; font-size: 0.65rem; font-weight: 700; text-transform: uppercase;">✓ ${type}</span>
-                            </div>
-                        </div>
-                    `;
-                    subjectsList.innerHTML += card;
-                });
-            } else {
-                subjectsList.innerHTML = '<p style="color: #6b7280; grid-column: 1/-1;">No subjects assigned</p>';
-            }
-
-            // Show modal
             try {
-                const overlay = document.getElementById("teacherProfileOverlay");
-                if (!overlay) {
-                    console.error('Teacher profile overlay not found');
+                showLoader('Loading teacher profile...');
+                activeTeacherId = teacher.id;
+                const profileData = teachers.find(t => t.id === activeTeacherId && t.branch === selectedBranch);
+                if (!profileData) {
+                    console.warn('Teacher profile not found');
                     hideLoader();
                     return;
                 }
-                overlay.classList.remove("hidden");
+
+                // Populate avatar and basic info
+                try {
+                    const photoEl = document.getElementById("admin-profile-photo");
+                    if (photoEl) photoEl.src = profileData.photo || defaultTeacherAvatar;
+                } catch (e) { console.warn('Photo:', e); }
+                
+                // Parse name
+                const nameParts = (profileData.name || '').split(' ');
+                const firstName = nameParts[0] || '';
+                const lastName = nameParts.slice(1).join(' ') || '';
+                
+                // Populate view mode
+                try {
+                    const el1 = document.getElementById("admin-fname-view");
+                    const el2 = document.getElementById("admin-lname-view");
+                    const el3 = document.getElementById("admin-email-view");
+                    const el4 = document.getElementById("admin-phone-view");
+                    const el5 = document.getElementById("admin-id-view");
+                    const el6 = document.getElementById("admin-dept-view");
+                    
+                    if (el1) el1.textContent = firstName || '-';
+                    if (el2) el2.textContent = lastName || '-';
+                    if (el3) el3.textContent = profileData.email || 'N/A';
+                    if (el4) el4.textContent = profileData.phone || 'N/A';
+                    if (el5) el5.textContent = profileData.id || 'N/A';
+                    if (el6) el6.textContent = profileData.department || 'N/A';
+                } catch (e) { console.warn('View mode:', e); }
+
+                // Populate edit mode
+                try {
+                    const e1 = document.getElementById("admin-fname-edit");
+                    const e2 = document.getElementById("admin-lname-edit");
+                    const e3 = document.getElementById("admin-email-edit");
+                    const e4 = document.getElementById("admin-phone-edit");
+                    
+                    if (e1) e1.value = firstName;
+                    if (e2) e2.value = lastName;
+                    if (e3) e3.value = profileData.email || '';
+                    if (e4) e4.value = profileData.phone || '';
+                } catch (e) { console.warn('Edit mode:', e); }
+
+                // Populate subjects list
+                try {
+                    const subjectsList = document.getElementById("admin-subjects-list");
+                    if (subjectsList) {
+                        subjectsList.innerHTML = '';
+                        if (profileData.subjects && profileData.subjects.length > 0) {
+                            profileData.subjects.forEach((subject, index) => {
+                                try {
+                                    let subjectName = subject;
+                                    let semester = '';
+                                    let type = 'Theory';
+                                    let typeIcon = '📖';
+                                    
+                                    if (typeof subject === 'object' && subject.name) {
+                                        subjectName = subject.name;
+                                        semester = subject.semester || '';
+                                        type = subject.type || 'Theory';
+                                    } else if (typeof subject === 'string') {
+                                        const parts = subject.split(' - ');
+                                        if (parts.length >= 2) {
+                                            subjectName = parts[0];
+                                            if (parts[1]) semester = parts[1];
+                                            if (parts[2]) type = parts[2];
+                                        }
+                                    }
+                                    
+                                    if (type.toLowerCase().includes('practical')) {
+                                        typeIcon = '🔧';
+                                    } else if (type.toLowerCase().includes('audit')) {
+                                        typeIcon = '✓';
+                                    } else if (type.toLowerCase().includes('lab')) {
+                                        typeIcon = '⚗️';
+                                    }
+                                    
+                                    const card = `<div class="prof-subject-card"><div class="prof-subject-icon">${typeIcon}</div><div class="prof-subject-name">${subjectName}</div><div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.75rem;">${semester ? `<span style="display: inline-flex; align-items: center; gap: 0.25rem; color: #4b5563; background: #f1f5f9; padding: 0.25rem 0.625rem; border-radius: 0.375rem; font-size: 0.65rem; font-weight: 700; text-transform: uppercase;">📅 ${semester}</span>` : ''}<span style="display: inline-flex; align-items: center; gap: 0.25rem; color: #059669; background: #ecfdf5; padding: 0.25rem 0.625rem; border-radius: 0.375rem; font-size: 0.65rem; font-weight: 700; text-transform: uppercase;">✓ ${type}</span></div></div>`;
+                                    subjectsList.innerHTML += card;
+                                } catch (e) { console.warn('Subject error:', e); }
+                            });
+                        } else {
+                            subjectsList.innerHTML = '<p style="color: #6b7280; grid-column: 1/-1;">No subjects assigned</p>';
+                        }
+                    }
+                } catch (e) { console.warn('Subjects:', e); }
+
+                // Show modal
+                try {
+                    const overlay = document.getElementById("teacherProfileOverlay");
+                    if (overlay) overlay.classList.remove("hidden");
+                    else console.error('Overlay not found');
+                } catch (e) { console.error('Modal show:', e); }
                 
                 // Reset to personal tab
-                switchAdminTab('personal');
+                try { switchAdminTab('personal'); } catch (e) { console.error('Tab:', e); }
                 
-                // Load faculty users data
-                loadFacultyUsers();
+                // Load faculty users
+                try { loadFacultyUsers(); } catch (e) { console.error('Faculty:', e); }
                 
-                // Initialize access control tab
-                switchAccessMode('view');
+                // Initialize access control
+                try { switchAccessMode('view'); } catch (e) { console.error('Access:', e); }
+                
             } catch (e) {
-                console.error('Error in showTeacherProfile display logic:', e);
+                console.error('CRITICAL showTeacherProfile:', e);
+            } finally {
+                hideLoader();
             }
-            
-            hideLoader();
         }
 
         function switchAdminTab(tabId) {
