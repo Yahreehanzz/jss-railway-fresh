@@ -37948,6 +37948,26 @@ Easily access and review students' academic performance here. This section provi
     </div>
 </div>
 
+<!-- Faculty User Selection Modal -->
+<div class="hidden overlay-base" id="facultyUserSelectionOverlay" style="z-index:999998;">
+    <div class="role-password-modal" id="facultyUserSelectionModal">
+        <h2 id="facultyUserSelectionTitle">Select Teacher Account</h2>
+        <p id="facultyUserSelectionDesc">Choose your account to login</p>
+        
+        <div id="facultyUsersList" style="max-height: 300px; overflow-y: auto; margin: 20px 0; padding: 10px; background: rgba(0,0,0,0.1); border-radius: 8px;">
+            <!-- Populated by JS -->
+        </div>
+        
+        <div class="role-password-error" id="facultyUserSelectionError"></div>
+        
+        <div class="role-password-buttons">
+            <button class="role-password-btn-back" onclick="backToRoleSelection()">
+                <i class="fas fa-arrow-left"></i> Back
+            </button>
+        </div>
+    </div>
+</div>
+
 <!-- 2FA Verification Modal -->
 <div class="hidden overlay-base" id="twoFAOverlay" style="z-index:999997;">
 <div class="twofa-modal" id="twoFAModal">
@@ -50536,14 +50556,31 @@ function restoreTeacherZonePhoto() {
         }
 
         function backToRoleSelection() {
-            // Hide password modal, show role selection
+            // Hide password modal and faculty user selection, show role selection
             document.getElementById('rolePasswordOverlay').classList.add('hidden');
+            document.getElementById('facultyUserSelectionOverlay').classList.add('hidden');
             document.getElementById('roleSelectionOverlay').classList.remove('hidden');
             
-            // Clear password input
+            // Clear password input and selected faculty user
             document.getElementById('rolePasswordInput').value = '';
             document.getElementById('rolePasswordError').textContent = '';
             document.getElementById('rolePasswordError').classList.remove('show');
+            selectedFacultyTeacherId = null;
+            selectedFacultyUserIndex = null;
+            
+            // Reset the selected role pill
+            currentRoleSelection = null;
+            const roleTeacher = document.getElementById('role-teacher');
+            const roleHod = document.getElementById('role-hod');
+            const roleAdmin = document.getElementById('role-admin');
+            const continueBtn = document.getElementById('continue-btn-role');
+            if (roleTeacher) roleTeacher.classList.remove('selected');
+            if (roleHod) roleHod.classList.remove('selected');
+            if (roleAdmin) roleAdmin.classList.remove('selected');
+            if (continueBtn) {
+                continueBtn.classList.add('disabled');
+                continueBtn.classList.remove('active');
+            }
         }
 
         let currentRoleSelection = null;
@@ -50586,34 +50623,140 @@ function restoreTeacherZonePhoto() {
             // Add loading state to button
             continueBtn.disabled = true;
             
-            // Hide role selection, show password modal
+            // Hide role selection
             setTimeout(() => {
                 document.getElementById('roleSelectionOverlay').classList.add('hidden');
-                document.getElementById('rolePasswordOverlay').classList.remove('hidden');
                 
-                // Update password modal title based on role
-                const roleMap = {
-                    'teacher': 'Teacher',
-                    'hod': 'Head of Department (HOD)',
-                    'admin': 'Principal / Administrator'
-                };
-                const roleTitle = roleMap[currentSelectedRole] || 'User';
-                document.getElementById('rolePasswordTitle').textContent = `Enter ${roleTitle} Password`;
-                document.getElementById('rolePasswordDesc').textContent = `Verify your ${roleTitle} credentials`;
-                
-                // Clear password input and error
-                document.getElementById('rolePasswordInput').value = '';
-                const errorEl = document.getElementById('rolePasswordError');
-                errorEl.textContent = '';
-                errorEl.classList.remove('show');
-                
-                // Focus on password input
-                setTimeout(() => {
-                    document.getElementById('rolePasswordInput').focus();
-                }, 100);
+                // For teacher role, show faculty users list
+                if (currentSelectedRole === 'teacher') {
+                    showFacultyUserSelection();
+                } else {
+                    // For other roles, show password modal
+                    showRolePasswordModal();
+                }
                 
                 continueBtn.disabled = false;
             }, 300);
+        }
+
+        function showRolePasswordModal() {
+            document.getElementById('rolePasswordOverlay').classList.remove('hidden');
+            
+            // Update password modal title based on role
+            const roleMap = {
+                'hod': 'Head of Department (HOD)',
+                'admin': 'Principal / Administrator'
+            };
+            const roleTitle = roleMap[currentSelectedRole] || 'User';
+            document.getElementById('rolePasswordTitle').textContent = `Enter ${roleTitle} Password`;
+            document.getElementById('rolePasswordDesc').textContent = `Verify your ${roleTitle} credentials`;
+            
+            // Clear password input and error
+            document.getElementById('rolePasswordInput').value = '';
+            const errorEl = document.getElementById('rolePasswordError');
+            errorEl.textContent = '';
+            errorEl.classList.remove('show');
+            
+            // Focus on password input
+            setTimeout(() => {
+                document.getElementById('rolePasswordInput').focus();
+            }, 100);
+        }
+
+        function showFacultyUserSelection() {
+            try {
+                const facultyUsers = JSON.parse(localStorage.getItem('faculty_users') || '{}');
+                const usersList = document.getElementById('facultyUsersList');
+                
+                if (!usersList) return;
+                
+                // Get all teachers from the teachers array
+                const teacherIds = Object.keys(facultyUsers);
+                
+                if (teacherIds.length === 0) {
+                    usersList.innerHTML = '<div style="color: #999; text-align: center; padding: 20px;">No teacher accounts available</div>';
+                    document.getElementById('facultyUserSelectionOverlay').classList.remove('hidden');
+                    return;
+                }
+
+                // Find teacher names to display
+                let usersHTML = '';
+                teacherIds.forEach((teacherId, idx) => {
+                    const userCredentials = facultyUsers[teacherId];
+                    if (Array.isArray(userCredentials)) {
+                        userCredentials.forEach((user, userIdx) => {
+                            usersHTML += `
+                                <div onclick="selectFacultyUser('${teacherId}', ${userIdx})" style="
+                                    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%);
+                                    border: 1px solid rgba(59, 130, 246, 0.3);
+                                    padding: 12px 16px;
+                                    margin: 8px 0;
+                                    border-radius: 8px;
+                                    cursor: pointer;
+                                    transition: all 0.3s;
+                                    display: flex;
+                                    align-items: center;
+                                    gap: 12px;
+                                " onmouseover="this.style.background='linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(37, 99, 235, 0.1) 100%)'" onmouseout="this.style.background='linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%)'">
+                                    <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1rem;">👤</div>
+                                    <div style="flex: 1;">
+                                        <div style="color: #1f2937; font-weight: 600; font-size: 0.95rem;">${user.username}</div>
+                                        <div style="color: #6b7280; font-size: 0.8rem;">Teacher/Educator • Created ${new Date(user.createdAt).toLocaleDateString()}</div>
+                                    </div>
+                                    <div style="color: #3b82f6; font-size: 1.2rem;">→</div>
+                                </div>
+                            `;
+                        });
+                    }
+                });
+                
+                if (usersHTML === '') {
+                    usersList.innerHTML = '<div style="color: #999; text-align: center; padding: 20px;">No user accounts created yet</div>';
+                } else {
+                    usersList.innerHTML = usersHTML;
+                }
+                
+                document.getElementById('facultyUserSelectionOverlay').classList.remove('hidden');
+            } catch (e) {
+                console.error('Error showing faculty users:', e);
+                document.getElementById('facultyUserSelectionError').textContent = 'Error loading user accounts';
+            }
+        }
+
+        let selectedFacultyTeacherId = null;
+        let selectedFacultyUserIndex = null;
+        
+        function selectFacultyUser(teacherId, userIndex) {
+            try {
+                selectedFacultyTeacherId = teacherId;
+                selectedFacultyUserIndex = userIndex;
+                
+                // Hide faculty user selection and show password modal
+                document.getElementById('facultyUserSelectionOverlay').classList.add('hidden');
+                
+                const facultyUsers = JSON.parse(localStorage.getItem('faculty_users') || '{}');
+                const username = facultyUsers[teacherId][userIndex].username;
+                
+                // Show password modal
+                setTimeout(() => {
+                    document.getElementById('rolePasswordOverlay').classList.remove('hidden');
+                    document.getElementById('rolePasswordTitle').textContent = `Enter Password for "${username}"`;
+                    document.getElementById('rolePasswordDesc').textContent = `Verify your credentials`;
+                    
+                    // Clear password input
+                    document.getElementById('rolePasswordInput').value = '';
+                    const errorEl = document.getElementById('rolePasswordError');
+                    errorEl.textContent = '';
+                    errorEl.classList.remove('show');
+                    
+                    // Focus on password input
+                    setTimeout(() => {
+                        document.getElementById('rolePasswordInput').focus();
+                    }, 100);
+                }, 300);
+            } catch (e) {
+                console.error('Error selecting faculty user:', e);
+            }
         }
 
         async function verifyRolePassword() {
@@ -50624,33 +50767,52 @@ function restoreTeacherZonePhoto() {
             errorEl.textContent = '';
             errorEl.classList.remove('show');
             
-            // Validate password based on role
-            let isValidPassword = false;
-            
-            if (currentSelectedRole === 'teacher' && password === 'teacher123') {
-                isValidPassword = true;
-            } else if (currentSelectedRole === 'hod' && password === 'hod123') {
-                isValidPassword = true;
-            }
-            
             if (!password) {
                 errorEl.textContent = 'Please enter the password';
                 errorEl.classList.add('show');
                 return;
             }
             
+            // Validate password based on role
+            let isValidPassword = false;
+            
+            // For teacher role with faculty user
+            if (currentSelectedRole === 'teacher' && selectedFacultyTeacherId !== null && selectedFacultyUserIndex !== null) {
+                try {
+                    const facultyUsers = JSON.parse(localStorage.getItem('faculty_users') || '{}');
+                    const user = facultyUsers[selectedFacultyTeacherId][selectedFacultyUserIndex];
+                    const storedPassswordEncoded = user.password;
+                    const decodedPassword = atob(storedPassswordEncoded);
+                    if (password === decodedPassword) {
+                        isValidPassword = true;
+                    }
+                } catch (e) {
+                    console.error('Error verifying faculty user password:', e);
+                }
+            } 
+            // Default hardcoded passwords for other roles
+            else if (currentSelectedRole === 'teacher' && password === 'teacher123') {
+                isValidPassword = true;
+            } else if (currentSelectedRole === 'hod' && password === 'hod123') {
+                isValidPassword = true;
+            }
+            
             if (!isValidPassword) {
-                errorEl.textContent = `Invalid ${currentSelectedRole === 'teacher' ? 'Teacher' : 'HOD'} password`;
+                errorEl.textContent = `Invalid password`;
                 errorEl.classList.add('show');
                 return;
             }
             
             // Password verified, hide password modal and show 2FA
             verifyBtn.disabled = true;
-            verifyBtn.textContent = 'VERIFIED ?';
+            verifyBtn.textContent = 'VERIFIED ✓';
             
             // Store the selected role
             sessionStorage.setItem('userRole', currentSelectedRole);
+            if (selectedFacultyTeacherId) {
+                sessionStorage.setItem('facultyTeacherId', selectedFacultyTeacherId);
+                sessionStorage.setItem('facultyUserIndex', selectedFacultyUserIndex);
+            }
             
             // Hide modals and show 2FA after a brief delay
             setTimeout(() => {
