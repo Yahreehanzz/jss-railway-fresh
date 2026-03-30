@@ -43648,7 +43648,7 @@ function restoreTeacherZonePhoto() {
         
         window.openTodayAttendanceModal = function() {
             try {
-                console.log('?? Opening Today\'s Attendance Modal...');
+                console.log('[INFO] Opening Today\'s Attendance Modal...');
                 
                 const selectedDate = document.getElementById('attendanceMarkingDate')?.value;
                 const attendanceDate = selectedDate || new Date().toISOString().split('T')[0];
@@ -44102,10 +44102,10 @@ function restoreTeacherZonePhoto() {
                 // Insert new modal directly into body
                 document.body.insertAdjacentHTML('beforeend', newModalHTML);
                 
-                console.log('? NEW SIMPLE MODAL CREATED AND DISPLAYED!');
+                console.log('[✓] NEW SIMPLE MODAL CREATED AND DISPLAYED!');
                 
             } catch (error) {
-                console.error('? Error:', error);
+                console.error('[✗] Error:', error);
                 alert('Error: ' + error.message);
             }
         };
@@ -44114,13 +44114,13 @@ function restoreTeacherZonePhoto() {
             const modal = document.getElementById('simpleAttendanceModal');
             if (modal) {
                 modal.remove();
-                console.log('? Modal closed and removed');
+                console.log('[✓] Modal closed and removed');
             }
         };
         
         window.switchAttendanceDetailTab = function(filter) {
             try {
-                console.log('?? Switching to tab:', filter);
+                console.log('[INFO] Switching to tab:', filter);
                 const selectedDate = document.getElementById('attendanceMarkingDate')?.value;
                 const attendanceDate = selectedDate || new Date().toISOString().split('T')[0];
                 const dateAttendance = attendance[attendanceDate] || {};
@@ -44143,7 +44143,7 @@ function restoreTeacherZonePhoto() {
                     }
                 });
             } catch (error) {
-                console.error('? Error switching tab:', error);
+                console.error('[✗] Error switching tab:', error);
             }
         };
         
@@ -44151,7 +44151,7 @@ function restoreTeacherZonePhoto() {
             try {
                 const list = document.getElementById('todayAttendanceList');
                 if (!list) {
-                    console.error('? Attendance list element not found');
+                    console.error('[✗] Attendance list element not found');
                     return;
                 }
                 
@@ -44164,7 +44164,7 @@ function restoreTeacherZonePhoto() {
                     filteredStudents = studentsWithAttendance.filter(s => dateAttendance[s.usn] === 'absent');
                 }
                 
-                console.log('?? Rendering', filteredStudents.length, 'students for filter:', filter);
+                console.log('[INFO] Rendering', filteredStudents.length, 'students for filter:', filter);
                 
                 if (filteredStudents.length === 0) {
                     list.innerHTML = '<p style="text-align: center; padding: 20px; color: #6b7280;">No students found for this filter.</p>';
@@ -44203,15 +44203,15 @@ function restoreTeacherZonePhoto() {
                     list.appendChild(item);
                 });
                 
-                console.log('? List rendered successfully');
+                console.log('[✓] List rendered successfully');
             } catch (error) {
-                console.error('? Error rendering list:', error);
+                console.error('[✗] Error rendering list:', error);
             }
         };
         
         window.exportTodayAttendanceToExcel = function() {
             try {
-                console.log('?? Exporting attendance to Excel...');
+                console.log('[INFO] Exporting attendance to Excel...');
                 const selectedDate = document.getElementById('attendanceMarkingDate')?.value;
                 const attendanceDate = selectedDate || new Date().toISOString().split('T')[0];
                 const dateAttendance = attendance[attendanceDate] || {};
@@ -44471,15 +44471,15 @@ function restoreTeacherZonePhoto() {
                 document.body.removeChild(link);
                 URL.revokeObjectURL(url);
                 
-                console.log('? Export completed');
+                console.log('[✓] Export completed');
                 showMessageBox('Success', `Professional attendance report exported successfully with full formatting!`, 'success');
             } catch (error) {
-                console.error('? Error exporting:', error);
+                console.error('[✗] Error exporting:', error);
                 showMessageBox('Error', 'Failed to export attendance. Please try again.', 'error');
             }
         };
         
-        console.log('? Today\'s Attendance Modal functions registered globally (early)');
+        console.log('[✓] Today\'s Attendance Modal functions registered globally (early)');
         
         // ========== END OF EARLY FUNCTION DECLARATIONS ==========
         let teachers = [];
@@ -44508,7 +44508,7 @@ function restoreTeacherZonePhoto() {
         window.API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
             ? `http://localhost:${window.location.port || 3000}/api`
             : `https://jss-railway-fresh-production.up.railway.app/api`;
-        console.log('? Global API_BASE set to:', window.API_BASE);
+        console.log('[✓] Global API_BASE set to:', window.API_BASE);
         let apiConnected = false;
 
         // -- Fetch with timeout ------------------------------------
@@ -44566,15 +44566,15 @@ function restoreTeacherZonePhoto() {
                     const json = await r.json();
                     if (json.success) {
                         apiConnected = true;
-                        console.log('%c? Railway DB Connected ? DB: ' + json.db, 'color:green;font-weight:bold;font-size:14px');
+                        console.log('%c✓ Railway DB Connected - DB: ' + json.db, 'color:green;font-weight:bold;font-size:14px');
                         return true;
                     }
                 }
             } catch(e) {
-                console.warn('?? Railway API not reachable:', e.message);
+                console.warn('✗ Railway API not reachable:', e.message);
             }
             apiConnected = false;
-            console.warn('?? Using localStorage (server not running)');
+            console.warn('✗ Using localStorage (server not running)');
             return false;
         }
 
@@ -44726,7 +44726,7 @@ function restoreTeacherZonePhoto() {
                         // Push any localStorage-only students up to Railway (always migrate)
                         const localOnlyStudents = Object.values(lsMap).filter(s => s.usn && !railwayUSNs.has(s.usn));
                         if (localOnlyStudents.length > 0) {
-                            console.log(`%c?? Syncing ${localOnlyStudents.length} local-only student(s) to Railway DB...`, 'color:orange;font-weight:bold');
+                            console.log(`%c[SYNC] Syncing ${localOnlyStudents.length} local-only student(s) to Railway DB...`, 'color:orange;font-weight:bold');
                             for (const s of localOnlyStudents) {
                                 try {
                                     const payload = {
@@ -44752,12 +44752,12 @@ function restoreTeacherZonePhoto() {
                             }
                             const existingUSNs = new Set(students.map(s => s.usn));
                             localOnlyStudents.forEach(s => { if (!existingUSNs.has(s.usn)) students.push(s); });
-                            console.log(`%c? Sync complete ? all students now in Railway DB`, 'color:green;font-weight:bold');
+                            console.log(`%c[✓] Sync complete - all students now in Railway DB`, 'color:green;font-weight:bold');
                         }
 
                         // Save to localStorage (IA enrichment happens when settings are loaded)
                         localStorage.setItem('students', JSON.stringify(students));
-                        console.log(`%c? Railway DB Connected ? ${students.length} students loaded`, 'color:green;font-weight:bold');
+                        console.log(`%c[✓] Railway DB Connected - ${students.length} students loaded`, 'color:green;font-weight:bold');
                         if (typeof renderStudentDataOverview === 'function') renderStudentDataOverview();
                         if (typeof renderStudentList === 'function') renderStudentList();
                         if (typeof renderDashboard === 'function') renderDashboard();
@@ -44769,7 +44769,7 @@ function restoreTeacherZonePhoto() {
                        studNotifD, notifHistD, qrSessD, attAlertsD, studPwdsD, teachLeaveD,
                        userAboutD, accentD, avatarImgD, coverImgD, notifRulesD] = settingsRes;
                 
-                console.log(`%c?? IA Setting Response: success=${iaD?.success}, has data=${!!iaD?.data}, type=${typeof iaD?.data}`, 'color:blue;font-size:11px');
+                console.log(`%c[INFO] IA Setting Response: success=${iaD?.success}, has data=${!!iaD?.data}, type=${typeof iaD?.data}`, 'color:blue;font-size:11px');
                 if (iaD?.data) console.log(`%c  Raw iaD.data:`, 'color:blue;font-size:10px', iaD.data);
                 
                 if (att?.success && att.data)    { attendance = att.data; localStorage.setItem('attendance', JSON.stringify(attendance)); }
@@ -44779,12 +44779,12 @@ function restoreTeacherZonePhoto() {
                 if (iaD?.success && iaD.data)    { 
                     internalAssessments = iaD.data; 
                     localStorage.setItem('internalAssessments', JSON.stringify(internalAssessments));
-                    console.log(`%c? internalAssessments loaded from Railway:`, 'color:blue;font-size:11px', internalAssessments);
+                    console.log(`%c[✓] internalAssessments loaded from Railway:`, 'color:blue;font-size:11px', internalAssessments);
                 }
                 
                 // ? NOW enrich students with IA data AFTER loading it
                 try {
-                    console.log(`%c?? Starting IA enrichment...`, 'color:blue;font-size:12px');
+                    console.log(`%c[INFO] Starting IA enrichment...`, 'color:blue;font-size:12px');
                     console.log(`%c  internalAssessments type: ${typeof internalAssessments}, is null: ${internalAssessments === null}, is object: ${typeof internalAssessments === 'object'}`, 'color:blue;font-size:11px');
                     
                     if (internalAssessments && typeof internalAssessments === 'object' && !Array.isArray(internalAssessments)) {
@@ -44794,17 +44794,17 @@ function restoreTeacherZonePhoto() {
                         Object.entries(internalAssessments).forEach(([usn, iaData]) => {
                             if (typeof iaData === 'object' && iaData !== null) {
                                 iaByStudent[usn] = iaData;
-                                console.log(`%c  ? Found IA for USN: ${usn}`, 'color:green;font-size:10px');
+                                console.log(`%c  ✓ Found IA for USN: ${usn}`, 'color:green;font-size:10px');
                             }
                         });
                         
-                        console.log(`%c? Grouped IA by student - ${Object.keys(iaByStudent).length} students`, 'color:green;font-size:11px');
+                        console.log(`%c✓ Grouped IA by student - ${Object.keys(iaByStudent).length} students`, 'color:green;font-size:11px');
                         
                         // Attach IA to students
                         students = students.map(s => {
                             const hasIA = iaByStudent[s.usn] && Object.keys(iaByStudent[s.usn]).length > 0;
                             if (hasIA) {
-                                console.log(`%c?? Attached IA for ${s.name} (${s.usn})`, 'color:orange;font-size:10px');
+                                console.log(`%c[ATTACH] Attached IA for ${s.name} (${s.usn})`, 'color:orange;font-size:10px');
                             }
                             return {
                                 ...s,
@@ -44814,14 +44814,14 @@ function restoreTeacherZonePhoto() {
                         });
                         
                         localStorage.setItem('students', JSON.stringify(students));
-                        console.log(`%c? All students enriched with IA data`, 'color:green;font-weight:bold;font-size:12px');
+                        console.log(`%c✓ All students enriched with IA data`, 'color:green;font-weight:bold;font-size:12px');
                     } else if (Array.isArray(internalAssessments)) {
-                        console.log(`%c?? internalAssessments is an array (${internalAssessments.length} items)`, 'color:orange;font-size:11px');
+                        console.log(`%c[WARN] internalAssessments is an array (${internalAssessments.length} items)`, 'color:orange;font-size:11px');
                     } else {
-                        console.log(`%c?? internalAssessments is null or not an object`, 'color:orange;font-size:11px');
+                        console.log(`%c[WARN] internalAssessments is null or not an object`, 'color:orange;font-size:11px');
                     }
                 } catch (iaErr) {
-                    console.warn(`%c?? IA enrichment error: ${iaErr.message}`, 'color:red;font-size:11px', iaErr);
+                    console.warn(`%c[ERROR] IA enrichment error: ${iaErr.message}`, 'color:red;font-size:11px', iaErr);
                 }
                 
                 if (ttD?.success && ttD.data)    { timetables = ttD.data; localStorage.setItem('timetables', JSON.stringify(timetables)); }
@@ -44855,7 +44855,7 @@ function restoreTeacherZonePhoto() {
 
             } catch(e) {
                 apiConnected = false;
-                console.warn('?? Railway offline, using cached data');
+                console.warn('[OFFLINE] Railway offline, using cached data');
             }
         }
         
@@ -48419,7 +48419,7 @@ function restoreTeacherZonePhoto() {
                     }
                 }
                 
-                console.log(`?? Progress: ${current}/${total} (${percentage}%)`);
+                console.log(`[INFO] Progress: ${current}/${total} (${percentage}%)`);
             } catch (e) {
                 console.error('Progress update error:', e);
             }
@@ -50125,9 +50125,9 @@ function restoreTeacherZonePhoto() {
         try {
             firebaseApp = firebase.initializeApp(firebaseConfig);
             firebaseDb = firebase.database();
-            console.log('? Firebase initialized for 2FA');
+            console.log('[2FA] Firebase initialized for 2FA');
         } catch (error) {
-            console.error('? Firebase initialization error:', error);
+            console.error('[2FA ERROR] Firebase initialization error:', error);
         }
 
         // Show 2FA modal
@@ -50257,7 +50257,7 @@ function restoreTeacherZonePhoto() {
 
         // Verify 2FA code
         async function verify2FACode() {
-            console.log('?? verify2FACode called');
+            console.log('[2FA] verify2FACode called');
             const errorEl = document.getElementById('twoFAError');
             errorEl.textContent = '';
 
@@ -50286,7 +50286,7 @@ function restoreTeacherZonePhoto() {
                 code += value;
             }
             
-            console.log('?? Entered code:', code);
+            console.log('[2FA] Entered code:', code);
             
             // Validate code format
             if (!/^\d{6}$/.test(code)) {
@@ -50302,14 +50302,14 @@ function restoreTeacherZonePhoto() {
             try {
                 // Check if Firebase is initialized
                 if (!firebaseDb) {
-                    console.error('? Firebase not initialized');
+                    console.error('[2FA ERROR] Firebase not initialized');
                     errorEl.textContent = 'System error. Please contact administrator.';
                     return;
                 }
                 
                 // Get username from login form
                 const username = document.getElementById('username')?.value || '';
-                console.log('?? Checking code for username:', username || '(no username)');
+                console.log('[2FA] Checking code for username:', username || '(no username)');
                 
                 // Check code in Firebase - get the most recent few codes so we don't
                 // fail just because a new code was generated a second earlier
@@ -50319,7 +50319,7 @@ function restoreTeacherZonePhoto() {
                     .once('value');
                 
                 if (!snapshot.exists()) {
-                    console.log('?? No verification code found in database');
+                    console.log('[2FA] No verification code found in database');
                     errorEl.textContent = 'No verification code found. Please generate a code first.';
                     return;
                 }
@@ -50329,10 +50329,10 @@ function restoreTeacherZonePhoto() {
                 
                 snapshot.forEach((childSnapshot) => {
                     const data = childSnapshot.val();
-                    console.log('?? Checking code from Firebase:', data);
+                    console.log('[2FA] Checking code from Firebase:', data);
                     
                     if (!data || !data.code || !data.timestamp) {
-                        console.warn('?? Skipping malformed auth_codes entry:', childSnapshot.key);
+                        console.warn('[2FA] Skipping malformed auth_codes entry:', childSnapshot.key);
                         return;
                     }
                     
@@ -50340,12 +50340,12 @@ function restoreTeacherZonePhoto() {
                         // Make sure timestamp is treated as a number
                         const ts = typeof data.timestamp === 'string' ? parseInt(data.timestamp, 10) : data.timestamp;
                         const codeAge = Date.now() - ts;
-                        console.log('? Matched code age:', codeAge, 'ms (max: 60000ms)');
+                        console.log('[2FA] Matched code age:', codeAge, 'ms (max: 60000ms)');
                         
                         if (!Number.isNaN(codeAge) && codeAge >= 0 && codeAge < 60000) {
                             isValid = true;
                             validCodeKey = childSnapshot.key;
-                            console.log('? Code is valid and not expired');
+                            console.log('[2FA] Code is valid and not expired');
                         } else {
                             console.log('? Code expired or invalid timestamp. Age:', codeAge, 'ms');
                         }
