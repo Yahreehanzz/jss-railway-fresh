@@ -61249,6 +61249,13 @@ function renderAttendance() {
             renderTeacherTable();
         }
 
+        // Subject format examples:
+        // 1. Simple string: "Mathematics"
+        // 2. String with details: "Mathematics - Sem 1 - Theory"
+        // 3. Object format: { name: "Mathematics", semester: "1", type: "Theory" }
+        // OR for multiple types: { name: "Programming Lab", semester: "2", type: "Practical" }
+        // 4. Types: "Theory", "Practical", "Lab", "Audit"
+        
         function showTeacherProfile(teacher) {
             showLoader('Loading teacher profile...');
             activeTeacherId = teacher.id;
@@ -61285,17 +61292,54 @@ function renderAttendance() {
             subjectsList.innerHTML = '';
             if (profileData.subjects && profileData.subjects.length > 0) {
                 profileData.subjects.forEach((subject, index) => {
+                    // Handle both string and object formats
+                    let subjectName = subject;
+                    let semester = '';
+                    let type = 'Theory';
+                    let typeColor = 'bg-blue-50 text-blue-700';
+                    let typeIcon = '📖';
+                    
+                    // Check if subject is an object with properties
+                    if (typeof subject === 'object' && subject.name) {
+                        subjectName = subject.name;
+                        semester = subject.semester || '';
+                        type = subject.type || 'Theory';
+                    } else if (typeof subject === 'string') {
+                        // Try to parse from string format like "Mathematics - Sem 1 - Theory"
+                        const parts = subject.split(' - ');
+                        if (parts.length >= 2) {
+                            subjectName = parts[0];
+                            if (parts[1]) semester = parts[1];
+                            if (parts[2]) type = parts[2];
+                        }
+                    }
+                    
+                    // Set color and icon based on type
+                    if (type.toLowerCase().includes('practical')) {
+                        typeColor = 'bg-green-50 text-green-700';
+                        typeIcon = '🔧';
+                    } else if (type.toLowerCase().includes('audit')) {
+                        typeColor = 'bg-purple-50 text-purple-700';
+                        typeIcon = '✓';
+                    } else if (type.toLowerCase().includes('lab')) {
+                        typeColor = 'bg-orange-50 text-orange-700';
+                        typeIcon = '⚗️';
+                    }
+                    
                     const card = `
                         <div class="prof-subject-card">
-                            <div class="prof-subject-icon">📖</div>
-                            <div class="prof-subject-name">${subject}</div>
-                            <div class="prof-subject-status">✓ Assigned</div>
+                            <div class="prof-subject-icon">${typeIcon}</div>
+                            <div class="prof-subject-name">${subjectName}</div>
+                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.75rem;">
+                                ${semester ? `<span style="display: inline-flex; align-items: center; gap: 0.25rem; color: #4b5563; background: #f1f5f9; padding: 0.25rem 0.625rem; border-radius: 0.375rem; font-size: 0.65rem; font-weight: 700; text-transform: uppercase;">📅 ${semester}</span>` : ''}
+                                <span style="display: inline-flex; align-items: center; gap: 0.25rem; color: #059669; background: #ecfdf5; padding: 0.25rem 0.625rem; border-radius: 0.375rem; font-size: 0.65rem; font-weight: 700; text-transform: uppercase;">✓ ${type}</span>
+                            </div>
                         </div>
                     `;
                     subjectsList.innerHTML += card;
                 });
             } else {
-                subjectsList.innerHTML = '<p style="color: #6b7280;">No subjects assigned</p>';
+                subjectsList.innerHTML = '<p style="color: #6b7280; grid-column: 1/-1;">No subjects assigned</p>';
             }
 
             // Show modal
