@@ -29,11 +29,6 @@ app.get('/', (req, res) => {
     });
 });
 
-// Fallback: serve index.html for any unknown routes (SPA support)
-app.use((req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
-
 //  Database 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
@@ -787,6 +782,18 @@ app.get('/api/health', async (req, res) => {
         const r = await pool.query('SELECT NOW() as time, current_database() as db');
         res.json({ success: true, db: r.rows[0].db, time: r.rows[0].time, status: 'ok' });
     } catch (e) { res.status(500).json({ success: false, error: e.message }); }
+});
+
+// Fallback: serve index.html for any unknown routes (SPA support)
+// [MUST BE LAST - after all API routes]
+app.use((req, res) => {
+    console.log(`Fallback: Serving index.html for path: ${req.path}`);
+    res.sendFile(path.join(__dirname, 'index.html'), (err) => {
+        if (err) {
+            console.error('Error serving index.html from fallback:', err.message);
+            res.status(500).send('Server error');
+        }
+    });
 });
 
 //  Start 
