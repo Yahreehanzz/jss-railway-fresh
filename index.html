@@ -3108,12 +3108,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         .remember-checkbox:checked + .checkbox-custom::after {
-            content: '\u2713';
+            content: '✓';
             color: white;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: bold;
             position: absolute;
             line-height: 1;
+            font-family: Arial, sans-serif;
+            letter-spacing: 0;
         }
         
         .checkbox-text {
