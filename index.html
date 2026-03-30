@@ -43581,37 +43581,119 @@ function restoreTeacherZonePhoto() {
 </div>
 
 <style>
-/* Professional Horizontal Popup Modal */
+/* Professional Profile Modal with Left Sidebar */
 #teacherProfileOverlay {
-    background: rgba(0, 0, 0, 0.5) !important;
-    backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.6) !important;
+    backdrop-filter: blur(5px);
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    animation: fadeIn 0.3s ease-out;
+    animation: fadeInModal 0.4s ease-out;
+}
+
+@keyframes fadeInModal {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 .prof-popup-container {
     background: white;
-    border-radius: 1.25rem;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-    width: 90%;
-    max-width: 900px;
-    max-height: 90vh;
+    border-radius: 1.5rem;
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.2);
+    width: 95%;
+    max-width: 1100px;
+    height: 80vh;
+    max-height: 600px;
     overflow: hidden;
     display: flex;
+    animation: slideInPopup 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes slideInPopup {
+    from { transform: translateY(30px) scale(0.95); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+/* Left Sidebar */
+.prof-sidebar {
+    width: 280px;
+    background: linear-gradient(135deg, #f8fafc 0%, #f0f4f8 100%);
+    border-right: 1px solid #e2e8f0;
+    padding: 2rem 0;
+    display: flex;
     flex-direction: column;
-    animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    gap: 1rem;
+    overflow-y: auto;
 }
 
-@keyframes slideUp {
-    from { transform: translateY(20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+.prof-sidebar-title {
+    padding: 0 1.5rem;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+.prof-sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0 1rem;
+}
+
+.prof-tab-pill {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1rem;
+    background: transparent;
+    border: none;
+    border-radius: 0.75rem;
+    color: #64748b;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.95rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.prof-tab-pill::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 0;
+    height: 100%;
+    background: rgba(59, 130, 246, 0.1);
+    transition: width 0.3s ease;
+    z-index: -1;
+}
+
+.prof-tab-pill:hover {
+    color: #1e293b;
+    background: rgba(59, 130, 246, 0.08);
+}
+
+.prof-tab-pill.active {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+    transform: translateX(4px);
+}
+
+.prof-tab-icon {
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+/* Main Content Area */
+.prof-main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 /* Header Bar */
@@ -43620,70 +43702,36 @@ function restoreTeacherZonePhoto() {
     align-items: center;
     justify-content: space-between;
     padding: 1.5rem 2rem;
-    border-bottom: 1px solid #e5e7eb;
-    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border-bottom: 1px solid #e2e8f0;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
 }
 
 .prof-popup-title {
-    font-size: 1.25rem;
+    font-size: 1.3rem;
     font-weight: 700;
-    color: #111827;
+    color: #0f172a;
     margin: 0;
 }
 
 .prof-popup-close {
-    background: #f3f4f6;
-    border: none;
-    width: 2rem;
-    height: 2rem;
+    background: #f1f5f9;
+    border: 2px solid transparent;
+    width: 2.2rem;
+    height: 2.2rem;
     border-radius: 50%;
     cursor: pointer;
-    font-size: 1.25rem;
-    color: #6b7280;
+    font-size: 1.4rem;
+    color: #64748b;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s;
+    transition: all 0.3s;
 }
 
 .prof-popup-close:hover {
-    background: #e5e7eb;
-    color: #111827;
-}
-
-/* Tab Navigation - Horizontal */
-.prof-popup-tabs {
-    display: flex;
-    gap: 0;
-    padding: 0;
-    border-bottom: 1px solid #e5e7eb;
-    background: #f9fafb;
-}
-
-.prof-popup-tab-btn {
-    flex: 1;
-    padding: 1.25rem 1.5rem;
-    background: transparent;
-    border: none;
-    border-bottom: 2px solid transparent;
-    color: #6b7280;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-align: center;
-    font-size: 0.95rem;
-}
-
-.prof-popup-tab-btn:hover {
-    color: #111827;
-    background: rgba(0, 0, 0, 0.02);
-}
-
-.prof-popup-tab-btn.active {
-    color: #111827;
-    border-bottom-color: #3b82f6;
-    font-weight: 600;
-    background: white;
+    background: #e2e8f0;
+    color: #0f172a;
+    transform: rotate(90deg);
 }
 
 /* Content Area */
@@ -43691,15 +43739,38 @@ function restoreTeacherZonePhoto() {
     flex: 1;
     overflow-y: auto;
     padding: 2rem;
+    background: white;
+}
+
+.prof-popup-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.prof-popup-content::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+.prof-popup-content::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.prof-popup-content::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
 }
 
 .prof-popup-section {
     display: none;
+    animation: fadeInContent 0.4s ease-out;
 }
 
 .prof-popup-section.active {
     display: block;
-    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeInContent {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 /* Profile Grid */
@@ -43717,31 +43788,37 @@ function restoreTeacherZonePhoto() {
 }
 
 .prof-info-label {
-    font-size: 0.7rem;
-    font-weight: 700;
-    color: #9ca3af;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #94a3b8;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 1.2px;
 }
 
 .prof-info-value {
-    font-size: 1rem;
+    font-size: 1.05rem;
     font-weight: 600;
-    color: #111827;
+    color: #0f172a;
 }
 
 .prof-info-input {
     padding: 0.75rem 1rem;
-    border: 1px solid #d1d5db;
-    border-radius: 0.5rem;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 0.625rem;
     font-size: 0.95rem;
-    transition: border 0.2s;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.prof-info-input:hover {
+    border-color: #cbd5e1;
 }
 
 .prof-info-input:focus {
     outline: none;
     border-color: #3b82f6;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    background: #f0f6fe;
 }
 
 /* Avatar */
@@ -43753,9 +43830,9 @@ function restoreTeacherZonePhoto() {
     width: 5rem;
     height: 5rem;
     border-radius: 50%;
-    border: 2px solid #e5e7eb;
+    border: 2px solid #e2e8f0;
     overflow: hidden;
-    background: #f3f4f6;
+    background: #f1f5f9;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -43775,7 +43852,7 @@ function restoreTeacherZonePhoto() {
     right: 0;
     width: 1.5rem;
     height: 1.5rem;
-    background: #111827;
+    background: #0f172a;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -43792,28 +43869,30 @@ function restoreTeacherZonePhoto() {
 
 .prof-btn {
     padding: 0.625rem 1.25rem;
-    border-radius: 0.5rem;
-    border: 1px solid #d1d5db;
+    border-radius: 0.625rem;
+    border: 1.5px solid #e2e8f0;
     background: white;
-    color: #4b5563;
-    font-weight: 500;
+    color: #475569;
+    font-weight: 600;
     font-size: 0.875rem;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.3s;
 }
 
 .prof-btn:hover {
-    border-color: #9ca3af;
+    border-color: #cbd5e1;
+    background: #f8fafc;
 }
 
 .prof-btn-primary {
-    background: #111827;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
     color: white;
     border: none;
 }
 
 .prof-btn-primary:hover {
-    background: #1f2937;
+    box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+    transform: translateY(-2px);
 }
 
 .prof-btn-danger {
@@ -43835,23 +43914,25 @@ function restoreTeacherZonePhoto() {
 }
 
 .prof-subject-card {
-    padding: 1rem;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.75rem;
-    background: white;
-    transition: all 0.2s;
+    padding: 1.25rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.875rem;
+    background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
+    transition: all 0.3s;
+    cursor: pointer;
 }
 
 .prof-subject-card:hover {
     border-color: #3b82f6;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.15);
+    transform: translateY(-4px);
 }
 
 .prof-subject-icon {
     width: 2.5rem;
     height: 2.5rem;
     border-radius: 50%;
-    background: #eff6ff;
+    background: linear-gradient(135deg, #eff6ff 0%, #e0f2fe 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -43861,7 +43942,7 @@ function restoreTeacherZonePhoto() {
 
 .prof-subject-name {
     font-weight: 700;
-    color: #111827;
+    color: #0f172a;
     font-size: 0.95rem;
     margin-bottom: 0.5rem;
 }
@@ -43881,45 +43962,66 @@ function restoreTeacherZonePhoto() {
 
 /* Details Box */
 .prof-details-box {
-    background: #f9fafb;
-    border-radius: 0.75rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 0.875rem;
     padding: 1.5rem;
-    border: 1px solid #e5e7eb;
+    border: 1px solid #e2e8f0;
 }
 
 .prof-hidden {
     display: none !important;
 }
+
+/* Divider */
+.prof-divider {
+    border-top: 1px solid #e2e8f0;
+    margin: 2rem 0;
+}
+
+/* Section Title */
+.prof-section-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 1.5rem;
+}
 </style>
 
 <div class="hidden overlay-base" id="teacherProfileOverlay">
 <div class="prof-popup-container">
-    <!-- Header -->
-    <div class="prof-popup-header">
-        <h2 class="prof-popup-title">Staff Profile</h2>
-        <button class="prof-popup-close" onclick="closeTeacherProfile()">×</button>
-    </div>
+    <!-- Left Sidebar with Tabs -->
+    <aside class="prof-sidebar">
+        <div class="prof-sidebar-title">Staff<br>Profile</div>
+        <nav class="prof-sidebar-nav">
+            <button class="prof-tab-pill active" onclick="switchAdminTab('personal')" id="nav-admin-personal">
+                <span class="prof-tab-icon">👤</span>
+                <span>Personal Info</span>
+            </button>
+            <button class="prof-tab-pill" onclick="switchAdminTab('subjects')" id="nav-admin-subjects">
+                <span class="prof-tab-icon">📚</span>
+                <span>Subjects</span>
+            </button>
+            <button class="prof-tab-pill" onclick="switchAdminTab('user')" id="nav-admin-user">
+                <span class="prof-tab-icon">🛡️</span>
+                <span>Details</span>
+            </button>
+        </nav>
+    </aside>
 
-    <!-- Tabs -->
-    <div class="prof-popup-tabs">
-        <button class="prof-popup-tab-btn active" onclick="switchAdminTab('personal')" id="nav-admin-personal">
-            👤 Personal Info
-        </button>
-        <button class="prof-popup-tab-btn" onclick="switchAdminTab('subjects')" id="nav-admin-subjects">
-            📚 Subjects
-        </button>
-        <button class="prof-popup-tab-btn" onclick="switchAdminTab('user')" id="nav-admin-user">
-            🛡️ Details
-        </button>
-    </div>
+    <!-- Main Content Area -->
+    <div class="prof-main-content">
+        <!-- Header -->
+        <div class="prof-popup-header">
+            <h2 class="prof-popup-title" id="prof-modal-title">Staff Profile</h2>
+            <button class="prof-popup-close" onclick="closeTeacherProfile()">×</button>
+        </div>
 
-    <!-- Content -->
-    <div class="prof-popup-content">
-        <!-- Personal Info Tab -->
-        <div id="admin-content-personal" class="prof-popup-section active">
-            <div style="margin-bottom: 1.5rem;">
+        <!-- Content -->
+        <div class="prof-popup-content">
+            <!-- Personal Info Tab -->
+            <div id="admin-content-personal" class="prof-popup-section active">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                    <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600; color: #111827;">Personal Information</h3>
+                    <h3 class="prof-section-title">Personal Information</h3>
                     <div class="prof-popup-actions">
                         <button class="prof-btn" onclick="toggleAdminEditMode()" id="admin-edit-btn">✏️ Edit</button>
                         <button class="prof-btn prof-btn-primary prof-hidden" id="admin-save-btn" onclick="toggleAdminEditMode()">✓ Save</button>
@@ -43972,41 +44074,43 @@ function restoreTeacherZonePhoto() {
                     </div>
                 </div>
 
-                <div style="border-top: 1px solid #e5e7eb; margin-top: 1.5rem; padding-top: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
-                    <p style="margin: 0; font-weight: 600; color: #111827;">Delete Account</p>
+                <div class="prof-divider"></div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <p style="margin: 0; font-weight: 600; color: #0f172a;">Delete Account</p>
                     <button class="prof-btn prof-btn-danger" onclick="showConfirm('Are you sure?', () => deleteTeacherFromProfile())">Delete</button>
                 </div>
             </div>
-        </div>
 
-        <!-- Subjects Tab -->
-        <div id="admin-content-subjects" class="prof-popup-section">
-            <h3 style="margin: 0 0 1rem 0; font-size: 1.1rem; font-weight: 600; color: #111827;">Subjects Assigned</h3>
-            <div class="prof-subjects-grid" id="admin-subjects-list">
-                <!-- Populated by JS -->
+            <!-- Subjects Tab -->
+            <div id="admin-content-subjects" class="prof-popup-section">
+                <h3 class="prof-section-title">Subjects Assigned</h3>
+                <div class="prof-subjects-grid" id="admin-subjects-list">
+                    <!-- Populated by JS -->
+                </div>
             </div>
-        </div>
 
-        <!-- User Details Tab -->
-        <div id="admin-content-user" class="prof-popup-section">
-            <h3 style="margin: 0 0 1rem 0; font-size: 1.1rem; font-weight: 600; color: #111827;">Account Details</h3>
-            <div class="prof-details-box">
-                <div class="prof-info-grid">
-                    <div class="prof-info-field">
-                        <p class="prof-info-label">Staff ID</p>
-                        <p class="prof-info-value" id="admin-id-view">-</p>
-                    </div>
-                    <div class="prof-info-field">
-                        <p class="prof-info-label">Department</p>
-                        <p class="prof-info-value" id="admin-dept-view">-</p>
-                    </div>
-                    <div class="prof-info-field">
-                        <p class="prof-info-label">Role</p>
-                        <p class="prof-info-value">Teacher / Faculty</p>
-                    </div>
-                    <div class="prof-info-field">
-                        <p class="prof-info-label">Status</p>
-                        <p class="prof-info-value" style="color: #059669;">✓ Active</p>
+            <!-- User Details Tab -->
+            <div id="admin-content-user" class="prof-popup-section">
+                <h3 class="prof-section-title">Account Details</h3>
+                <div class="prof-details-box">
+                    <div class="prof-info-grid">
+                        <div class="prof-info-field">
+                            <p class="prof-info-label">Staff ID</p>
+                            <p class="prof-info-value" id="admin-id-view">-</p>
+                        </div>
+                        <div class="prof-info-field">
+                            <p class="prof-info-label">Department</p>
+                            <p class="prof-info-value" id="admin-dept-view">-</p>
+                        </div>
+                        <div class="prof-info-field">
+                            <p class="prof-info-label">Role</p>
+                            <p class="prof-info-value">Teacher / Faculty</p>
+                        </div>
+                        <div class="prof-info-field">
+                            <p class="prof-info-label">Status</p>
+                            <p class="prof-info-value" style="color: #059669;">✓ Active</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -61204,21 +61308,27 @@ function renderAttendance() {
         }
 
         function switchAdminTab(tabId) {
-            // Hide all tabs
+            // Hide all tabs with smooth animation
             document.querySelectorAll('.prof-popup-section').forEach(tab => {
                 tab.classList.remove('active');
             });
             
-            // Deactivate all nav buttons
-            document.querySelectorAll('.prof-popup-tab-btn').forEach(btn => {
+            // Deactivate all nav pills
+            document.querySelectorAll('.prof-tab-pill').forEach(btn => {
                 btn.classList.remove('active');
             });
 
-            // Show active tab
-            document.getElementById(`admin-content-${tabId}`).classList.add('active');
+            // Show active tab with animation
+            const activeTab = document.getElementById(`admin-content-${tabId}`);
+            if (activeTab) {
+                activeTab.classList.add('active');
+            }
             
-            // Activate nav button
-            document.getElementById(`nav-admin-${tabId}`).classList.add('active');
+            // Activate nav pill
+            const activeButton = document.getElementById(`nav-admin-${tabId}`);
+            if (activeButton) {
+                activeButton.classList.add('active');
+            }
         }
 
         let adminProfileEditMode = false;
@@ -61274,6 +61384,19 @@ function renderAttendance() {
                 saveBtn.classList.add('prof-hidden');
             }
         }
+
+        // Prevent overlay from closing when clicking on the backdrop
+        document.addEventListener('DOMContentLoaded', function() {
+            const overlay = document.getElementById('teacherProfileOverlay');
+            if (overlay) {
+                overlay.addEventListener('click', function(e) {
+                    // Only close if clicking directly on the overlay background, not on the container
+                    if (e.target === overlay) {
+                        return; // Don't close on overlay click
+                    }
+                });
+            }
+        });
 
         function showEditTeacherForm() {
             showLoader('Loading edit form...');
