@@ -44506,7 +44506,7 @@ function restoreTeacherZonePhoto() {
         // -----------------------------------------------------------
         window.API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
             ? `http://localhost:${window.location.port || 3000}/api`
-            : `https://jss-app-production.up.railway.app/api`;
+            : `/api`;
         console.log('? Global API_BASE set to:', window.API_BASE);
         let apiConnected = false;
 
@@ -75063,7 +75063,7 @@ let facultyFeeData = [];
 const FACULTY_API_BASE = (typeof API_BASE !== 'undefined') ? API_BASE : 
     (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
         ? `http://localhost:${window.location.port || 3000}/api`
-        : `https://jss-app-production.up.railway.app/api`;
+        : `/api`;
 
 async function loadFacultyFeeManagement() {
     try {
