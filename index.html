@@ -37840,7 +37840,7 @@ Easily access and review students' academic performance here. This section provi
 <div class="hidden overlay-base" id="roleSelectionOverlay" style="z-index:999999;">
     <div class="role-selection-modal" id="roleSelectionModal">
         <!-- Selection Panel -->
-        <div class="role-modal-selection">
+        <div class="role-modal-selection" id="roleSelectionPanel">
             
             <div class="role-modal-header">
                 <h2>Select your role</h2>
@@ -37915,6 +37915,28 @@ Easily access and review students' academic performance here. This section provi
                 </button>
             </div>
 
+        </div>
+
+        <!-- Faculty Users Panel -->
+        <div class="role-modal-selection" id="facultyUsersPanel" style="display: none; opacity: 0; transform: translateY(20px); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);">
+            <div class="role-modal-header">
+                <h2>Select Your Account</h2>
+                <p>Choose your faculty user account to login</p>
+            </div>
+
+            <div id="facultyUsersListContainer" style="display: grid; gap: 12px; margin: 20px 0; max-height: 300px; overflow-y: auto; padding: 10px;">
+                <!-- Populated by JS -->
+            </div>
+
+            <div class="role-selection-footer">
+                <a onclick="backFromFacultyUsers()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    Back to roles
+                </a>
+            </div>
         </div>
     </div>
 </div>
@@ -50625,18 +50647,154 @@ function restoreTeacherZonePhoto() {
             
             // Hide role selection
             setTimeout(() => {
-                document.getElementById('roleSelectionOverlay').classList.add('hidden');
-                
-                // For teacher role, show faculty users list
+                // For teacher role, show faculty users list with animation IN SAME MODAL
                 if (currentSelectedRole === 'teacher') {
-                    showFacultyUserSelection();
+                    showFacultyUserSelectionAnimated();
                 } else {
                     // For other roles, show password modal
+                    document.getElementById('roleSelectionOverlay').classList.add('hidden');
                     showRolePasswordModal();
                 }
                 
                 continueBtn.disabled = false;
             }, 300);
+        }
+
+        function showFacultyUserSelectionAnimated() {
+            try {
+                const facultyUsers = JSON.parse(localStorage.getItem('faculty_users') || '{}');
+                const roleSelectionPanel = document.getElementById('roleSelectionPanel');
+                const facultyUsersPanel = document.getElementById('facultyUsersPanel');
+                const usersListContainer = document.getElementById('facultyUsersListContainer');
+                
+                if (!facultyUsersPanel || !usersListContainer) {
+                    console.error('Faculty users panel not found');
+                    return;
+                }
+                
+                // Get all teacher IDs
+                const teacherIds = Object.keys(facultyUsers);
+                
+                if (teacherIds.length === 0) {
+                    usersListContainer.innerHTML = '<div style="color: #999; text-align: center; padding: 20px;">No user accounts available. Create accounts in the admin panel first.</div>';
+                    // Animate panel in
+                    roleSelectionPanel.style.display = 'none';
+                    facultyUsersPanel.style.display = 'block';
+                    setTimeout(() => {
+                        facultyUsersPanel.style.opacity = '1';
+                        facultyUsersPanel.style.transform = 'translateY(0)';
+                    }, 50);
+                    return;
+                }
+
+                // Build user list HTML with staggered animation
+                let usersHTML = '';
+                let userCount = 0;
+                teacherIds.forEach((teacherId, teacherIdx) => {
+                    const userCredentials = facultyUsers[teacherId];
+                    if (Array.isArray(userCredentials)) {
+                        userCredentials.forEach((user, userIdx) => {
+                            const delay = userCount * 0.08;
+                            usersHTML += `
+                                <div onclick="selectFacultyUser('${teacherId}', ${userIdx})" style="
+                                    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%);
+                                    border: 2px solid rgba(59, 130, 246, 0.3);
+                                    padding: 16px 20px;
+                                    border-radius: 12px;
+                                    cursor: pointer;
+                                    transition: all 0.3s ease;
+                                    display: flex;
+                                    align-items: center;
+                                    gap: 16px;
+                                    animation: slideUpUser 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) ${delay}s backwards;
+                                " onmouseover="this.style.borderColor='rgba(59, 130, 246, 0.8)'; this.style.background='linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(37, 99, 235, 0.1) 100%)'; this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='rgba(59, 130, 246, 0.3)'; this.style.background='linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%)'; this.style.transform='translateY(0)'">
+                                    <div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.2rem; flex-shrink: 0;">👤</div>
+                                    <div style="flex: 1;">
+                                        <div style="color: #1f2937; font-weight: 700; font-size: 1rem; margin-bottom: 4px;">${user.username}</div>
+                                        <div style="color: #6b7280; font-size: 0.85rem;">Teacher/Educator • ${new Date(user.createdAt).toLocaleDateString()}</div>
+                                    </div>
+                                    <div style="color: #3b82f6; font-size: 1.4rem; font-weight: 700;">→</div>
+                                </div>
+                            `;
+                            userCount++;
+                        });
+                    }
+                });
+                
+                // Add CSS animation if not already added
+                if (!document.getElementById('userListAnimationStyle')) {
+                    const style = document.createElement('style');
+                    style.id = 'userListAnimationStyle';
+                    style.textContent = `
+                        @keyframes slideUpUser {
+                            from {
+                                opacity: 0;
+                                transform: translateY(20px);
+                            }
+                            to {
+                                opacity: 1;
+                                transform: translateY(0);
+                            }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+                
+                usersListContainer.innerHTML = usersHTML;
+                
+                // Animate: hide role selection, show faculty users
+                roleSelectionPanel.style.opacity = '0';
+                roleSelectionPanel.style.transform = 'translateY(-20px)';
+                
+                setTimeout(() => {
+                    roleSelectionPanel.style.display = 'none';
+                    facultyUsersPanel.style.display = 'block';
+                    facultyUsersPanel.style.opacity = '0';
+                    facultyUsersPanel.style.transform = 'translateY(20px)';
+                    
+                    setTimeout(() => {
+                        facultyUsersPanel.style.opacity = '1';
+                        facultyUsersPanel.style.transform = 'translateY(0)';
+                    }, 50);
+                }, 300);
+            } catch (e) {
+                console.error('Error showing faculty users:', e);
+            }
+        }
+
+        function backFromFacultyUsers() {
+            const roleSelectionPanel = document.getElementById('roleSelectionPanel');
+            const facultyUsersPanel = document.getElementById('facultyUsersPanel');
+            
+            if (!roleSelectionPanel || !facultyUsersPanel) return;
+            
+            // Animate panel out
+            facultyUsersPanel.style.opacity = '0';
+            facultyUsersPanel.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                facultyUsersPanel.style.display = 'none';
+                roleSelectionPanel.style.display = 'block';
+                roleSelectionPanel.style.opacity = '1';
+                roleSelectionPanel.style.transform = 'translateY(0)';
+                
+                // Reset selection
+                currentRoleSelection = null;
+                selectedFacultyTeacherId = null;
+                selectedFacultyUserIndex = null;
+                
+                const roleTeacher = document.getElementById('role-teacher');
+                const roleHod = document.getElementById('role-hod');
+                const roleAdmin = document.getElementById('role-admin');
+                const continueBtn = document.getElementById('continue-btn-role');
+                if (roleTeacher) roleTeacher.classList.remove('selected');
+                if (roleHod) roleHod.classList.remove('selected');
+                if (roleAdmin) roleAdmin.classList.remove('selected');
+                if (continueBtn) {
+                    continueBtn.classList.add('disabled');
+                    continueBtn.classList.remove('active');
+                }
+            }, 400);
         }
 
         function showRolePasswordModal() {
@@ -50663,68 +50821,43 @@ function restoreTeacherZonePhoto() {
             }, 100);
         }
 
-        function showFacultyUserSelection() {
-            try {
-                const facultyUsers = JSON.parse(localStorage.getItem('faculty_users') || '{}');
-                const usersList = document.getElementById('facultyUsersList');
-                
-                if (!usersList) return;
-                
-                // Get all teachers from the teachers array
-                const teacherIds = Object.keys(facultyUsers);
-                
-                if (teacherIds.length === 0) {
-                    usersList.innerHTML = '<div style="color: #999; text-align: center; padding: 20px;">No teacher accounts available</div>';
-                    document.getElementById('facultyUserSelectionOverlay').classList.remove('hidden');
-                    return;
-                }
-
-                // Find teacher names to display
-                let usersHTML = '';
-                teacherIds.forEach((teacherId, idx) => {
-                    const userCredentials = facultyUsers[teacherId];
-                    if (Array.isArray(userCredentials)) {
-                        userCredentials.forEach((user, userIdx) => {
-                            usersHTML += `
-                                <div onclick="selectFacultyUser('${teacherId}', ${userIdx})" style="
-                                    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%);
-                                    border: 1px solid rgba(59, 130, 246, 0.3);
-                                    padding: 12px 16px;
-                                    margin: 8px 0;
-                                    border-radius: 8px;
-                                    cursor: pointer;
-                                    transition: all 0.3s;
-                                    display: flex;
-                                    align-items: center;
-                                    gap: 12px;
-                                " onmouseover="this.style.background='linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(37, 99, 235, 0.1) 100%)'" onmouseout="this.style.background='linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%)'">
-                                    <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1rem;">👤</div>
-                                    <div style="flex: 1;">
-                                        <div style="color: #1f2937; font-weight: 600; font-size: 0.95rem;">${user.username}</div>
-                                        <div style="color: #6b7280; font-size: 0.8rem;">Teacher/Educator • Created ${new Date(user.createdAt).toLocaleDateString()}</div>
-                                    </div>
-                                    <div style="color: #3b82f6; font-size: 1.2rem;">→</div>
-                                </div>
-                            `;
-                        });
-                    }
-                });
-                
-                if (usersHTML === '') {
-                    usersList.innerHTML = '<div style="color: #999; text-align: center; padding: 20px;">No user accounts created yet</div>';
-                } else {
-                    usersList.innerHTML = usersHTML;
-                }
-                
-                document.getElementById('facultyUserSelectionOverlay').classList.remove('hidden');
-            } catch (e) {
-                console.error('Error showing faculty users:', e);
-                document.getElementById('facultyUserSelectionError').textContent = 'Error loading user accounts';
-            }
-        }
-
         let selectedFacultyTeacherId = null;
         let selectedFacultyUserIndex = null;
+        
+        function selectFacultyUser(teacherId, userIndex) {
+            try {
+                selectedFacultyTeacherId = teacherId;
+                selectedFacultyUserIndex = userIndex;
+                
+                const facultyUsers = JSON.parse(localStorage.getItem('faculty_users') || '{}');
+                const username = facultyUsers[teacherId][userIndex].username;
+                
+                // Hide faculty users panel and role selection overlay, show password modal
+                const roleSelectionOverlay = document.getElementById('roleSelectionOverlay');
+                const rolePasswordOverlay = document.getElementById('rolePasswordOverlay');
+                
+                setTimeout(() => {
+                    roleSelectionOverlay.classList.add('hidden');
+                    rolePasswordOverlay.classList.remove('hidden');
+                    
+                    document.getElementById('rolePasswordTitle').textContent = `Enter Password for "${username}"`;
+                    document.getElementById('rolePasswordDesc').textContent = `Verify your credentials`;
+                    
+                    // Clear password input
+                    document.getElementById('rolePasswordInput').value = '';
+                    const errorEl = document.getElementById('rolePasswordError');
+                    errorEl.textContent = '';
+                    errorEl.classList.remove('show');
+                    
+                    // Focus on password input
+                    setTimeout(() => {
+                        document.getElementById('rolePasswordInput').focus();
+                    }, 100);
+                }, 100);
+            } catch (e) {
+                console.error('Error selecting faculty user:', e);
+            }
+        }
         
         function selectFacultyUser(teacherId, userIndex) {
             try {
