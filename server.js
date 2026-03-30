@@ -29,6 +29,11 @@ app.get('/', (req, res) => {
     res.sendFile(indexPath);
 });
 
+// Health check
+app.get('/health', (req, res) => {
+    res.json({ status: 'ok', message: 'Server is running' });
+});
+
 //  Database 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
