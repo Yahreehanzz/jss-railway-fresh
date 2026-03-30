@@ -43989,6 +43989,14 @@ function restoreTeacherZonePhoto() {
     color: #0f172a;
     margin-bottom: 1.5rem;
 }
+
+/* Access Control Specific Styles */
+.prof-info-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    background: #f0f6fe;
+}
 </style>
 
 <div class="hidden overlay-base" id="teacherProfileOverlay">
@@ -44006,8 +44014,8 @@ function restoreTeacherZonePhoto() {
                 <span>Subjects</span>
             </button>
             <button class="prof-tab-pill" onclick="switchAdminTab('user')" id="nav-admin-user">
-                <span class="prof-tab-icon">🛡️</span>
-                <span>Details</span>
+                <span class="prof-tab-icon">�</span>
+                <span>Access Control</span>
             </button>
         </nav>
     </aside>
@@ -44096,25 +44104,64 @@ function restoreTeacherZonePhoto() {
 
             <!-- User Details Tab -->
             <div id="admin-content-user" class="prof-popup-section">
-                <h3 class="prof-section-title">Account Details</h3>
-                <div class="prof-details-box">
-                    <div class="prof-info-grid">
-                        <div class="prof-info-field">
-                            <p class="prof-info-label">Staff ID</p>
-                            <p class="prof-info-value" id="admin-id-view">-</p>
+                <h3 class="prof-section-title">Access Control & User Credentials</h3>
+                
+                <!-- No Access State -->
+                <div id="admin-no-access-state" style="text-align: center; padding: 3rem 2rem;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🔓</div>
+                    <h4 style="color: #0f172a; font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem;">No Access Created Yet</h4>
+                    <p style="color: #64748b; margin-bottom: 1.5rem;">Create credentials for this user to enable system login</p>
+                    <button class="prof-btn prof-btn-primary" onclick="switchAccessMode('create')" style="padding: 0.75rem 1.5rem;">
+                        + Create User Credentials
+                    </button>
+                </div>
+
+                <!-- Create Access Form -->
+                <div id="admin-create-access-form" class="prof-hidden">
+                    <div style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border: 1px solid #e2e8f0; border-radius: 1rem; padding: 2rem; margin-bottom: 2rem;">
+                        <h4 style="margin: 0 0 1.5rem 0; color: #0f172a; font-weight: 700;">Create New User Access</h4>
+                        
+                        <div class="prof-info-grid" style="grid-template-columns: 1fr;">
+                            <div class="prof-info-field">
+                                <label class="prof-info-label">Username</label>
+                                <input type="text" id="admin-new-username" class="prof-info-input" placeholder="Enter username (must be unique)" />
+                                <p id="admin-username-error" style="color: #dc2626; font-size: 0.75rem; margin-top: 0.25rem; display: none; font-weight: 600;"></p>
+                            </div>
+                            
+                            <div class="prof-info-field" style="margin-top: 1rem;">
+                                <label class="prof-info-label">Password</label>
+                                <input type="password" id="admin-new-password" class="prof-info-input" placeholder="Enter strong password" />
+                            </div>
+                            
+                            <div class="prof-info-field" style="margin-top: 1rem;">
+                                <label class="prof-info-label">Confirm Password</label>
+                                <input type="password" id="admin-confirm-password" class="prof-info-input" placeholder="Re-enter password" />
+                                <p id="admin-password-error" style="color: #dc2626; font-size: 0.75rem; margin-top: 0.25rem; display: none; font-weight: 600;"></p>
+                            </div>
                         </div>
-                        <div class="prof-info-field">
-                            <p class="prof-info-label">Department</p>
-                            <p class="prof-info-value" id="admin-dept-view">-</p>
+
+                        <div style="background: #ecfdf5; border-left: 4px solid #059669; padding: 1rem; border-radius: 0.5rem; margin-top: 1.5rem; font-size: 0.85rem; color: #059669;">
+                            <strong>✓ Password Requirements:</strong> Minimum 8 characters, mix of letters, numbers, and special characters recommended
                         </div>
-                        <div class="prof-info-field">
-                            <p class="prof-info-label">Role</p>
-                            <p class="prof-info-value">Teacher / Faculty</p>
+
+                        <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
+                            <button class="prof-btn" onclick="switchAccessMode('view')">← Back</button>
+                            <button class="prof-btn prof-btn-primary" onclick="createUserAccess()">✓ Create Access</button>
                         </div>
-                        <div class="prof-info-field">
-                            <p class="prof-info-label">Status</p>
-                            <p class="prof-info-value" style="color: #059669;">✓ Active</p>
-                        </div>
+                    </div>
+                </div>
+
+                <!-- Access List -->
+                <div id="admin-access-list" class="prof-hidden">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h4 style="margin: 0; color: #0f172a; font-weight: 700;">Active User Accounts</h4>
+                        <button class="prof-btn prof-btn-primary" onclick="switchAccessMode('create')" style="padding: 0.625rem 1rem;">
+                            + Add Another
+                        </button>
+                    </div>
+
+                    <div id="admin-access-users-list" style="display: grid; gap: 1rem;">
+                        <!-- Populated by JS -->
                     </div>
                 </div>
             </div>
@@ -61260,6 +61307,189 @@ function renderAttendance() {
         // OR for multiple types: { name: "Programming Lab", semester: "2", type: "Practical" }
         // 4. Types: "Theory", "Practical", "Lab", "Audit"
         
+        // Faculty User Credentials System
+        let facultyUsers = {};
+        
+        function loadFacultyUsers() {
+            try {
+                const stored = localStorage.getItem('faculty_users') || '{}';
+                facultyUsers = JSON.parse(stored);
+            } catch (e) {
+                facultyUsers = {};
+            }
+        }
+
+        function saveFacultyUsers() {
+            localStorage.setItem('faculty_users', JSON.stringify(facultyUsers));
+            syncSettingToRailway('faculty_users', facultyUsers);
+        }
+
+        function switchAccessMode(mode) {
+            const noAccessState = document.getElementById('admin-no-access-state');
+            const createForm = document.getElementById('admin-create-access-form');
+            const accessList = document.getElementById('admin-access-list');
+
+            // Hide all states
+            if (noAccessState) noAccessState.classList.add('prof-hidden');
+            if (createForm) createForm.classList.add('prof-hidden');
+            if (accessList) accessList.classList.add('prof-hidden');
+
+            if (mode === 'create') {
+                if (createForm) createForm.classList.remove('prof-hidden');
+                // Clear form fields
+                document.getElementById('admin-new-username').value = '';
+                document.getElementById('admin-new-password').value = '';
+                document.getElementById('admin-confirm-password').value = '';
+                document.getElementById('admin-username-error').style.display = 'none';
+                document.getElementById('admin-password-error').style.display = 'none';
+            } else if (mode === 'view') {
+                loadFacultyUsers();
+                if (activeTeacherId && facultyUsers[activeTeacherId]) {
+                    if (accessList) accessList.classList.remove('prof-hidden');
+                    renderAccessList();
+                } else {
+                    if (noAccessState) noAccessState.classList.remove('prof-hidden');
+                }
+            }
+        }
+
+        function createUserAccess() {
+            const username = document.getElementById('admin-new-username').value.trim();
+            const password = document.getElementById('admin-new-password').value;
+            const confirmPassword = document.getElementById('admin-confirm-password').value;
+            
+            const usernameError = document.getElementById('admin-username-error');
+            const passwordError = document.getElementById('admin-password-error');
+            
+            usernameError.style.display = 'none';
+            passwordError.style.display = 'none';
+
+            // Validation
+            if (!username) {
+                usernameError.textContent = 'Username is required';
+                usernameError.style.display = 'block';
+                return;
+            }
+
+            if (username.length < 3) {
+                usernameError.textContent = 'Username must be at least 3 characters';
+                usernameError.style.display = 'block';
+                return;
+            }
+
+            // Check if username already exists
+            if (Object.values(facultyUsers).some(user => user.username === username)) {
+                usernameError.textContent = 'This username already exists';
+                usernameError.style.display = 'block';
+                return;
+            }
+
+            if (!password) {
+                passwordError.textContent = 'Password is required';
+                passwordError.style.display = 'block';
+                return;
+            }
+
+            if (password.length < 8) {
+                passwordError.textContent = 'Password must be at least 8 characters';
+                passwordError.style.display = 'block';
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                passwordError.textContent = 'Passwords do not match';
+                passwordError.style.display = 'block';
+                return;
+            }
+
+            // Create user access
+            loadFacultyUsers();
+            if (!facultyUsers[activeTeacherId]) {
+                facultyUsers[activeTeacherId] = [];
+            }
+
+            const userData = {
+                username: username,
+                password: btoa(password), // Simple encoding (not production-grade)
+                createdAt: new Date().toISOString(),
+                role: 'TEACHER/EDUCATOR',
+                status: 'active'
+            };
+
+            facultyUsers[activeTeacherId].push(userData);
+            saveFacultyUsers();
+
+            // Show success message
+            showMessageBox('✓ Success', `User "${username}" has been created and granted access as Teacher/Educator`, 'success');
+            
+            // Switch to view after a short delay
+            setTimeout(() => {
+                switchAccessMode('view');
+            }, 500);
+        }
+
+        function renderAccessList() {
+            const listContainer = document.getElementById('admin-access-users-list');
+            loadFacultyUsers();
+            
+            if (!facultyUsers[activeTeacherId] || facultyUsers[activeTeacherId].length === 0) {
+                listContainer.innerHTML = '<p style="color: #64748b;">No users created yet</p>';
+                return;
+            }
+
+            listContainer.innerHTML = facultyUsers[activeTeacherId].map((user, idx) => `
+                <div style="background: white; border: 1px solid #e2e8f0; border-radius: 0.875rem; padding: 1.25rem; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                            <span style="width: 2rem; height: 2rem; border-radius: 50%; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem;">👤</span>
+                            <div>
+                                <p style="margin: 0; color: #0f172a; font-weight: 700; font-size: 0.95rem;">${user.username}</p>
+                                <p style="margin: 0; color: #64748b; font-size: 0.75rem; text-transform: uppercase; font-weight: 600;">Teacher/Educator</p>
+                            </div>
+                        </div>
+                        <p style="margin: 0.5rem 0 0 0; color: #94a3b8; font-size: 0.75rem;">Created: ${new Date(user.createdAt).toLocaleDateString()}</p>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="prof-btn" onclick="resetUserPassword(${idx})" title="Reset Password" style="padding: 0.5rem 0.75rem;">
+                            🔄 Reset
+                        </button>
+                        <button class="prof-btn prof-btn-danger" onclick="removeUserAccess(${idx})" title="Delete User">
+                            🗑️ Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function resetUserPassword(index) {
+            const username = facultyUsers[activeTeacherId][index].username;
+            showConfirm('Reset Password', `Are you sure you want to reset password for user "${username}"?`, () => {
+                const newPassword = prompt('Enter new password (minimum 8 characters):');
+                if (newPassword) {
+                    if (newPassword.length < 8) {
+                        showMessageBox('⚠ Invalid', 'Password must be at least 8 characters', 'warning');
+                        return;
+                    }
+                    facultyUsers[activeTeacherId][index].password = btoa(newPassword);
+                    saveFacultyUsers();
+                    showMessageBox('✓ Updated', 'Password has been reset successfully', 'success');
+                    renderAccessList();
+                }
+            });
+        }
+
+        function removeUserAccess(index) {
+            const username = facultyUsers[activeTeacherId][index].username;
+            showConfirm('Remove Access', `Remove access for user "${username}"?`, () => {
+                facultyUsers[activeTeacherId].splice(index, 1);
+                saveFacultyUsers();
+                showMessageBox('✓ Removed', 'User access has been revoked', 'success');
+                setTimeout(() => {
+                    switchAccessMode('view');
+                }, 500);
+            }, { type: 'danger', icon: 'fas fa-trash' });
+        }
+        
         function showTeacherProfile(teacher) {
             showLoader('Loading teacher profile...');
             activeTeacherId = teacher.id;
@@ -61352,6 +61582,9 @@ function renderAttendance() {
             // Reset to personal tab
             switchAdminTab('personal');
             
+            // Load faculty users data
+            loadFacultyUsers();
+            
             hideLoader();
         }
 
@@ -61431,6 +61664,13 @@ function renderAttendance() {
                 editBtn.classList.remove('prof-hidden');
                 saveBtn.classList.add('prof-hidden');
             }
+            // Reset access mode
+            const noAccessState = document.getElementById('admin-no-access-state');
+            const createForm = document.getElementById('admin-create-access-form');
+            const accessList = document.getElementById('admin-access-list');
+            if (noAccessState) noAccessState.classList.remove('prof-hidden');
+            if (createForm) createForm.classList.add('prof-hidden');
+            if (accessList) accessList.classList.add('prof-hidden');
         }
 
         // Prevent overlay from closing when clicking on the backdrop
