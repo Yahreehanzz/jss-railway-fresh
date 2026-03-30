@@ -37861,7 +37861,6 @@ Easily access and review students' academic performance here. This section provi
                         <div class="role-option-title">Teacher / Educator</div>
                         <div class="role-option-desc">Standard access to class management, grading, and student records.</div>
                     </div>
-                    <div class="role-radio"></div>
                 </button>
 
                 <!-- HOD Role -->
@@ -37878,7 +37877,6 @@ Easily access and review students' academic performance here. This section provi
                         <div class="role-option-title">Head of Department</div>
                         <div class="role-option-desc">Full administrative access, department overviews, and faculty management.</div>
                     </div>
-                    <div class="role-radio"></div>
                 </button>
 
                 <!-- Admin Role -->
@@ -37892,7 +37890,7 @@ Easily access and review students' academic performance here. This section provi
                         <div class="role-option-title">Principal / Administrator</div>
                         <div class="role-option-desc">Complete system access, institutional settings, and comprehensive analytics.</div>
                     </div>
-                    <div class="role-radio"></div>
+                </button>
                 </button>
 
             </div>
@@ -50696,30 +50694,19 @@ function restoreTeacherZonePhoto() {
         function handleRoleSelection(role) {
             // Mark the selected role
             currentRoleSelection = role;
+            currentSelectedRole = role;
             
-            // Get all role buttons
-            const roleTeacher = document.getElementById('role-teacher');
-            const roleHod = document.getElementById('role-hod');
-            const roleAdmin = document.getElementById('role-admin');
-            
-            // Remove selected class from all
-            roleTeacher.classList.remove('selected');
-            roleHod.classList.remove('selected');
-            roleAdmin.classList.remove('selected');
-
-            // Add selected class to chosen role
-            if (role === 'teacher') {
-                roleTeacher.classList.add('selected');
-            } else if (role === 'hod') {
-                roleHod.classList.add('selected');
-            } else if (role === 'admin') {
-                roleAdmin.classList.add('selected');
+            // Add subtle highlight animation
+            const btn = document.getElementById('role-' + role);
+            if (btn) {
+                btn.style.transform = 'scale(0.98)';
+                setTimeout(() => {
+                    btn.style.transform = 'scale(1)';
+                }, 100);
             }
 
-            // Automatically proceed to next step after brief delay
-            setTimeout(() => {
-                continueToRole();
-            }, 300);
+            // Automatically proceed to next step immediately with smooth animation
+            continueToRole();
         }
 
         function continueToRole() {
