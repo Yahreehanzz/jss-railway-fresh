@@ -48434,7 +48434,7 @@ function restoreTeacherZonePhoto() {
             
             const iconEl = document.createElement('div');
             iconEl.className = 'progress-student-icon';
-            iconEl.innerHTML = status === 'success' ? '<i class="ph ph-check"></i>' : '?';
+            iconEl.innerHTML = status === 'success' ? '<i class="ph ph-check"></i>' : (status === 'pending' ? '<i class="ph ph-hourglass"></i>' : '<i class="ph ph-x"></i>');
             
             const infoEl = document.createElement('div');
             infoEl.className = 'progress-student-info';
@@ -48445,7 +48445,7 @@ function restoreTeacherZonePhoto() {
             
             const metaEl = document.createElement('span');
             metaEl.className = 'progress-student-meta';
-            metaEl.textContent = `ID: STU-${1000 + progressState.success} ? ${status === 'success' ? 'Added' : 'Error'}`;
+            metaEl.textContent = `ID: STU-${1000 + progressState.success} - ${status === 'success' ? 'Added' : 'Error'}`;
             
             infoEl.appendChild(nameEl);
             infoEl.appendChild(metaEl);
@@ -60598,11 +60598,11 @@ function renderAttendance() {
             };
 
             if (window.teacherDeptPieChart) {
-                console.log('? Updating existing pie chart');
+                console.log('[UPDATE] Updating existing pie chart');
                 window.teacherDeptPieChart.data.datasets[0].data = config.data.datasets[0].data;
                 window.teacherDeptPieChart.update();
             } else {
-                console.log('? Creating new pie chart');
+                console.log('[CREATE] Creating new pie chart');
                 window.teacherDeptPieChart = new Chart(ctx, config);
             }
         }
