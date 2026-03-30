@@ -16,17 +16,17 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname)));
 
-// Serve index.html for root path
+// Serve all static files (images, css, js, etc.)
+app.use(express.static(path.join(__dirname), { 
+    maxAge: '1h',
+    etag: false 
+}));
+
+// Explicitly serve index.html for root
 app.get('/', (req, res) => {
-    const file = path.join(__dirname, 'index.html');
-    res.sendFile(file, (err) => {
-        if (err) {
-            console.error('Error sending index.html:', err);
-            res.status(500).send('Server error');
-        }
-    });
+    const indexPath = path.join(__dirname, 'index.html');
+    res.sendFile(indexPath);
 });
 
 //  Database 
@@ -791,10 +791,14 @@ app.get('/api/health', async (req, res) => {
 // Fallback: serve index.html for any unknown routes (SPA support)
 // [MUST BE LAST - after all API routes]
 app.use((req, res) => {
-    console.log(`Fallback: Serving index.html for path: ${req.path}`);
-    res.sendFile(path.join(__dirname, 'index.html'), (err) => {
+    // Don't serve HTML for API requests or actual files
+    if (req.path.startsWith('/api/')) return res.status(404).json({ error: 'Not found' });
+    
+    const indexPath = path.join(__dirname, 'index.html');
+    console.log(`[SPA] Fallback routing to index.html for path: ${req.path}`);
+    res.sendFile(indexPath, (err) => {
         if (err) {
-            console.error('Error serving index.html from fallback:', err.message);
+            console.error('[ERROR] Failed to serve index.html:', err.code);
             res.status(500).send('Server error');
         }
     });
