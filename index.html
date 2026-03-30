@@ -50725,27 +50725,18 @@ function restoreTeacherZonePhoto() {
         function continueToRole() {
             if (!currentRoleSelection) return;
             
-            const continueBtn = document.getElementById('continue-btn-role');
             currentSelectedRole = currentRoleSelection;
             
-            // Add loading state to button
-            continueBtn.disabled = true;
-            
-            // Hide role selection
-            setTimeout(() => {
-                // For teacher role, show faculty users list with animation IN SAME MODAL
-                if (currentSelectedRole === 'teacher') {
-                    showFacultyUserSelectionAnimated();
-                } else if (currentSelectedRole === 'hod') {
-                    // For HOD role, show HOD password panel in same modal
-                    showHODPasswordPanel();
-                } else if (currentSelectedRole === 'admin') {
-                    // For Admin role, show Admin password panel in same modal
-                    showAdminPasswordPanel();
-                }
-                
-                continueBtn.disabled = false;
-            }, 300);
+            // For teacher role, show faculty users list with animation IN SAME MODAL
+            if (currentSelectedRole === 'teacher') {
+                showFacultyUserSelectionAnimated();
+            } else if (currentSelectedRole === 'hod') {
+                // For HOD role, show HOD password panel in same modal
+                showHODPasswordPanel();
+            } else if (currentSelectedRole === 'admin') {
+                // For Admin role, show Admin password panel in same modal
+                showAdminPasswordPanel();
+            }
         }
 
         function showHODPasswordPanel() {
