@@ -35,9 +35,13 @@ const pool = new Pool({
     ssl: { rejectUnauthorized: false }
 });
 
-pool.connect((err, client, release) => {
-    if (err) { console.error(' DB connection failed:', err.message); }
-    else { console.log(' Connected to Railway PostgreSQL'); release(); }
+// Test connection but don't block server startup
+pool.query('SELECT NOW()', (err, res) => {
+    if (err) { 
+        console.error('❌ Initial DB connection failed:', err.message); 
+    } else { 
+        console.log('✅ Connected to Railway PostgreSQL'); 
+    }
 });
 
 // 
