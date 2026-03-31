@@ -15233,23 +15233,28 @@ document.addEventListener('DOMContentLoaded', function() {
             100% { opacity: 1; transform: translateX(0); }
         }
         #attendanceMarkingList {
-            display: flex;
-            flex-direction: column;
-            overflow-x: visible;
-            padding: 10px 0;
-            gap: 15px;
-            white-space: normal;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            padding: 15px;
+            overflow-y: auto;
+            max-height: 600px;
         }
         .attendance-mark-card {
-            flex: 0 0 200px; /* Fixed width for each card */
             background: var(--card-bg);
-            border-radius: 12px;
+            border-radius: 14px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            padding: 15px;
+            padding: 18px;
             text-align: center;
             display: flex;
             flex-direction: column;
             align-items: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .attendance-mark-card:hover {
+            box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+            transform: translateY(-3px);
         }
         .attendance-mark-card img {
             width: 80px;
@@ -15273,6 +15278,20 @@ document.addEventListener('DOMContentLoaded', function() {
             display: flex;
             justify-content: center;
             margin-top: 15px;
+            width: 100%;
+        }
+        
+        /* Responsive grid for attendance cards */
+        @media (max-width: 1200px) {
+            #attendanceMarkingList {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 768px) {
+            #attendanceMarkingList {
+                grid-template-columns: 1fr;
+                max-height: 500px;
+            }
         }
 
         /* Dynamic Island Toggle Button */
@@ -65712,7 +65731,7 @@ function renderAttendanceMarkingList(filterYear, filterSemester) {
 
         const statusClass = status === 'present' ? 'present' : status === 'absent' ? 'absent' : '';
         const displayText = status === 'present' ? 'Present' : status === 'absent' ? 'Absent' : 'Mark';
-        const iconHTML = status === 'present' ? '?' : status === 'absent' ? '?' : '?';
+        const iconHTML = status === 'present' ? '<i class="fas fa-check"></i>' : status === 'absent' ? '<i class="fas fa-times"></i>' : '<i class="fas fa-edit"></i>';
 
         card.innerHTML = `
             <img src="${s.photo || defaultAvatar}" alt="${s.name}">
