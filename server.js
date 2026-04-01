@@ -82,8 +82,35 @@ pool.query('SELECT NOW()', (err) => {
 
 // Ensure teachers table has all required columns
 function ensureTeachersTable() {
+    // First CREATE the table with all columns if it doesn't exist
+    const createSQL = `
+        CREATE TABLE IF NOT EXISTS teachers (
+            id SERIAL PRIMARY KEY,
+            name VARCHAR(100) NOT NULL,
+            email VARCHAR(100),
+            phone VARCHAR(20),
+            subject VARCHAR(100),
+            department VARCHAR(50),
+            qualification VARCHAR(100),
+            experience INTEGER,
+            office_hours JSONB,
+            employee_id VARCHAR(50) UNIQUE,
+            photo_url TEXT,
+            created_at TIMESTAMP DEFAULT NOW(),
+            updated_at TIMESTAMP DEFAULT NOW()
+        );
+    `;
+    
+    pool.query(createSQL, (err) => {
+        if (err) {
+            console.error('❌ Error creating teachers table:', err.message);
+        } else {
+            console.log('✅ Teachers table ensured to exist');
+        }
+    });
+    
+    // Then add any missing columns as fallback (in case table exists with old schema)
     const queries = [
-        // Add columns if they don't exist (safe operation)
         `ALTER TABLE teachers ADD COLUMN IF NOT EXISTS employee_id VARCHAR(50) UNIQUE;`,
         `ALTER TABLE teachers ADD COLUMN IF NOT EXISTS photo_url TEXT;`,
     ];
@@ -91,13 +118,13 @@ function ensureTeachersTable() {
     queries.forEach(query => {
         pool.query(query, (err) => {
             if (err && !err.message.includes('already exists')) {
-                console.log('🔧 Table update:', err.message);
+                console.log('🔧 Column add result:', err.message);
             }
         });
     });
     
     dbReady = true;
-    console.log('✅ Teachers table ready');
+    console.log('✅ Teachers table initialization complete');
 }
 
 // 
@@ -259,22 +286,30 @@ app.get('/api/teachers', async (req, res) => {
 });
 
 app.post('/api/teachers', async (req, res) => {
+    console.log('📥 POST /api/teachers - Request received');
+    console.log('   Body:', JSON.stringify(req.body).substring(0, 100));
+    
     try {
         const { name, email, phone, subject, department, employee_id, photo_url } = req.body;
         
+        console.log('   Name:', name, '| Employee ID:', employee_id);
+        
         // Validate required fields
         if (!name || !employee_id) {
+            console.log('   ❌ Validation failed: missing name or employee_id');
             return res.status(400).json({ success: false, error: 'Name and employee_id are required' });
         }
         
+        console.log('   ✓ Validation passed - inserting into database...');
         const r = await pool.query(
             `INSERT INTO teachers (name, email, phone, subject, department, employee_id, photo_url)
              VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
             [name, email||null, phone||null, subject||null, department||null, employee_id, photo_url||null]
         );
+        console.log('   ✅ Teacher inserted successfully, ID:', r.rows[0].id);
         res.json({ success: true, data: r.rows[0] });
     } catch (e) {
-        console.error('❌ Error adding teacher:', e.message, e.code);
+        console.error('   ❌ Error adding teacher:', e.message, '| Code:', e.code);
         if (e.code === '23505') return res.status(409).json({ success: false, error: 'Employee ID already exists' });
         res.status(500).json({ success: false, error: e.message });
     }
