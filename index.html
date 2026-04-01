@@ -61938,18 +61938,18 @@ function renderAttendance() {
                 method: 'POST',
                 headers: {'Content-Type':'application/json'},
                 body: JSON.stringify({
-                    name: teacher.name,
-                    email: teacher.email,
-                    phone: teacher.phone,
-                    subject: teacher.subjects ? teacher.subjects.join(', ') : '',
-                    department: teacher.department,
-                    employee_id: teacher.id,
-                    photo_url: teacher.photo,
+                    name: teacher.name || '',
+                    email: teacher.email || '',
+                    phone: teacher.phone || '',
+                    subject: teacher.subjects ? (Array.isArray(teacher.subjects) ? teacher.subjects.join(', ') : teacher.subjects) : '',
+                    department: teacher.department || '',
+                    employee_id: teacher.id || '',
+                    photo_url: teacher.photo || '',
                     designation: teacher.designation || '',
                     gender: teacher.gender || '',
-                    date_of_joining: teacher.joining_date || '',
+                    date_of_joining: teacher.joining || '',
                     qualification: teacher.qualification || '',
-                    experience: teacher.experience || null
+                    experience: null
                 })
             }).then(r => r.json()).then(res => {
                 if (res.success && res.data && res.data.id) {
