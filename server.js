@@ -198,7 +198,7 @@ app.use((err, req, res, next) => {
 // ============================================================
 app.listen(PORT, () => {
     console.log('\n═══════════════════════════════════════════');
-    console.log('✅ SERVER READY');
+    console.log('✅ SERVER READY - FRESH DEPLOYMENT');
     console.log(`📍 Port: ${PORT}`);
     console.log('🔗 Routes:');
     console.log('   GET  /health');
