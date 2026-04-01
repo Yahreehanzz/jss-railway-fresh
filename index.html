@@ -62415,6 +62415,15 @@ function renderAttendance() {
                     return;
                 }
 
+                // Check if this teacher already has credentials (prevent multiple)
+                if (facultyUsers[activeTeacherId] && Array.isArray(facultyUsers[activeTeacherId]) && facultyUsers[activeTeacherId].length > 0) {
+                    if (usernameError) {
+                        usernameError.textContent = 'This teacher already has user credentials. Delete existing credentials first to create new ones.';
+                        usernameError.style.display = 'block';
+                    }
+                    return;
+                }
+
                 if (!password) {
                     if (passwordError) {
                         passwordError.textContent = 'Password is required';
