@@ -26,13 +26,23 @@ pool.query(`
         phone VARCHAR(20),
         subject VARCHAR(100),
         department VARCHAR(50),
+        qualification VARCHAR(100),
+        experience INTEGER,
+        office_hours JSONB,
         employee_id VARCHAR(50) UNIQUE,
         photo_url TEXT,
-        created_at TIMESTAMP DEFAULT NOW()
+        designation VARCHAR(100),
+        gender VARCHAR(20),
+        date_of_joining DATE,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
     );
 `).catch(err => console.error('DB Error:', err));
 
 // Add missing columns
+pool.query(`ALTER TABLE teachers ADD COLUMN IF NOT EXISTS designation VARCHAR(100);`).catch(err => {});
+pool.query(`ALTER TABLE teachers ADD COLUMN IF NOT EXISTS gender VARCHAR(20);`).catch(err => {});
+pool.query(`ALTER TABLE teachers ADD COLUMN IF NOT EXISTS date_of_joining DATE;`).catch(err => {});
 pool.query(`ALTER TABLE teachers ADD COLUMN IF NOT EXISTS qualification VARCHAR(100);`).catch(err => {});
 pool.query(`ALTER TABLE teachers ADD COLUMN IF NOT EXISTS experience INTEGER;`).catch(err => {});
 pool.query(`ALTER TABLE teachers ADD COLUMN IF NOT EXISTS office_hours JSONB;`).catch(err => {});
