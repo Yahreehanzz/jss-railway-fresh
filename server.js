@@ -179,15 +179,8 @@ app.delete('/api/teachers/:id', async (req, res) => {
 
 // ============================================================
 // ============================================================
-// EMAIL OTP SYSTEM FOR TEACHER SETUP
+// EMAIL OTP SYSTEM FOR TEACHER SETUP (TEST MODE)
 // ============================================================
-
-let nodemailer;
-try {
-    nodemailer = require('nodemailer');
-} catch (e) {
-    console.warn('⚠️ Nodemailer not available, email OTP will use test mode');
-}
 
 // In-memory OTP storage (expires after 10 minutes)
 const otpStore = {};
@@ -197,49 +190,10 @@ function generateOTP() {
     return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-// Email transporter - Test mode by default
-let transporter = null;
+console.log('ℹ️ Email OTP System initialized in TEST MODE');
+console.log('📧 OTP codes will be logged to console - check logs to see codes');
 
-// Initialize email service
-function initEmailService() {
-    if (!nodemailer) {
-        console.log('ℹ️ Email service in TEST MODE - OTP will be logged to console');
-        return;
-    }
-    
-    const emailService = process.env.EMAIL_SERVICE || 'test'; // 'gmail', 'outlook', or 'test'
-    const emailUser = process.env.EMAIL_USER;
-    const emailPass = process.env.EMAIL_PASSWORD;
-    
-    if (emailService === 'gmail' && emailUser && emailPass) {
-        transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: emailUser,
-                pass: emailPass  // Use Gmail App Password, not your main password
-            }
-        });
-        console.log('✅ Email service configured: Gmail');
-    } else if (emailService === 'outlook' && emailUser && emailPass) {
-        transporter = nodemailer.createTransport({
-            host: 'smtp-mail.outlook.com',
-            port: 587,
-            secure: false,
-            auth: {
-                user: emailUser,
-                pass: emailPass
-            }
-        });
-        console.log('✅ Email service configured: Outlook');
-    } else {
-        console.log('ℹ️ Email service in TEST MODE - OTP will be logged to console');
-        transporter = null;
-    }
-}
-
-initEmailService();
-
-// Send OTP endpoint (via Email)
+// Send OTP endpoint
 app.post('/api/send-otp', async (req, res) => {
     try {
         const { phone, countryCode, email } = req.body;
@@ -248,9 +202,8 @@ app.post('/api/send-otp', async (req, res) => {
             return res.status(400).json({ success: false, error: 'Email, phone, and country code required' });
         }
 
-        // Validate email format
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
+        // Validate email format (simple check)
+        if (!email.includes('@') || !email.includes('.')) {
             return res.status(400).json({ success: false, error: 'Invalid email address' });
         }
 
@@ -267,82 +220,19 @@ app.post('/api/send-otp', async (req, res) => {
             attempts: 0
         };
 
-        console.log(`📧 OTP Generated for ${email}: ${otp}`);
+        // Log OTP to console (for test mode)
+        console.log(`\n${'='.repeat(70)}`);
+        console.log(`📧 EMAIL OTP GENERATED FOR: ${email}`);
+        console.log(`📱 PHONE: ${fullPhone}`);
+        console.log(`🔐 OTP CODE: ${otp}`);
+        console.log(`⏰ Valid for 10 minutes`);
+        console.log(`${'='.repeat(70)}\n`);
 
-        // Email content
-        const emailContent = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <style>
-                body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; }
-                .container { max-width: 400px; margin: 0 auto; padding: 20px; }
-                .header { text-align: center; margin-bottom: 30px; }
-                .otp-box { 
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    color: white;
-                    padding: 20px;
-                    border-radius: 8px;
-                    text-align: center;
-                    margin: 20px 0;
-                }
-                .otp-code { font-size: 32px; font-weight: bold; letter-spacing: 4px; }
-                .footer { color: #666; font-size: 12px; text-align: center; margin-top: 30px; }
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <div class="header">
-                    <h2>Phone Verification</h2>
-                </div>
-                <p>Hi there,</p>
-                <p>Your verification code for phone number <strong>${fullPhone}</strong> is:</p>
-                <div class="otp-box">
-                    <div class="otp-code">${otp}</div>
-                </div>
-                <p>This code will expire in 10 minutes.</p>
-                <p>If you didn't request this code, please ignore this email.</p>
-                <div class="footer">
-                    <p>JSS Teacher Management System</p>
-                </div>
-            </div>
-        </body>
-        </html>
-        `;
-
-        // Try to send email if service configured
-        if (transporter) {
-            try {
-                await transporter.sendMail({
-                    from: process.env.EMAIL_USER,
-                    to: email,
-                    subject: `Your Verification Code: ${otp}`,
-                    html: emailContent
-                });
-                
-                console.log(`✅ Email sent successfully to ${email}`);
-                return res.json({ 
-                    success: true, 
-                    message: 'OTP sent via email',
-                    email: email.replace(/(.{2})(.*)(@.*)/, '$1***$3')  // Masked email
-                });
-            } catch (emailErr) {
-                console.warn('⚠️ Email send failed:', emailErr.message);
-                // Fall through to test mode below
-            }
-        }
-
-        // Test mode: OTP logged to console
-        console.log(`\n${'='.repeat(60)}`);
-        console.log(`TEST MODE: OTP for ${email}`);
-        console.log(`CODE: ${otp}`);
-        console.log(`${'='.repeat(60)}\n`);
-        
         return res.json({ 
             success: true, 
-            message: 'OTP sent via email (check logs for test mode)',
+            message: 'OTP generated (check Railway logs for code)',
             email: email.replace(/(.{2})(.*)(@.*)/, '$1***$3'),
-            testMode: !transporter
+            testMode: true
         });
 
     } catch (e) {
@@ -393,11 +283,11 @@ app.post('/api/verify-otp', async (req, res) => {
         const verifiedPhone = storedData.phone;
         delete otpStore[email];
         
-        console.log(`✅ OTP verified successfully for ${email} (${verifiedPhone})`);
+        console.log(`✅ OTP VERIFIED for ${email} (${verifiedPhone})`);
         
         return res.json({ 
             success: true, 
-            message: 'Phone number verified',
+            message: 'Phone number verified successfully',
             verifiedEmail: email,
             verifiedPhone: verifiedPhone,
             timestamp: new Date().toISOString()
