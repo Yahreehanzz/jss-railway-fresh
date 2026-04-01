@@ -934,6 +934,17 @@ app.use((err, req, res, next) => {
 
 //  Start Server
 app.listen(PORT, () => {
-    console.log('🚀 Server running at http://localhost:' + PORT);
-    console.log('   Database connection will be established automatically');
+    console.log('\n');
+    console.log('═══════════════════════════════════════════════════════');
+    console.log('🚀 RAILWAY SERVER STARTED SUCCESSFULLY');
+    console.log('═══════════════════════════════════════════════════════');
+    console.log(`📍 Port: ${PORT}`);
+    console.log(`🌐 URL: http://localhost:${PORT}`);
+    console.log('✅ API routes registered:');
+    console.log('   - GET  /api/health');
+    console.log('   - GET  /api/db-check');
+    console.log('   - POST /api/teachers-test');
+    console.log('   - GET  /api/teachers');
+    console.log('   - POST /api/teachers');
+    console.log('═══════════════════════════════════════════════════════\n');
 });
