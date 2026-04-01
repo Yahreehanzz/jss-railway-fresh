@@ -7,36 +7,33 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// MIDDLEWARE
-app.use(cors({
-    origin: '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    credentials: false
-}));
+// ============================================================
+// MIDDLEWARE - VERY FIRST
+// ============================================================
+app.use(cors());
 app.use(express.json({ limit: '50mb' }));
-app.use((req, res, next) => {
-    res.setHeader('Content-Type', 'application/json');
-    next();
-});
 
-// DATABASE
+// ============================================================
+// DATABASE CONNECTION
+// ============================================================
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false }
 });
 
-// TEST DATABASE CONNECTION
 pool.connect((err, client, release) => {
     if (err) {
         console.error('❌ DATABASE CONNECTION FAILED:', err.message);
         process.exit(1);
     } else {
         console.log('✅ Database connected successfully');
-        release();
+        if (client) release();
     }
 });
 
-// INIT DATABASE SCHEMA
+// ============================================================
+// INITIALIZE DATABASE SCHEMA
+// ============================================================
 async function initDatabase() {
     try {
         await pool.query(`
@@ -57,20 +54,9 @@ async function initDatabase() {
                 date_of_joining DATE,
                 created_at TIMESTAMP DEFAULT NOW(),
                 updated_at TIMESTAMP DEFAULT NOW()
-            );
+            )
         `);
         console.log('✅ Teachers table ready');
-
-        // Add missing columns if needed
-        const columns = ['designation', 'gender', 'date_of_joining', 'qualification', 'experience', 'office_hours', 'updated_at'];
-        for (let col of columns) {
-            try {
-                await pool.query(`ALTER TABLE teachers ADD COLUMN IF NOT EXISTS ${col} ${col === 'office_hours' ? 'JSONB' : col === 'experience' ? 'INTEGER' : col === 'date_of_joining' ? 'DATE' : 'VARCHAR(100)'};`);
-            } catch (e) {
-                // Column might already exist
-            }
-        }
-        console.log('✅ Database schema initialized');
     } catch (err) {
         console.error('❌ Database initialization error:', err.message);
     }
@@ -79,114 +65,120 @@ async function initDatabase() {
 initDatabase();
 
 // ============================================================
-// GLOBAL ERROR HANDLER FOR UNHANDLED REJECTIONS
+// HEALTH CHECKS
 // ============================================================
-process.on('unhandledRejection', (reason, promise) => {
-    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-});
-
-// ============================================================
-// API ENDPOINTS - MUST BE BEFORE STATIC FILES
-// ============================================================
-
 app.get('/health', (req, res) => {
-    return res.json({ ok: true, timestamp: new Date().toISOString() });
+    res.json({ ok: true, timestamp: new Date().toISOString() });
 });
 
 app.get('/api/health', (req, res) => {
-    return res.json({ status: 'ok', message: 'API is running', timestamp: new Date().toISOString() });
+    res.json({ status: 'ok', message: 'API is running', db: 'connected' });
 });
 
+// ============================================================
+// TEACHERS API ENDPOINTS
+// ============================================================
+
+// GET all teachers
 app.get('/api/teachers', async (req, res) => {
     try {
+        console.log('📖 GET /api/teachers');
         const result = await pool.query('SELECT * FROM teachers ORDER BY name');
-        return res.json({ success: true, data: result.rows, count: result.rows.length });
+        res.json({ success: true, data: result.rows, count: result.rows.length });
     } catch (e) {
-        console.error('GET /api/teachers error:', e.message);
-        return res.status(500).json({ success: false, error: e.message });
+        console.error('❌ GET /api/teachers ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
     }
 });
 
+// POST - Add new teacher
 app.post('/api/teachers', async (req, res) => {
     try {
-        const { name, email, phone, subject, department, employee_id, photo_url, designation, gender, date_of_joining, qualification, experience } = req.body;
+        console.log('📝 POST /api/teachers - Body:', req.body);
         
-        console.log('📝 POST /api/teachers received:', { name, employee_id, designation });
+        const { name, email, phone, subject, department, employee_id, designation, gender, date_of_joining, qualification, experience } = req.body;
         
         if (!name || !employee_id) {
             return res.status(400).json({ success: false, error: 'Name and employee_id are required' });
         }
         
-        const insertQuery = `
+        const query = `
             INSERT INTO teachers 
-            (name, email, phone, subject, department, employee_id, photo_url, designation, gender, date_of_joining, qualification, experience) 
+            (name, email, phone, subject, department, employee_id, designation, gender, date_of_joining, qualification, experience, photo_url) 
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) 
             RETURNING *
         `;
         
         const values = [
-            String(name).trim(),
-            email ? String(email).trim() : null,
-            phone ? String(phone).trim() : null,
-            subject ? String(subject).trim() : null,
-            department ? String(department).trim() : null,
-            String(employee_id).trim(),
-            photo_url ? String(photo_url).trim() : null,
-            designation ? String(designation).trim() : null,
-            gender ? String(gender).trim() : null,
-            date_of_joining ? String(date_of_joining).trim() : null,
-            qualification ? String(qualification).trim() : null,
-            experience !== null && experience !== undefined ? parseInt(experience) : null
+            name.trim(),
+            email || null,
+            phone || null,
+            subject || null,
+            department || null,
+            employee_id.trim(),
+            designation || null,
+            gender || null,
+            date_of_joining || null,
+            qualification || null,
+            experience || null,
+            null
         ];
         
-        console.log('🔄 Executing INSERT query...');
-        const result = await pool.query(insertQuery, values);
-        console.log('✅ Teacher saved! ID:', result.rows[0].id);
+        console.log('🔄 Running INSERT query...');
+        const result = await pool.query(query, values);
+        const savedTeacher = result.rows[0];
         
-        return res.status(201).json({ 
+        console.log('✅ Teacher saved! ID:', savedTeacher.id);
+        res.status(201).json({ 
             success: true, 
-            data: result.rows[0],
+            data: savedTeacher,
             message: 'Teacher saved successfully'
         });
+        
     } catch (e) {
-        console.error('❌ POST /api/teachers ERROR:', e.message);
-        console.error('Stack:', e.stack);
-        return res.status(500).json({ 
+        console.error('❌ POST /api/teachers ERROR:', e.message, e.code);
+        res.status(500).json({ 
             success: false, 
             error: e.message,
-            code: e.code 
+            code: e.code
         });
     }
 });
 
+// PUT - Update teacher
 app.put('/api/teachers/:id', async (req, res) => {
-    res.setHeader('Content-Type', 'application/json');
     try {
-        const { name, email, phone, subject, department, employee_id, photo_url, designation, gender, date_of_joining, qualification, experience } = req.body;
-        const result = await pool.query(
-            `UPDATE teachers SET name=$1, email=$2, phone=$3, subject=$4, department=$5, employee_id=$6, photo_url=$7, designation=$8, gender=$9, date_of_joining=$10, qualification=$11, experience=$12, updated_at=NOW() WHERE id=$13 RETURNING *`,
-            [name||null, email||null, phone||null, subject||null, department||null, employee_id||null, photo_url||null, designation||null, gender||null, date_of_joining||null, qualification||null, experience||null, req.params.id]
-        );
-        return res.json({ success: true, data: result.rows[0] || null });
+        const { name, email, phone, subject, department, employee_id, designation, gender, date_of_joining, qualification, experience } = req.body;
+        
+        const query = `
+            UPDATE teachers 
+            SET name=$1, email=$2, phone=$3, subject=$4, department=$5, employee_id=$6, designation=$7, gender=$8, date_of_joining=$9, qualification=$10, experience=$11, updated_at=NOW() 
+            WHERE id=$12 
+            RETURNING *
+        `;
+        
+        const result = await pool.query(query, [name, email, phone, subject, department, employee_id, designation, gender, date_of_joining, qualification, experience, req.params.id]);
+        res.json({ success: true, data: result.rows[0] || null });
     } catch (e) {
-        console.error('PUT /api/teachers error:', e.message);
-        return res.json({ success: false, error: e.message });
+        console.error('❌ PUT /api/teachers ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
     }
 });
 
+// DELETE - Remove teacher
 app.delete('/api/teachers/:id', async (req, res) => {
-    res.setHeader('Content-Type', 'application/json');
     try {
+        console.log('🗑️  DELETE /api/teachers/' + req.params.id);
         await pool.query('DELETE FROM teachers WHERE id=$1', [req.params.id]);
-        return res.json({ success: true });
+        res.json({ success: true, message: 'Teacher deleted' });
     } catch (e) {
-        console.error('DELETE /api/teachers error:', e.message);
-        return res.json({ success: false, error: e.message });
+        console.error('❌ DELETE /api/teachers ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
     }
 });
 
 // ============================================================
-// STATIC FILES & SPA (AFTER ALL API ROUTES)
+// STATIC FILES & SPA FALLBACK (AFTER ALL API ROUTES!)
 // ============================================================
 
 app.use(express.static(__dirname, { maxAge: '1h' }));
@@ -195,33 +187,26 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Fallback SPA route - but NOT for API endpoints
-app.use((req, res) => {
-    // If it's an API request that didn't match, return JSON error
+// SPA fallback - for any non-API routes
+app.get('*', (req, res) => {
     if (req.path.startsWith('/api/')) {
-        console.warn(`⚠️  API route not found: ${req.method} ${req.path}`);
-        return res.status(404).json({ 
-            success: false, 
-            error: `API endpoint not found: ${req.method} ${req.path}` 
-        });
+        return res.status(404).json({ success: false, error: 'API endpoint not found' });
     }
-    // Otherwise serve index.html for SPA routing
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // ============================================================
-// GLOBAL ERROR HANDLER (LAST MIDDLEWARE)
+// ERROR HANDLER
 // ============================================================
 app.use((err, req, res, next) => {
-    console.error('❌ Global error handler:', err.message, err.stack);
-    return res.status(500).json({ 
-        success: false, 
-        error: err.message || 'Internal server error'
-    });
+    console.error('❌ UNHANDLED ERROR:', err.message);
+    res.status(500).json({ success: false, error: err.message });
 });
 
+// ============================================================
 // START SERVER
+// ============================================================
 app.listen(PORT, () => {
     console.log(`✅ Server running on port ${PORT}`);
-    console.log(`📍 Railway API: https://jss-railway-fresh-production.up.railway.app/api`);
+    console.log(`📍 API: https://jss-railway-fresh-production.up.railway.app/api`);
 });
