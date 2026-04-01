@@ -15233,143 +15233,95 @@ document.addEventListener('DOMContentLoaded', function() {
             100% { opacity: 1; transform: translateX(0); }
         }
         #attendanceMarkingList {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            padding: 10px;
-            max-height: 600px;
-            overflow-y: auto;
-            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            overflow-x: visible;
+            padding: 10px 0;
+            gap: 15px;
             white-space: normal;
         }
-        @media (max-width: 1200px) {
-            #attendanceMarkingList {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        @media (max-width: 768px) {
-            #attendanceMarkingList {
-                grid-template-columns: 1fr;
-            }
-        }
         .attendance-mark-card {
+            flex: 0 0 200px; /* Fixed width for each card */
             background: var(--card-bg);
-            border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 15px;
             text-align: center;
             display: flex;
             flex-direction: column;
             align-items: center;
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
-        }
-        .attendance-mark-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-            border-color: var(--primary-light);
         }
         .attendance-mark-card img {
-            width: 100px;
-            height: 100px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
             object-fit: cover;
-            margin-bottom: 12px;
-            border: 4px solid var(--primary-light);
-            box-shadow: 0 4px 12px rgba(0, 51, 102, 0.15);
+            margin-bottom: 10px;
+            border: 3px solid var(--primary-light);
         }
         .attendance-mark-card h4 {
-            font-size: 16px;
-            font-weight: 700;
-            margin: 0 0 6px;
+            font-size: 1rem;
+            margin: 0 0 5px;
             color: var(--text);
-            letter-spacing: -0.3px;
         }
         .attendance-mark-card small {
-            font-size: 12px;
+            font-size: 0.8rem;
             color: var(--text);
-            opacity: 0.6;
-            margin-bottom: 16px;
-            font-weight: 500;
+            opacity: 0.7;
         }
         .attendance-action-buttons {
             display: flex;
             justify-content: center;
-            margin-top: 8px;
-            width: 100%;
+            margin-top: 15px;
         }
 
         /* Dynamic Island Toggle Button */
         .dynamic-island-toggle {
             position: relative;
-            width: 100%;
-            max-width: 160px;
-            height: 48px;
-            border-radius: 24px;
+            width: 180px;
+            height: 52px;
+            border-radius: 26px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             cursor: pointer;
-            overflow: hidden;
+            overflow: visible;
             transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-            box-shadow: 0 6px 18px rgba(102, 126, 234, 0.35);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
             border: none;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 600;
-        }
-
-        .dynamic-island-toggle:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 28px rgba(102, 126, 234, 0.45);
         }
 
         .dynamic-island-toggle:active {
-            transform: scale(0.94);
+            transform: scale(0.92);
         }
 
         .dynamic-island-toggle.present {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35);
-        }
-
-        .dynamic-island-toggle.present:hover {
-            box-shadow: 0 10px 28px rgba(16, 185, 129, 0.45);
+            background: linear-gradient(135deg, #003366 0%, #004d80 100%);
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.45);
         }
 
         .dynamic-island-toggle.absent {
             background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            box-shadow: 0 6px 18px rgba(239, 68, 68, 0.35);
-        }
-
-        .dynamic-island-toggle.absent:hover {
-            box-shadow: 0 10px 28px rgba(239, 68, 68, 0.45);
+            box-shadow: 0 8px 24px rgba(239, 68, 68, 0.45);
         }
 
         .dynamic-island-content {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 10px;
             height: 100%;
-            padding: 0 16px;
+            padding: 0 24px;
             position: relative;
         }
 
         .dynamic-island-icon {
-            font-size: 24px;
+            font-size: 20px;
             color: white;
             display: inline-block;
             transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
             font-weight: 700;
-        }
-
-        .dynamic-island-text {
-            color: white;
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            transition: all 0.4s ease;
         }
 
         .dynamic-island-text {
@@ -44413,8 +44365,8 @@ function restoreTeacherZonePhoto() {
                 });
             }
         }
-        const defaultAvatar = 'data:image/svg+xml,%3Csvg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"%3E%3Ccircle cx="50" cy="50" r="50" fill="%23e0e0e0"/%3E%3Ccircle cx="50" cy="35" r="15" fill="%23999"/%3E%3Cpath d="M 30 50 Q 30 65 50 65 Q 70 65 70 50" fill="%23999"/%3E%3C/svg%3E';
-        const defaultTeacherAvatar = 'data:image/svg+xml,%3Csvg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"%3E%3Ccircle cx="50" cy="50" r="50" fill="%23e0e0e0"/%3E%3Ccircle cx="50" cy="35" r="15" fill="%23999"/%3E%3Cpath d="M 30 50 Q 30 65 50 65 Q 70 65 70 50" fill="%23999"/%3E%3C/svg%3E'; // Using SVG placeholder for teacher
+        const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+        const defaultTeacherAvatar = "https://cdn-icons-png.flaticon.com/512/2922/2922561.png"; // Example teacher avatar
         
         // Global data arrays
         let students = [];
@@ -56877,7 +56829,7 @@ function restoreTeacherZonePhoto() {
                     cardWrap.innerHTML = filteredStudents.map(s => {
                         const yc  = _stvYearChipClass(s.year);
                         const ha  = !!(s.photo && s.photo !== '');
-                        const ini = (s.name || 'U').charAt(0).toUpperCase();
+                        const ini = (s.name || '?').charAt(0).toUpperCase();
                         const avatarHtml = ha
                             ? `<img src="${s.photo}" alt="${s.name}" class="stv-card-avatar" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
                                <div class="stv-card-avatar-placeholder" style="display:none;">${ini}</div>`
@@ -65760,10 +65712,10 @@ function renderAttendanceMarkingList(filterYear, filterSemester) {
 
         const statusClass = status === 'present' ? 'present' : status === 'absent' ? 'absent' : '';
         const displayText = status === 'present' ? 'Present' : status === 'absent' ? 'Absent' : 'Mark';
-        const iconHTML = status === 'present' ? '✓' : status === 'absent' ? '✕' : '📋';
+        const iconHTML = status === 'present' ? '?' : status === 'absent' ? '?' : '?';
 
         card.innerHTML = `
-            <img src="${s.photo || defaultAvatar}" alt="${s.name}" onerror="this.src='${defaultAvatar}'">
+            <img src="${s.photo || defaultAvatar}" alt="${s.name}">
             <h4>${s.name}</h4>
             <small>${s.usn}</small>
             <div class="attendance-action-buttons">
@@ -67312,14 +67264,14 @@ function toggleAttendance(usn, toggleElement) {
         // Add new status class and update content
         if (newStatus === 'present') {
             toggleElement.classList.add('present');
-            iconSpan.innerHTML = '?';
+            iconSpan.innerHTML = '✓';
             textSpan.textContent = 'Present';
         } else if (newStatus === 'absent') {
             toggleElement.classList.add('absent');
-            iconSpan.innerHTML = '?';
+            iconSpan.innerHTML = '✕';
             textSpan.textContent = 'Absent';
         } else {
-            iconSpan.innerHTML = '?';
+            iconSpan.innerHTML = '📋';
             textSpan.textContent = 'Mark';
         }
 
@@ -78897,7 +78849,7 @@ window.loadNow = function() {
                 <div class="card-inner">
                     <div class="student-card-header">
                         <img src="${student.photo}" alt="${student.name}" class="student-photo"
-                             onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=6366f1&color=fff&bold=true'; this.onerror=function(){this.src='data:image/svg+xml,%3Csvg viewBox=%220 0 100 100%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23e0e0e0%22/%3E%3Ccircle cx=%2250%22 cy=%2235%22 r=%2215%22 fill=%22%23999%22/%3E%3Cpath d=%22M 30 50 Q 30 65 50 65 Q 70 65 70 50%22 fill=%22%23999%22/%3E%3C/svg%3E';}">
+                             onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=6366f1&color=fff&bold=true'">
                         <div class="student-info">
                             <h4>${student.name}</h4>
                             <p style="font-weight:700;letter-spacing:0.3px;">${student.usn}</p>
@@ -81679,7 +81631,7 @@ Govt. Polytechnic, Beelagi`;
                         <div class="fee-card-header">
                             <img src="${student.photo || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(student.name) + '&background=6366f1&color=fff&bold=true'}" 
                                  alt="${student.name}" class="fee-card-photo"
-                                 onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=6366f1&color=fff&bold=true'; this.onerror=function(){this.src='data:image/svg+xml,%3Csvg viewBox=%220 0 100 100%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23e0e0e0%22/%3E%3Ccircle cx=%2250%22 cy=%2235%22 r=%2215%22 fill=%22%23999%22/%3E%3Cpath d=%22M 30 50 Q 30 65 50 65 Q 70 65 70 50%22 fill=%22%23999%22/%3E%3C/svg%3E';};">
+                                 onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=6366f1&color=fff&bold=true'">
                             <div class="fee-card-info">
                                 <h4>${student.name}</h4>
                                 <p style="color:var(--text-muted);font-size:11px;font-weight:600;letter-spacing:0.3px;">${student.usn}</p>
@@ -81743,7 +81695,7 @@ Govt. Polytechnic, Beelagi`;
                         <div class="fee-table-name-cell">
                             <img src="${student.photo || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(student.name) + '&background=6366f1&color=fff&bold=true&size=40'}" 
                                  alt="${student.name}" class="fee-table-photo"
-                                 onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=6366f1&color=fff&bold=true&size=40'; this.onerror=function(){this.src='data:image/svg+xml,%3Csvg viewBox=%220 0 100 100%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23e0e0e0%22/%3E%3Ccircle cx=%2250%22 cy=%2235%22 r=%2215%22 fill=%22%23999%22/%3E%3Cpath d=%22M 30 50 Q 30 65 50 65 Q 70 65 70 50%22 fill=%22%23999%22/%3E%3C/svg%3E';};">
+                                 onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=6366f1&color=fff&bold=true&size=40'">
                             <div class="fee-table-name-info">
                                 <strong>${student.name}</strong>
                                 <span>${student.usn}</span>
