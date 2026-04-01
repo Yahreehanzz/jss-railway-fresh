@@ -35,65 +35,13 @@ app.use((req, res, next) => {
     next();
 });
 
-// Serve all static files (images, css, js, etc.)
-app.use(express.static(path.join(__dirname), { 
-    maxAge: '1h',
-    etag: false 
-}));
-
-// Explicitly serve index.html for root
-app.get('/', (req, res) => {
-    const indexPath = path.join(__dirname, 'index.html');
-    res.sendFile(indexPath);
-});
-
-// Health check
-app.get('/health', (req, res) => {
-    res.json({ status: 'ok', message: 'Server is running' });
-});
-
-// Database diagnostic endpoint
-app.get('/api/db-check', (req, res) => {
-    pool.query(`
-        SELECT column_name, data_type, is_nullable
-        FROM information_schema.columns
-        WHERE table_name='teachers'
-        ORDER BY ordinal_position;
-    `, (err, result) => {
-        if (err) {
-            return res.json({ success: false, error: err.message });
-        }
-        const columns = result.rows.map(r => ({
-            name: r.column_name,
-            type: r.data_type,
-            nullable: r.is_nullable
-        }));
-        const hasEmployeeId = columns.some(c => c.name === 'employee_id');
-        const hasPhotoUrl = columns.some(c => c.name === 'photo_url');
-        res.json({ 
-            success: true, 
-            database_ready: hasEmployeeId && hasPhotoUrl,
-            columns: columns,
-            message: hasEmployeeId && hasPhotoUrl ? '✅ Database ready for teachers' : '⏳ Waiting for migrations to complete'
-        });
-    });
-});
-
-// QUICK TEST ENDPOINT
-console.log('🔧 [STARTUP] Registering POST /api/teachers-test...');
-app.post('/api/teachers-test', (req, res) => {
-    console.log('✅ TEST endpoint hit! Body:', req.body);
-    res.json({ success: true, message: 'Test endpoint works', body: req.body });
-});
-console.log('✅ [STARTUP] POST /api/teachers-test registered');
-
-//  Database Pool
+//  Database Pool - MUST BE BEFORE API ROUTES
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false }
 });
 
-let dbReady = true;  // Assume ready - handle errors in requests
+let dbReady = true;
 
 // Test connection and ensure tables
 pool.query('SELECT NOW()', (err) => {
@@ -105,6 +53,10 @@ pool.query('SELECT NOW()', (err) => {
         ensureTeachersTable();
     }
 });
+
+// ══════════════════════════════════════════════════════════════
+//  ALL API ROUTES - BEFORE STATIC FILES
+// ══════════════════════════════════════════════════════════════
 
 // Ensure teachers table has all required columns
 function ensureTeachersTable() {
@@ -152,6 +104,50 @@ function ensureTeachersTable() {
     dbReady = true;
     console.log('✅ Teachers table initialization complete');
 }
+
+// ══════════════════════════════════════════════════════════════
+// API ENDPOINTS
+// ══════════════════════════════════════════════════════════════
+
+// Health check
+app.get('/health', (req, res) => {
+    res.json({ status: 'ok', message: 'Server is running' });
+});
+
+// Database diagnostic endpoint
+app.get('/api/db-check', (req, res) => {
+    pool.query(`
+        SELECT column_name, data_type, is_nullable
+        FROM information_schema.columns
+        WHERE table_name='teachers'
+        ORDER BY ordinal_position;
+    `, (err, result) => {
+        if (err) {
+            return res.json({ success: false, error: err.message });
+        }
+        const columns = result.rows.map(r => ({
+            name: r.column_name,
+            type: r.data_type,
+            nullable: r.is_nullable
+        }));
+        const hasEmployeeId = columns.some(c => c.name === 'employee_id');
+        const hasPhotoUrl = columns.some(c => c.name === 'photo_url');
+        res.json({ 
+            success: true, 
+            database_ready: hasEmployeeId && hasPhotoUrl,
+            columns: columns,
+            message: hasEmployeeId && hasPhotoUrl ? '✅ Database ready for teachers' : '⏳ Waiting for migrations to complete'
+        });
+    });
+});
+
+// QUICK TEST ENDPOINT
+console.log('🔧 [STARTUP] Registering POST /api/teachers-test...');
+app.post('/api/teachers-test', (req, res) => {
+    console.log('✅ TEST endpoint hit! Body:', req.body);
+    res.json({ success: true, message: 'Test endpoint works', body: req.body });
+});
+console.log('✅ [STARTUP] POST /api/teachers-test registered');
 
 // 
 // STUDENTS  table: students
@@ -919,6 +915,22 @@ app.get('/api/health', async (req, res) => {
         const r = await pool.query('SELECT NOW() as time, current_database() as db');
         res.json({ success: true, db: r.rows[0].db, time: r.rows[0].time, status: 'ok' });
     } catch (e) { res.status(500).json({ success: false, error: e.message }); }
+});
+
+// ══════════════════════════════════════════════════════════════
+// STATIC FILES - AFTER ALL API ROUTES
+// ══════════════════════════════════════════════════════════════
+
+// Serve all static files (images, css, js, etc.)
+app.use(express.static(path.join(__dirname), { 
+    maxAge: '1h',
+    etag: false 
+}));
+
+// Explicitly serve index.html for root
+app.get('/', (req, res) => {
+    const indexPath = path.join(__dirname, 'index.html');
+    res.sendFile(indexPath);
 });
 
 // Fallback: serve index.html for any unknown routes (SPA support)
