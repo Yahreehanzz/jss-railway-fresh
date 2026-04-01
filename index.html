@@ -15233,46 +15233,105 @@ document.addEventListener('DOMContentLoaded', function() {
             100% { opacity: 1; transform: translateX(0); }
         }
         #attendanceMarkingList {
-            display: flex;
-            flex-direction: column;
-            overflow-x: visible;
-            padding: 10px 0;
-            gap: 15px;
-            white-space: normal;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 15px 0;
+            width: 100%;
         }
+        
+        /* Responsive grid breakpoints */
+        @media (max-width: 480px) {
+            #attendanceMarkingList {
+                grid-template-columns: repeat(1, 1fr);
+                gap: 15px;
+            }
+        }
+        
+        @media (min-width: 481px) and (max-width: 768px) {
+            #attendanceMarkingList {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 18px;
+            }
+        }
+        
+        @media (min-width: 769px) and (max-width: 1024px) {
+            #attendanceMarkingList {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 18px;
+            }
+        }
+        
+        @media (min-width: 1025px) and (max-width: 1440px) {
+            #attendanceMarkingList {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 20px;
+            }
+        }
+        
+        @media (min-width: 1441px) {
+            #attendanceMarkingList {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 20px;
+            }
+        }
+        
         .attendance-mark-card {
-            flex: 0 0 200px; /* Fixed width for each card */
             background: var(--card-bg);
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            padding: 15px;
+            padding: 18px;
             text-align: center;
             display: flex;
             flex-direction: column;
             align-items: center;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: 1px solid transparent;
         }
+        
+        .attendance-mark-card:hover {
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            transform: translateY(-4px);
+            border-color: var(--primary-light);
+        }
+        
         .attendance-mark-card img {
-            width: 80px;
-            height: 80px;
+            width: 85px;
+            height: 85px;
             border-radius: 50%;
             object-fit: cover;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             border: 3px solid var(--primary-light);
+            transition: transform 0.3s ease;
         }
+        
+        .attendance-mark-card:hover img {
+            transform: scale(1.05);
+        }
+        
         .attendance-mark-card h4 {
-            font-size: 1rem;
-            margin: 0 0 5px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin: 0 0 6px;
             color: var(--text);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            width: 100%;
         }
+        
         .attendance-mark-card small {
             font-size: 0.8rem;
             color: var(--text);
-            opacity: 0.7;
+            opacity: 0.6;
+            margin-bottom: 12px;
         }
+        
         .attendance-action-buttons {
             display: flex;
             justify-content: center;
-            margin-top: 15px;
+            margin-top: auto;
+            width: 100%;
         }
 
         /* Dynamic Island Toggle Button */
