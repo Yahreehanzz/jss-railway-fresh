@@ -13,6 +13,16 @@ const os = require('os');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+console.log('\n🔧 [STARTUP] Initializing Express app...');
+console.log(`🔧 [STARTUP] PORT = ${PORT}`);
+console.log(`🔧 [STARTUP] NODE_ENV = ${process.env.NODE_ENV || 'not set'}`);
+
+// ⚠️ CRITICAL: Catch ALL requests at the very beginning
+app.use((req, res, next) => {
+    console.log(`📨 [${new Date().toISOString()}] ${req.method} ${req.path}`);
+    next();
+});
+
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true }));
@@ -20,8 +30,7 @@ app.use(express.urlencoded({ extended: true }));
 // ⚠️ IMPORTANT: Log all API requests BEFORE static middleware
 app.use((req, res, next) => {
     if (req.path.startsWith('/api/')) {
-        console.log(`\n📍 [${new Date().toISOString()}] ${req.method} ${req.path}`);
-        console.log(`   Headers: ${JSON.stringify(req.headers).substring(0, 100)}...`);
+        console.log(`📍 [API] ${req.method} ${req.path} - routing to API handler`);
     }
     next();
 });
@@ -71,10 +80,12 @@ app.get('/api/db-check', (req, res) => {
 });
 
 // QUICK TEST ENDPOINT
+console.log('🔧 [STARTUP] Registering POST /api/teachers-test...');
 app.post('/api/teachers-test', (req, res) => {
     console.log('✅ TEST endpoint hit! Body:', req.body);
     res.json({ success: true, message: 'Test endpoint works', body: req.body });
 });
+console.log('✅ [STARTUP] POST /api/teachers-test registered');
 
 //  Database Pool
 const pool = new Pool({
@@ -288,6 +299,7 @@ app.post('/api/students/bulk', async (req, res) => {
 //   id, name, email, phone, subject, department, employee_id, photo_url
 // 
 
+console.log('🔧 [STARTUP] Registering GET /api/teachers...');
 app.get('/api/teachers', async (req, res) => {
     try {
         const { department } = req.query;
@@ -299,6 +311,7 @@ app.get('/api/teachers', async (req, res) => {
         res.json({ success: true, data: r.rows });
     } catch (e) { res.status(500).json({ success: false, error: e.message }); }
 });
+console.log('✅ [STARTUP] GET /api/teachers registered');
 
 app.post('/api/teachers', async (req, res) => {
     console.log('\n✅ [TEACHERS POST] Request received');
@@ -335,6 +348,7 @@ app.post('/api/teachers', async (req, res) => {
         return res.status(500).json({ success: false, error: error.message });
     }
 });
+console.log('✅ [STARTUP] POST /api/teachers registered');
 
 app.put('/api/teachers/:id', async (req, res) => {
     try {
