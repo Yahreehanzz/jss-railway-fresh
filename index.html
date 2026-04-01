@@ -61932,67 +61932,37 @@ function renderAttendance() {
         }
 
         function finalizeAddTeacher(teacher) {
-            showLoader('Testing API connection...');
+            showLoader('Saving to database...');
             
-            // FIRST: Test ultra-simple endpoint
-            console.log('🧪 Testing /api/test-simple endpoint...');
-            fetch(`${API_BASE}/test-simple`, {
-                method: 'GET',
-                headers: {'Content-Type':'application/json'}
-            }).then(r => {
-                console.log('✅ Simple test status:', r.status);
-                return r.json();
-            }).then(res => {
-                console.log('✅ Simple test response:', res);
-                
-                // NOW: Test teachers endpoint
-                console.log('💾 Saving teacher to database...');
-                showLoader('Saving to database...');
-                
-                return fetch(`${API_BASE}/teachers`, {
-                    method: 'POST',
-                    headers: {'Content-Type':'application/json'},
-                    body: JSON.stringify({
-                        name: teacher.name,
-                        email: teacher.email,
-                        phone: teacher.phone,
-                        subject: teacher.subjects ? teacher.subjects.join(', ') : '',
-                        department: teacher.department,
-                        employee_id: teacher.id,
-                        photo_url: teacher.photo
-                    })
-                });
-            }).then(r => {
-                console.log('📊 Teachers POST status:', r.status);
-                return r.text().then(text => {
-                    console.log('📊 Teachers response (first 200 chars):', text.substring(0, 200));
-                    try {
-                        return JSON.parse(text);
-                    } catch (e) {
-                        console.error('❌ JSON parse failed:', e.message);
-                        throw new Error(`Invalid JSON: ${text.substring(0, 100)}`);
-                    }
-                });
-            }).then(res => {
-                console.log('✅ Parsed response:', JSON.stringify(res).substring(0, 200));
+            fetch(`${API_BASE}/teachers`, {
+                method: 'POST',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({
+                    name: teacher.name,
+                    email: teacher.email,
+                    phone: teacher.phone,
+                    subject: teacher.subjects ? teacher.subjects.join(', ') : '',
+                    department: teacher.department,
+                    employee_id: teacher.id,
+                    photo_url: teacher.photo
+                })
+            }).then(r => r.json()).then(res => {
                 if (res.success && res.data && res.data.id) {
-                    // Add to memory with database ID
                     teacher.db_id = res.data.id;
                     teachers.push(teacher);
                     hideLoader();
-                    showMessageBox('Success', 'Teacher successfully saved to database! ✓');
+                    showMessageBox('Success', 'Teacher saved! ✓');
                     document.getElementById("addTeacher").querySelectorAll('input:not([type="file"])').forEach(input => input.value = '');
                     document.getElementById("addTeacherPhoto").value = '';
                     document.getElementById("addTeacherPreviewPhoto").classList.add('hidden');
                     renderTeacherDashboard();
                 } else {
                     hideLoader();
-                    showMessageBox('Error', res.error || 'Failed to save teacher');
+                    showMessageBox('Error', res.error || 'Failed to save');
                 }
             }).catch(err => {
-                console.error('❌ Full error:', err);
                 hideLoader();
-                showMessageBox('Error', 'Failed to save teacher: ' + err.message);
+                showMessageBox('Error', 'Error: ' + err.message);
             });
         }
 
