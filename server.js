@@ -114,6 +114,11 @@ app.get('/health', (req, res) => {
     res.json({ status: 'ok', message: 'Server is running' });
 });
 
+// ULTRA SIMPLE TEST - Should always work
+app.get('/api/test-simple', (req, res) => {
+    res.json({ success: true, message: 'Basic routing works!', timestamp: new Date().toISOString() });
+});
+
 // Database diagnostic endpoint
 app.get('/api/db-check', (req, res) => {
     pool.query(`
