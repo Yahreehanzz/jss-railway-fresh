@@ -65771,7 +65771,7 @@ function renderAttendanceMarkingList(filterYear, filterSemester) {
 
         const statusClass = status === 'present' ? 'present' : status === 'absent' ? 'absent' : '';
         const displayText = status === 'present' ? 'Present' : status === 'absent' ? 'Absent' : 'Mark';
-        const iconHTML = status === 'present' ? '?' : status === 'absent' ? '?' : '?';
+        const iconHTML = status === 'present' ? '<i class="fas fa-check-circle"></i>' : status === 'absent' ? '<i class="fas fa-times-circle"></i>' : '<i class="fas fa-question-circle"></i>';
 
         card.innerHTML = `
             <img src="${s.photo || defaultAvatar}" alt="${s.name}">
