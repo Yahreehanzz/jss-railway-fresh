@@ -61944,7 +61944,12 @@ function renderAttendance() {
                     subject: teacher.subjects ? teacher.subjects.join(', ') : '',
                     department: teacher.department,
                     employee_id: teacher.id,
-                    photo_url: teacher.photo
+                    photo_url: teacher.photo,
+                    designation: teacher.designation || '',
+                    gender: teacher.gender || '',
+                    date_of_joining: teacher.joining_date || '',
+                    qualification: teacher.qualification || '',
+                    experience: teacher.experience || null
                 })
             }).then(r => r.json()).then(res => {
                 if (res.success && res.data && res.data.id) {

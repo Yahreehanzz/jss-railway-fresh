@@ -67,15 +67,16 @@ app.get('/api/teachers', async (req, res) => {
 
 app.post('/api/teachers', async (req, res) => {
     try {
-        const { name, email, phone, subject, department, employee_id, photo_url } = req.body;
+        const { name, email, phone, subject, department, employee_id, photo_url, designation, gender, date_of_joining, qualification, experience } = req.body;
         
         if (!name || !employee_id) {
             return res.json({ success: false, error: 'Name and employee_id required' });
         }
         
         const result = await pool.query(
-            'INSERT INTO teachers (name, email, phone, subject, department, employee_id, photo_url) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
-            [name, email||null, phone||null, subject||null, department||null, employee_id, photo_url||null]
+            `INSERT INTO teachers (name, email, phone, subject, department, employee_id, photo_url, designation, gender, date_of_joining, qualification, experience) 
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *`,
+            [name, email||null, phone||null, subject||null, department||null, employee_id, photo_url||null, designation||null, gender||null, date_of_joining||null, qualification||null, experience||null]
         );
         
         res.json({ success: true, data: result.rows[0] });
