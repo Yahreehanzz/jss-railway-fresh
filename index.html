@@ -658,6 +658,36 @@ body.teacher-dark .tc-card {
     text-transform: uppercase;
     cursor: pointer;
     transition: background 0.15s, color 0.15s;
+}
+/* Database Badge */
+.db-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    background: linear-gradient(135deg, #0f766e 0%, #134e4a 100%);
+    color: #5eead4;
+    border: 1px solid rgba(94, 234, 212, 0.2);
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    box-shadow: 0 2px 4px rgba(15, 118, 110, 0.2);
+}
+.db-badge::before {
+    content: '●';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #5eead4;
+    animation: pulse 2s infinite;
+}
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
     flex-shrink: 0;
 }
 .tcd-tcard-view:hover { background: #6366f1; color: #fff; border-color: #6366f1; }
@@ -61744,7 +61774,10 @@ function renderAttendance() {
                         li.innerHTML = `
                             <div class="tcd-tcard-avatar">${avatarHtml}</div>
                             <div class="tcd-tcard-info">
-                                <div class="tcd-tcard-name">${t.name || 'Unknown'}</div>
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                    <div class="tcd-tcard-name">${t.name || 'Unknown'}</div>
+                                    <span class="db-badge" style="font-size: 9px; padding: 2px 8px;">Database</span>
+                                </div>
                                 <div class="tcd-tcard-sub">${t.id || 'N/A'} &nbsp;?&nbsp; ${(t.subjects || []).join(', ') || 'No subjects'}</div>
                             </div>
                             <span class="tcd-tcard-dept ${deptClass}">${deptLabel}</span>
@@ -61920,7 +61953,7 @@ function renderAttendance() {
                     teacher.db_id = res.data.id;
                     teachers.push(teacher);
                     hideLoader();
-                    showMessageBox('Success', 'Teacher Added!');
+                    showMessageBox('Success', 'Teacher successfully saved to database! ✓');
                     document.getElementById("addTeacher").querySelectorAll('input:not([type="file"])').forEach(input => input.value = '');
                     document.getElementById("addTeacherPhoto").value = '';
                     document.getElementById("addTeacherPreviewPhoto").classList.add('hidden');
@@ -61966,7 +61999,12 @@ function renderAttendance() {
                             <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, ${avatarColor}, ${avatarColor}99); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                                 ${initial}
                             </div>
-                            <span style="font-weight: 500; color: #1f2937;">${t.name}</span>
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-weight: 500; color: #1f2937;">${t.name}</span>
+                                    <span class="db-badge">Database</span>
+                                </div>
+                            </div>
                         </td>
                         <td style="padding: 16px; color: #6b7280; font-size: 14px; font-family: monospace;">${t.id}</td>
                         <td style="padding: 16px; color: #6b7280; font-size: 14px;">${t.subjects ? t.subjects.join(', ') : '-'}</td>
