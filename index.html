@@ -38123,6 +38123,37 @@ Easily access and review students' academic performance here. This section provi
 <!-- Professional Teacher Onboarding Setup Screen -->
 <div id="teacherSetupOverlay" style="z-index:999997;background:#f5f5f7;display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;flex-direction:column;justify-content:center;align-items:center;">
     <style>
+        /* Setup Screen Entrance Animation */
+        @keyframes setupOverlayFadeIn {
+            from {
+                opacity: 0;
+                backdrop-filter: blur(0px);
+            }
+            to {
+                opacity: 1;
+                backdrop-filter: blur(4px);
+            }
+        }
+
+        @keyframes setupContainerSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        #teacherSetupOverlay.show-setup {
+            animation: setupOverlayFadeIn 0.5s ease-out forwards;
+        }
+
+        #teacherSetupOverlay.show-setup .setup-screen-container {
+            animation: setupContainerSlideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+
         /* Setup Screen Styles */
         .setup-screen-container {
             width: 100%;
@@ -38138,6 +38169,7 @@ Easily access and review students' academic performance here. This section provi
             user-select: none;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            opacity: 0;
         }
 
         .setup-content-area {
@@ -38609,7 +38641,7 @@ Easily access and review students' academic performance here. This section provi
                 }).catch(() => {});
             } catch (e) {}
 
-            document.getElementById('teacherSetupOverlay').style.display = 'none';
+            hideSetupOverlay();
             setTimeout(() => show2FAModal(), 300);
         }
 
@@ -51847,7 +51879,20 @@ function restoreTeacherZonePhoto() {
 
         function startTeacherSetup() {
             document.getElementById('roleSelectionOverlay').classList.add('hidden');
-            document.getElementById('teacherSetupOverlay').style.display = 'flex';
+            const overlay = document.getElementById('teacherSetupOverlay');
+            overlay.style.display = 'flex';
+            // Trigger animation
+            setTimeout(() => {
+                overlay.classList.add('show-setup');
+            }, 10);
+        }
+
+        function hideSetupOverlay() {
+            const overlay = document.getElementById('teacherSetupOverlay');
+            overlay.classList.remove('show-setup');
+            setTimeout(() => {
+                overlay.style.display = 'none';
+            }, 300);
         }
 
         function verifyFacultyUserPassword() {
