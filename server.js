@@ -105,7 +105,7 @@ app.post('/api/teachers', async (req, res) => {
         console.log('POST /api/teachers received:', { name, employee_id, designation, gender, date_of_joining });
         
         if (!name || !employee_id) {
-            return res.json({ success: false, error: 'Name and employee_id are required' });
+            return res.status(400).json({ success: false, error: 'Name and employee_id are required' });
         }
         
         const insertQuery = `
@@ -131,11 +131,11 @@ app.post('/api/teachers', async (req, res) => {
         ];
         
         const result = await pool.query(insertQuery, values);
-        console.log('Teacher saved successfully, ID:', result.rows[0].id);
-        return res.json({ success: true, data: result.rows[0] });
+        console.log('✅ Teacher saved successfully, ID:', result.rows[0].id);
+        return res.status(201).json({ success: true, data: result.rows[0] });
     } catch (e) {
-        console.error('POST /api/teachers error:', e.message);
-        return res.json({ success: false, error: e.message });
+        console.error('❌ POST /api/teachers error:', e.message, e.stack);
+        return res.status(500).json({ success: false, error: e.message });
     }
 });
 
