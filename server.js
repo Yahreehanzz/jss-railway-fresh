@@ -195,8 +195,17 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Fallback SPA route
+// Fallback SPA route - but NOT for API endpoints
 app.use((req, res) => {
+    // If it's an API request that didn't match, return JSON error
+    if (req.path.startsWith('/api/')) {
+        console.warn(`⚠️  API route not found: ${req.method} ${req.path}`);
+        return res.status(404).json({ 
+            success: false, 
+            error: `API endpoint not found: ${req.method} ${req.path}` 
+        });
+    }
+    // Otherwise serve index.html for SPA routing
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
@@ -204,9 +213,11 @@ app.use((req, res) => {
 // GLOBAL ERROR HANDLER (LAST MIDDLEWARE)
 // ============================================================
 app.use((err, req, res, next) => {
-    console.error('Global error handler:', err.message);
-    res.setHeader('Content-Type', 'application/json');
-    res.status(500).json({ success: false, error: err.message });
+    console.error('❌ Global error handler:', err.message, err.stack);
+    return res.status(500).json({ 
+        success: false, 
+        error: err.message || 'Internal server error'
+    });
 });
 
 // START SERVER
