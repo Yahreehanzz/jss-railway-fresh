@@ -61947,7 +61947,20 @@ function renderAttendance() {
                     employee_id: teacher.id,
                     photo_url: teacher.photo
                 })
-            }).then(r => r.json()).then(res => {
+            }).then(r => {
+                console.log('📊 Response status:', r.status);
+                console.log('📊 Response headers:', r.headers.get('content-type'));
+                return r.text().then(text => {
+                    console.log('📊 Raw response (first 200 chars):', text.substring(0, 200));
+                    try {
+                        return JSON.parse(text);
+                    } catch (e) {
+                        console.error('❌ Failed to parse JSON:', e.message);
+                        console.error('❌ Response was:', text.substring(0, 500));
+                        throw new Error(`Invalid JSON response: ${text.substring(0, 100)}`);
+                    }
+                });
+            }).then(res => {
                 if (res.success && res.data && res.data.id) {
                     // Add to memory with database ID
                     teacher.db_id = res.data.id;
@@ -61963,6 +61976,7 @@ function renderAttendance() {
                     showMessageBox('Error', res.error || 'Failed to save teacher');
                 }
             }).catch(err => {
+                console.error('❌ Fetch error:', err);
                 hideLoader();
                 showMessageBox('Error', 'Failed to save teacher: ' + err.message);
             });
