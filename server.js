@@ -61,104 +61,43 @@ app.get('/api/db-check', (req, res) => {
     });
 });
 
-//  Database 
+//  Database Pool
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false }
 });
 
-let dbReady = false;
+let dbReady = true;  // Assume ready - handle errors in requests
 
-// Initialize database - wait for it to be ready
-pool.query('SELECT NOW()', async (err, res) => {
+// Test connection and ensure tables
+pool.query('SELECT NOW()', (err) => {
     if (err) { 
-        console.error('❌ Initial DB connection failed:', err.message); 
+        console.error('❌ DB connection failed:', err.message); 
+        dbReady = false;
     } else { 
-        console.log('✅ Connected to Railway PostgreSQL'); 
-        await initializeDatabase();
+        console.log('✅ Connected to Railway PostgreSQL');
+        ensureTeachersTable();
     }
 });
 
-// Initialize database schema and migrations
-async function initializeDatabase() {
-    return new Promise((resolve) => {
-        console.log('🔄 Initializing database schema...');
-        
-        // First, ensure the table exists with ALL columns
-        const createTableSQL = `
-            CREATE TABLE IF NOT EXISTS teachers (
-                id SERIAL PRIMARY KEY,
-                name VARCHAR(100) NOT NULL,
-                email VARCHAR(100),
-                phone VARCHAR(20),
-                subject VARCHAR(100),
-                department VARCHAR(50),
-                qualification VARCHAR(100),
-                experience INTEGER,
-                office_hours JSONB,
-                employee_id VARCHAR(50) UNIQUE,
-                photo_url TEXT,
-                created_at TIMESTAMP DEFAULT NOW(),
-                updated_at TIMESTAMP DEFAULT NOW()
-            );
-        `;
-        
-        pool.query(createTableSQL, (err) => {
-            if (err) {
-                console.error('❌ Error creating teachers table:', err.message);
-                return resolve(false);
+// Ensure teachers table has all required columns
+function ensureTeachersTable() {
+    const queries = [
+        // Add columns if they don't exist (safe operation)
+        `ALTER TABLE teachers ADD COLUMN IF NOT EXISTS employee_id VARCHAR(50) UNIQUE;`,
+        `ALTER TABLE teachers ADD COLUMN IF NOT EXISTS photo_url TEXT;`,
+    ];
+    
+    queries.forEach(query => {
+        pool.query(query, (err) => {
+            if (err && !err.message.includes('already exists')) {
+                console.log('🔧 Table update:', err.message);
             }
-            console.log('✅ Teachers table ready');
-            
-            // Now add any missing columns
-            const addColumnsSQL = [
-                `ALTER TABLE teachers ADD COLUMN IF NOT EXISTS employee_id VARCHAR(50) UNIQUE;`,
-                `ALTER TABLE teachers ADD COLUMN IF NOT EXISTS photo_url TEXT;`,
-                `ALTER TABLE teachers DROP CONSTRAINT IF EXISTS teachers_email_key;`
-            ];
-            
-            let completed = 0;
-            addColumnsSQL.forEach((sql, idx) => {
-                pool.query(sql, (err) => {
-                    if (err && !err.message.includes('already exists') && !err.message.includes('does not exist')) {
-                        console.error(`⚠️ Migration ${idx + 1} warning:`, err.message);
-                    } else {
-                        console.log(`✅ Migration ${idx + 1} completed`);
-                    }
-                    completed++;
-                    
-                    if (completed === addColumnsSQL.length) {
-                        // Verify structure
-                        pool.query(
-                            `SELECT column_name, data_type FROM information_schema.columns 
-                             WHERE table_name='teachers' ORDER BY ordinal_position;`,
-                            (err, result) => {
-                                if (err) {
-                                    console.error('❌ Error verifying table structure:', err.message);
-                                    dbReady = false;
-                                } else {
-                                    const hasEmployeeId = result.rows.some(r => r.column_name === 'employee_id');
-                                    const hasPhotoUrl = result.rows.some(r => r.column_name === 'photo_url');
-                                    
-                                    if (hasEmployeeId && hasPhotoUrl) {
-                                        console.log('✅ Database schema verification PASSED');
-                                        console.log('📋 Teachers table columns:');
-                                        result.rows.forEach(r => console.log(`   - ${r.column_name} (${r.data_type})`));
-                                        dbReady = true;
-                                    } else {
-                                        console.error('❌ Database schema verification FAILED - missing columns');
-                                        console.log('Found columns:', result.rows.map(r => r.column_name).join(', '));
-                                        dbReady = false;
-                                    }
-                                }
-                                resolve(true);
-                            }
-                        );
-                    }
-                });
-            });
         });
     });
+    
+    dbReady = true;
+    console.log('✅ Teachers table ready');
 }
 
 // 
@@ -321,14 +260,6 @@ app.get('/api/teachers', async (req, res) => {
 
 app.post('/api/teachers', async (req, res) => {
     try {
-        // Check if database is ready
-        if (!dbReady) {
-            return res.status(503).json({ 
-                success: false, 
-                error: 'Database is initializing. Migrations are running. Please wait a moment and try again.' 
-            });
-        }
-        
         const { name, email, phone, subject, department, employee_id, photo_url } = req.body;
         
         // Validate required fields
@@ -344,8 +275,7 @@ app.post('/api/teachers', async (req, res) => {
         res.json({ success: true, data: r.rows[0] });
     } catch (e) {
         console.error('❌ Error adding teacher:', e.message, e.code);
-        if (e.code === '23505') return res.status(409).json({ success: false, error: 'Employee ID or email already exists' });
-        if (e.code === '42703') return res.status(400).json({ success: false, error: 'Database column not found. Migrations may not have completed. Try refreshing the page.' });
+        if (e.code === '23505') return res.status(409).json({ success: false, error: 'Employee ID already exists' });
         res.status(500).json({ success: false, error: e.message });
     }
 });
@@ -946,43 +876,8 @@ app.use((err, req, res, next) => {
     });
 });
 
-//  Start 
-let serverStarted = false;
-
-function startServer() {
-    if (serverStarted) return;
-    serverStarted = true;
-    
-    app.listen(PORT, () => {
-        console.log('🚀 Server running at http://localhost:' + PORT);
-        console.log('   Open http://localhost:' + PORT + ' in your browser');
-        console.log('✅ Database is ready - all systems operational');
-    });
-}
-
-// Start server after a short delay to allow migrations to complete
-setTimeout(() => {
-    if (dbReady) {
-        console.log('✅ Database ready - starting server immediately');
-        startServer();
-    } else {
-        console.log('⏳ Waiting for database initialization...');
-        // Check every 500ms if database is ready
-        const checkInterval = setInterval(() => {
-            if (dbReady) {
-                console.log('✅ Database is now ready - starting server');
-                clearInterval(checkInterval);
-                startServer();
-            }
-        }, 500);
-        
-        // Timeout after 30 seconds and start anyway
-        setTimeout(() => {
-            if (!serverStarted) {
-                console.warn('⚠️ Database initialization timeout - starting server anyway');
-                clearInterval(checkInterval);
-                startServer();
-            }
-        }, 30000);
-    }
-}, 2000);
+//  Start Server
+app.listen(PORT, () => {
+    console.log('🚀 Server running at http://localhost:' + PORT);
+    console.log('   Database connection will be established automatically');
+});

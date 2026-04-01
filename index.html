@@ -61960,20 +61960,11 @@ function renderAttendance() {
                     renderTeacherDashboard();
                 } else {
                     hideLoader();
-                    const errorMsg = res.error || 'Unknown error';
-                    let displayMsg = 'Failed to save teacher: ' + errorMsg;
-                    if (errorMsg.includes('column') || errorMsg.includes('Migrations')) {
-                        displayMsg = 'Database is still initializing. Migrations may still be running. Please wait 2-3 minutes and try again.';
-                    }
-                    showMessageBox('Error', displayMsg);
+                    showMessageBox('Error', res.error || 'Failed to save teacher');
                 }
             }).catch(err => {
                 hideLoader();
-                let displayMsg = 'Failed to save teacher: ' + err.message;
-                if (err.message.includes('JSON') || err.message.includes('token')) {
-                    displayMsg = 'Database is still initializing. Migrations may still be running. Please wait 2-3 minutes and refresh the page, then try again.';
-                }
-                showMessageBox('Error', displayMsg);
+                showMessageBox('Error', 'Failed to save teacher: ' + err.message);
             });
         }
 
