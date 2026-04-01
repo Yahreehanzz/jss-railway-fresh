@@ -17,6 +17,15 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// ⚠️ IMPORTANT: Log all API requests BEFORE static middleware
+app.use((req, res, next) => {
+    if (req.path.startsWith('/api/')) {
+        console.log(`\n📍 [${new Date().toISOString()}] ${req.method} ${req.path}`);
+        console.log(`   Headers: ${JSON.stringify(req.headers).substring(0, 100)}...`);
+    }
+    next();
+});
+
 // Serve all static files (images, css, js, etc.)
 app.use(express.static(path.join(__dirname), { 
     maxAge: '1h',
@@ -59,6 +68,12 @@ app.get('/api/db-check', (req, res) => {
             message: hasEmployeeId && hasPhotoUrl ? '✅ Database ready for teachers' : '⏳ Waiting for migrations to complete'
         });
     });
+});
+
+// QUICK TEST ENDPOINT
+app.post('/api/teachers-test', (req, res) => {
+    console.log('✅ TEST endpoint hit! Body:', req.body);
+    res.json({ success: true, message: 'Test endpoint works', body: req.body });
 });
 
 //  Database Pool
@@ -286,32 +301,38 @@ app.get('/api/teachers', async (req, res) => {
 });
 
 app.post('/api/teachers', async (req, res) => {
-    console.log('📥 POST /api/teachers - Request received');
-    console.log('   Body:', JSON.stringify(req.body).substring(0, 100));
+    console.log('\n✅ [TEACHERS POST] Request received');
+    console.log('   Full URL:', req.originalUrl);
+    console.log('   Method:', req.method);
+    console.log('   Body keys:', Object.keys(req.body).join(', '));
     
     try {
         const { name, email, phone, subject, department, employee_id, photo_url } = req.body;
         
-        console.log('   Name:', name, '| Employee ID:', employee_id);
+        console.log('   Extracted: name=[' + name + '], employee_id=[' + employee_id + ']');
         
-        // Validate required fields
+        // Validate
         if (!name || !employee_id) {
-            console.log('   ❌ Validation failed: missing name or employee_id');
-            return res.status(400).json({ success: false, error: 'Name and employee_id are required' });
+            console.log('   ❌ VALIDATION FAILED');
+            return res.status(400).json({ success: false, error: 'Name and employee_id required' });
         }
         
-        console.log('   ✓ Validation passed - inserting into database...');
-        const r = await pool.query(
+        console.log('   ✓ Validation passed, inserting to DB...');
+        
+        const result = await pool.query(
             `INSERT INTO teachers (name, email, phone, subject, department, employee_id, photo_url)
              VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
             [name, email||null, phone||null, subject||null, department||null, employee_id, photo_url||null]
         );
-        console.log('   ✅ Teacher inserted successfully, ID:', r.rows[0].id);
-        res.json({ success: true, data: r.rows[0] });
-    } catch (e) {
-        console.error('   ❌ Error adding teacher:', e.message, '| Code:', e.code);
-        if (e.code === '23505') return res.status(409).json({ success: false, error: 'Employee ID already exists' });
-        res.status(500).json({ success: false, error: e.message });
+        
+        console.log('   ✅ INSERT SUCCESS, ID:', result.rows[0].id);
+        return res.json({ success: true, data: result.rows[0] });
+    } catch (error) {
+        console.error('   ❌ ERROR:', error.message, error.code);
+        if (error.code === '23505') {
+            return res.status(409).json({ success: false, error: 'Employee ID already exists' });
+        }
+        return res.status(500).json({ success: false, error: error.message });
     }
 });
 
