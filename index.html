@@ -44413,8 +44413,8 @@ function restoreTeacherZonePhoto() {
                 });
             }
         }
-        const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
-        const defaultTeacherAvatar = "https://cdn-icons-png.flaticon.com/512/2922/2922561.png"; // Example teacher avatar
+        const defaultAvatar = 'data:image/svg+xml,%3Csvg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"%3E%3Ccircle cx="50" cy="50" r="50" fill="%23e0e0e0"/%3E%3Ccircle cx="50" cy="35" r="15" fill="%23999"/%3E%3Cpath d="M 30 50 Q 30 65 50 65 Q 70 65 70 50" fill="%23999"/%3E%3C/svg%3E';
+        const defaultTeacherAvatar = 'data:image/svg+xml,%3Csvg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"%3E%3Ccircle cx="50" cy="50" r="50" fill="%23e0e0e0"/%3E%3Ccircle cx="50" cy="35" r="15" fill="%23999"/%3E%3Cpath d="M 30 50 Q 30 65 50 65 Q 70 65 70 50" fill="%23999"/%3E%3C/svg%3E'; // Using SVG placeholder for teacher
         
         // Global data arrays
         let students = [];
@@ -56877,7 +56877,7 @@ function restoreTeacherZonePhoto() {
                     cardWrap.innerHTML = filteredStudents.map(s => {
                         const yc  = _stvYearChipClass(s.year);
                         const ha  = !!(s.photo && s.photo !== '');
-                        const ini = (s.name || '?').charAt(0).toUpperCase();
+                        const ini = (s.name || 'U').charAt(0).toUpperCase();
                         const avatarHtml = ha
                             ? `<img src="${s.photo}" alt="${s.name}" class="stv-card-avatar" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
                                <div class="stv-card-avatar-placeholder" style="display:none;">${ini}</div>`
@@ -65763,7 +65763,7 @@ function renderAttendanceMarkingList(filterYear, filterSemester) {
         const iconHTML = status === 'present' ? '✓' : status === 'absent' ? '✕' : '📋';
 
         card.innerHTML = `
-            <img src="${s.photo || defaultAvatar}" alt="${s.name}">
+            <img src="${s.photo || defaultAvatar}" alt="${s.name}" onerror="this.src='${defaultAvatar}'">
             <h4>${s.name}</h4>
             <small>${s.usn}</small>
             <div class="attendance-action-buttons">
@@ -78897,7 +78897,7 @@ window.loadNow = function() {
                 <div class="card-inner">
                     <div class="student-card-header">
                         <img src="${student.photo}" alt="${student.name}" class="student-photo"
-                             onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=6366f1&color=fff&bold=true'">
+                             onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=6366f1&color=fff&bold=true'; this.onerror=function(){this.src='data:image/svg+xml,%3Csvg viewBox=%220 0 100 100%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23e0e0e0%22/%3E%3Ccircle cx=%2250%22 cy=%2235%22 r=%2215%22 fill=%22%23999%22/%3E%3Cpath d=%22M 30 50 Q 30 65 50 65 Q 70 65 70 50%22 fill=%22%23999%22/%3E%3C/svg%3E';}">
                         <div class="student-info">
                             <h4>${student.name}</h4>
                             <p style="font-weight:700;letter-spacing:0.3px;">${student.usn}</p>
@@ -81679,7 +81679,7 @@ Govt. Polytechnic, Beelagi`;
                         <div class="fee-card-header">
                             <img src="${student.photo || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(student.name) + '&background=6366f1&color=fff&bold=true'}" 
                                  alt="${student.name}" class="fee-card-photo"
-                                 onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=6366f1&color=fff&bold=true'">
+                                 onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=6366f1&color=fff&bold=true'; this.onerror=function(){this.src='data:image/svg+xml,%3Csvg viewBox=%220 0 100 100%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23e0e0e0%22/%3E%3Ccircle cx=%2250%22 cy=%2235%22 r=%2215%22 fill=%22%23999%22/%3E%3Cpath d=%22M 30 50 Q 30 65 50 65 Q 70 65 70 50%22 fill=%22%23999%22/%3E%3C/svg%3E';};">
                             <div class="fee-card-info">
                                 <h4>${student.name}</h4>
                                 <p style="color:var(--text-muted);font-size:11px;font-weight:600;letter-spacing:0.3px;">${student.usn}</p>
@@ -81743,7 +81743,7 @@ Govt. Polytechnic, Beelagi`;
                         <div class="fee-table-name-cell">
                             <img src="${student.photo || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(student.name) + '&background=6366f1&color=fff&bold=true&size=40'}" 
                                  alt="${student.name}" class="fee-table-photo"
-                                 onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=6366f1&color=fff&bold=true&size=40'">
+                                 onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=6366f1&color=fff&bold=true&size=40'; this.onerror=function(){this.src='data:image/svg+xml,%3Csvg viewBox=%220 0 100 100%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23e0e0e0%22/%3E%3Ccircle cx=%2250%22 cy=%2235%22 r=%2215%22 fill=%22%23999%22/%3E%3Cpath d=%22M 30 50 Q 30 65 50 65 Q 70 65 70 50%22 fill=%22%23999%22/%3E%3C/svg%3E';};">
                             <div class="fee-table-name-info">
                                 <strong>${student.name}</strong>
                                 <span>${student.usn}</span>
