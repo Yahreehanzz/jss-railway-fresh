@@ -182,7 +182,12 @@ app.delete('/api/teachers/:id', async (req, res) => {
 // EMAIL OTP SYSTEM FOR TEACHER SETUP
 // ============================================================
 
-const nodemailer = require('nodemailer');
+let nodemailer;
+try {
+    nodemailer = require('nodemailer');
+} catch (e) {
+    console.warn('⚠️ Nodemailer not available, email OTP will use test mode');
+}
 
 // In-memory OTP storage (expires after 10 minutes)
 const otpStore = {};
@@ -197,6 +202,11 @@ let transporter = null;
 
 // Initialize email service
 function initEmailService() {
+    if (!nodemailer) {
+        console.log('ℹ️ Email service in TEST MODE - OTP will be logged to console');
+        return;
+    }
+    
     const emailService = process.env.EMAIL_SERVICE || 'test'; // 'gmail', 'outlook', or 'test'
     const emailUser = process.env.EMAIL_USER;
     const emailPass = process.env.EMAIL_PASSWORD;
@@ -239,7 +249,7 @@ app.post('/api/send-otp', async (req, res) => {
         }
 
         // Validate email format
-        const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
             return res.status(400).json({ success: false, error: 'Invalid email address' });
         }

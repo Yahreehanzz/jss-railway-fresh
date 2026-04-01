@@ -38648,7 +38648,7 @@ Easily access and review students' academic performance here. This section provi
             errorEl.textContent = '';
             
             // Validate email
-            const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!email || !emailRegex.test(email)) {
                 errorEl.textContent = 'Please enter a valid email address';
                 errorEl.style.display = 'block';
