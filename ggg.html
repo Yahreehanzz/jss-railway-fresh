@@ -3,329 +3,345 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Staff Profile Management</title>
-    <!-- Tailwind CSS for styling -->
+    <title>Staff Dashboard Redesign</title>
+    <!-- Tailwind CSS for rapid, professional styling -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for modern typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Google Fonts for a professional look matching the image -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        dark: {
+                            900: '#070B14', // Deepest background
+                            800: '#0F1629', // Card backgrounds
+                            700: '#1A233A', // Lighter borders/hover
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
+        /* Custom Styles for Unique Flair */
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8f9fa; /* Ultra-light premium gray background */
+            background-color: #070B14;
+            color: #94a3b8;
+            position: relative;
         }
-        
-        /* Smooth transitions for tab content */
-        .tab-content {
-            display: none;
-            animation: fadeIn 0.4s ease-out;
+
+        /* Subtle animated background grid */
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-size: 50px 50px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            mask-image: radial-gradient(ellipse at top, black 20%, transparent 70%);
+            z-index: -1;
+            pointer-events: none;
         }
-        .tab-content.active {
-            display: block;
+
+        /* Ambient glow spots */
+        .glow-spot-1 {
+            position: fixed;
+            top: -10%;
+            left: -10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+            z-index: -1;
+            pointer-events: none;
         }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
+
+        .glow-spot-2 {
+            position: fixed;
+            top: 20%;
+            right: -10%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Glassmorphism Cards */
+        .glass-card {
+            background: rgba(15, 22, 41, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #070B14;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1A233A;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2d3b5e;
+        }
+
+        /* Floating Notification Button */
+        .floating-notif {
+            position: fixed;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(15, 22, 41, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-right: none;
+            padding: 1rem 0.75rem;
+            border-radius: 16px 0 0 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: -4px 0 20px rgba(0,0,0,0.3);
+            z-index: 50;
+        }
+
+        .floating-notif:hover {
+            background: rgba(30, 41, 59, 0.9);
+            padding-right: 1.25rem;
+        }
+
+        .floating-notif .badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 8px;
+            height: 8px;
+            background-color: #ef4444;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #ef4444;
+        }
+
+        /* Pulse animation for the notification badge */
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        .pulse-badge {
+            animation: pulse-red 2s infinite;
         }
     </style>
 </head>
-<body class="min-h-screen text-gray-800 flex items-center justify-center p-4 md:p-8">
+<body class="antialiased selection:bg-indigo-500/30 selection:text-indigo-200">
 
-    <!-- Main Layout Container -->
-    <div class="max-w-[1200px] w-full mx-auto flex flex-col md:flex-row gap-8 md:gap-16">
-        
-        <!-- Left Sidebar Navigation -->
-        <aside class="w-full md:w-64 flex-shrink-0 pt-4">
-            <h1 class="text-[1.65rem] font-bold text-gray-900 mb-10 leading-tight tracking-tight">User profile<br>management</h1>
-            
-            <nav class="space-y-1.5 flex flex-row md:flex-col overflow-x-auto md:overflow-visible pb-2 md:pb-0 hide-scrollbar">
-                <!-- Nav Item 1 (Pill Shaped Active) -->
-                <button onclick="switchTab('personal')" id="nav-personal" class="nav-btn w-full flex items-center gap-3 px-5 py-3.5 rounded-full bg-gray-100/80 text-gray-900 font-semibold transition-all whitespace-nowrap">
-                    <i data-lucide="user" class="w-4 h-4"></i>
-                    Personal Info
-                </button>
-                
-                <!-- Nav Item 2 (Pill Shaped Inactive) -->
-                <button onclick="switchTab('subjects')" id="nav-subjects" class="nav-btn w-full flex items-center gap-3 px-5 py-3.5 rounded-full text-gray-500 hover:text-gray-800 hover:bg-gray-50 font-medium transition-all whitespace-nowrap">
-                    <i data-lucide="book-open" class="w-4 h-4"></i>
-                    Subjects Assigned
-                </button>
-                
-                <!-- Nav Item 3 (Pill Shaped Inactive) -->
-                <button onclick="switchTab('user')" id="nav-user" class="nav-btn w-full flex items-center gap-3 px-5 py-3.5 rounded-full text-gray-500 hover:text-gray-800 hover:bg-gray-50 font-medium transition-all whitespace-nowrap">
-                    <i data-lucide="shield" class="w-4 h-4"></i>
-                    User Details
-                </button>
-            </nav>
-        </aside>
+    <!-- Ambient Background Elements -->
+    <div class="bg-grid"></div>
+    <div class="glow-spot-1"></div>
+    <div class="glow-spot-2"></div>
 
-        <!-- Right Main Content Area -->
-        <main class="flex-1 bg-white rounded-[2rem] shadow-[0_4px_24px_rgba(0,0,0,0.02)] border border-gray-100/80 p-8 md:p-12 min-h-[600px]">
-            
-            <!-- SECTION 1: Personal Info -->
-            <div id="content-personal" class="tab-content active">
-                <!-- Header -->
-                <div class="flex justify-between items-center mb-8 border-b border-gray-100 pb-6">
-                    <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Personal information</h2>
-                    
-                    <div class="flex items-center gap-3">
-                        <!-- Edit Button -->
-                        <button onclick="toggleEditMode()" id="edit-btn" class="flex items-center gap-2 text-gray-600 hover:text-gray-900 bg-white border border-gray-200 hover:border-gray-300 font-medium text-sm px-5 py-2.5 rounded-full transition-all shadow-sm">
-                            <i data-lucide="edit-2" class="w-4 h-4"></i>
-                            <span id="edit-btn-text">Edit</span>
-                        </button>
-                        <!-- Save Button (Hidden by default) -->
-                        <button id="save-btn" onclick="toggleEditMode()" class="hidden flex items-center gap-2 text-white bg-gray-900 hover:bg-gray-800 font-medium text-sm px-6 py-2.5 rounded-full transition-all shadow-sm">
-                            <i data-lucide="check" class="w-4 h-4"></i>
-                            Save Changes
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Avatar Section -->
-                <div class="mb-10">
-                    <div class="relative w-24 h-24 rounded-full border border-gray-200 overflow-hidden bg-gray-50 shadow-sm">
-                        <!-- Placeholder Avatar Image from original -->
-                        <svg viewBox="0 0 100 100" class="w-full h-full text-gray-400" fill="currentColor">
-                            <circle cx="50" cy="45" r="20" fill="#fca5a5" />
-                            <path d="M 30 45 C 30 20 70 20 70 45 L 75 60 L 25 60 Z" fill="#374151" />
-                            <path d="M 25 105 C 25 70 75 70 75 105 Z" fill="#10b981" />
-                        </svg>
-                        <!-- Lock Overlay -->
-                        <div class="absolute bottom-0 inset-x-0 h-7 bg-gray-900/90 flex items-center justify-center">
-                            <i data-lucide="lock" class="w-3 h-3 text-white"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- READ-ONLY VIEW MODE (Professional Typography) -->
-                <div id="view-mode" class="grid grid-cols-1 md:grid-cols-2 gap-y-8 gap-x-8 mb-12">
-                    <div class="space-y-1.5">
-                        <p class="text-[0.65rem] font-bold text-gray-400 uppercase tracking-widest">First Name</p>
-                        <p class="text-base font-semibold text-gray-900">Sowrab</p>
-                    </div>
-                    <div class="space-y-1.5">
-                        <p class="text-[0.65rem] font-bold text-gray-400 uppercase tracking-widest">Last Name</p>
-                        <p class="text-base font-semibold text-gray-900">ha</p>
-                    </div>
-                    <div class="space-y-1.5">
-                        <p class="text-[0.65rem] font-bold text-gray-400 uppercase tracking-widest">Email Address</p>
-                        <p class="text-base font-semibold text-gray-900">admin@gmail.com</p>
-                    </div>
-                    <div class="space-y-1.5">
-                        <p class="text-[0.65rem] font-bold text-gray-400 uppercase tracking-widest">Phone Number</p>
-                        <p class="text-base font-semibold text-gray-900">+91 8789 798 7987</p>
-                    </div>
-                    <div class="space-y-1.5">
-                        <p class="text-[0.65rem] font-bold text-gray-400 uppercase tracking-widest">Country</p>
-                        <p class="text-base font-semibold text-gray-900">India</p>
-                    </div>
-                    <div class="space-y-1.5">
-                        <p class="text-[0.65rem] font-bold text-gray-400 uppercase tracking-widest">City</p>
-                        <p class="text-base font-semibold text-gray-900">Mysuru</p>
-                    </div>
-                    <div class="space-y-1.5">
-                        <p class="text-[0.65rem] font-bold text-gray-400 uppercase tracking-widest">Zip Code</p>
-                        <p class="text-base font-semibold text-gray-900">570001</p>
-                    </div>
-                </div>
-
-                <!-- EDIT MODE (Premium Forms) -->
-                <div id="edit-mode" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">First Name</label>
-                        <input type="text" value="Sowrab" class="w-full px-5 py-3.5 rounded-full border border-gray-200 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all text-gray-900 font-medium text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
-                        <input type="text" value="ha" class="w-full px-5 py-3.5 rounded-full border border-gray-200 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all text-gray-900 font-medium text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
-                        <input type="email" value="admin@gmail.com" class="w-full px-5 py-3.5 rounded-full border border-blue-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all text-gray-900 font-medium text-sm bg-blue-50/30">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
-                        <div class="flex rounded-full border border-gray-200 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 transition-all overflow-hidden bg-white">
-                            <div class="bg-gray-50/50 px-5 py-3.5 border-r border-gray-200 text-gray-600 flex items-center gap-1 text-sm font-medium cursor-pointer">
-                                +91 <i data-lucide="chevron-down" class="w-4 h-4 ml-0.5 text-gray-400"></i>
-                            </div>
-                            <input type="text" value="8789 798 7987" class="flex-1 px-4 py-3.5 focus:outline-none text-gray-900 font-medium text-sm">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Country</label>
-                        <div class="relative">
-                            <select class="w-full px-5 py-3.5 rounded-full border border-gray-200 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all text-gray-900 font-medium text-sm appearance-none bg-white cursor-pointer">
-                                <option>India</option>
-                                <option>Bangladesh</option>
-                                <option>United States</option>
-                            </select>
-                            <i data-lucide="chevron-down" class="w-4 h-4 absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">City</label>
-                        <div class="relative">
-                            <select class="w-full px-5 py-3.5 rounded-full border border-gray-200 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all text-gray-900 font-medium text-sm appearance-none bg-white cursor-pointer">
-                                <option>Mysuru</option>
-                                <option>Bengaluru</option>
-                                <option>Sylhet</option>
-                            </select>
-                            <i data-lucide="chevron-down" class="w-4 h-4 absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Zip Code</label>
-                        <input type="text" value="570001" class="w-full px-5 py-3.5 rounded-full border border-gray-200 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all text-gray-900 font-medium text-sm">
-                    </div>
-                </div>
-
-                <!-- Clean Delete Account Section -->
-                <div class="mt-8 border-t border-gray-100 pt-8 flex justify-between items-center">
-                    <h3 class="text-[1.05rem] font-bold text-gray-900">Delete Account</h3>
-                    <button class="px-6 py-2.5 bg-red-50 text-red-600 hover:bg-red-500 hover:text-white font-semibold rounded-full transition-all text-sm shadow-sm">
-                        Delete
-                    </button>
-                </div>
-            </div>
-
-            <!-- SECTION 2: Subjects Assigned -->
-            <div id="content-subjects" class="tab-content">
-                <div class="border-b border-gray-100 pb-6 mb-8">
-                    <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Subjects Assigned</h2>
-                    <p class="text-gray-500 mt-1.5 text-sm">Manage and view the subjects currently assigned to you.</p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div class="p-6 rounded-[1.5rem] border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-md hover:border-blue-200 transition-all bg-white cursor-pointer group">
-                        <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                            <i data-lucide="database" class="w-5 h-5 text-blue-600"></i>
-                        </div>
-                        <h3 class="text-lg font-bold text-gray-900 mb-1.5">Database System Concepts</h3>
-                        <p class="text-sm text-gray-500 mb-5">Information Science Dept.</p>
-                        <span class="inline-flex items-center gap-1.5 text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full text-[0.7rem] uppercase tracking-wider font-bold">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active
-                        </span>
-                    </div>
-
-                    <div class="p-6 rounded-[1.5rem] border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-md hover:border-purple-200 transition-all bg-white cursor-pointer group">
-                        <div class="w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                            <i data-lucide="code" class="w-5 h-5 text-purple-600"></i>
-                        </div>
-                        <h3 class="text-lg font-bold text-gray-900 mb-1.5">PL/SQL Programming</h3>
-                        <p class="text-sm text-gray-500 mb-5">Information Science Dept.</p>
-                        <span class="inline-flex items-center gap-1.5 text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full text-[0.7rem] uppercase tracking-wider font-bold">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active
-                        </span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SECTION 3: User Details -->
-            <div id="content-user" class="tab-content">
-                <div class="border-b border-gray-100 pb-6 mb-8">
-                    <h2 class="text-2xl font-bold text-gray-900 tracking-tight">User Account Details</h2>
-                    <p class="text-gray-500 mt-1.5 text-sm">System-level information and roles associated with this profile.</p>
-                </div>
-
-                <div class="bg-gray-50/50 rounded-[2rem] border border-gray-100 p-8">
-                    <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 border-b border-gray-200/60 pb-8 mb-8">
-                        <div class="space-y-1">
-                            <p class="text-[0.65rem] font-bold text-gray-400 uppercase tracking-widest">System Staff ID</p>
-                            <p class="text-2xl font-bold text-gray-900">787878</p>
-                        </div>
-                        <span class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-emerald-100/50 text-emerald-700 font-bold text-sm w-max border border-emerald-200/50">
-                            <i data-lucide="check-circle-2" class="w-4 h-4"></i> Verified Staff
-                        </span>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-y-8 gap-x-8">
-                        <div class="space-y-1">
-                            <p class="text-[0.65rem] font-bold text-gray-400 uppercase tracking-widest">Primary Role</p>
-                            <p class="text-gray-900 font-semibold text-[1.05rem]">Teacher / Faculty</p>
-                        </div>
-                        <div class="space-y-1">
-                            <p class="text-[0.65rem] font-bold text-gray-400 uppercase tracking-widest">Department</p>
-                            <p class="text-gray-900 font-semibold text-[1.05rem]">Information Science</p>
-                        </div>
-                        <div class="space-y-1">
-                            <p class="text-[0.65rem] font-bold text-gray-400 uppercase tracking-widest">Account Created</p>
-                            <p class="text-gray-900 font-semibold text-[1.05rem]">March 15, 2024</p>
-                        </div>
-                        <div class="space-y-1">
-                            <p class="text-[0.65rem] font-bold text-gray-400 uppercase tracking-widest">Last Login</p>
-                            <p class="text-gray-900 font-semibold text-[1.05rem]">Today at 09:42 AM</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </main>
+    <!-- Floating Notification Bar -->
+    <div class="floating-notif group" onclick="toggleNotifications()">
+        <div class="relative">
+            <i data-lucide="bell" class="w-6 h-6 text-indigo-400 group-hover:text-indigo-300 transition-colors"></i>
+            <span class="badge pulse-badge"></span>
+        </div>
+        <span class="text-[10px] font-bold tracking-widest text-slate-400 group-hover:text-slate-200 transition-colors" style="writing-mode: vertical-rl; transform: rotate(180deg);">NOTIF</span>
     </div>
 
+    <main class="max-w-7xl mx-auto px-6 py-12 lg:px-12 lg:py-16 min-h-screen flex flex-col gap-10">
+        
+        <!-- Header Section -->
+        <header class="flex flex-col gap-2 relative z-10">
+            <div class="flex items-center gap-3 text-xs font-bold tracking-widest text-slate-500 uppercase">
+                <i data-lucide="building-2" class="w-4 h-4 text-slate-600"></i>
+                <span>Govt. Polytechnic, Beelagi</span>
+                <span class="text-slate-700">&bull;</span>
+                <span class="text-indigo-400/80">Staff Portal</span>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-extrabold text-white tracking-tight mt-1">
+                Staff <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400">Dashboard</span>
+            </h1>
+        </header>
+
+        <!-- Metrics Grid -->
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+            
+            <!-- Metric Card 1 -->
+            <div class="glass-card rounded-2xl p-6 flex items-center gap-6 group">
+                <div class="w-16 h-16 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 group-hover:bg-indigo-500/20 group-hover:scale-110 transition-all duration-300">
+                    <i data-lucide="users" class="w-8 h-8"></i>
+                </div>
+                <div class="flex flex-col">
+                    <h2 class="text-4xl font-extrabold text-white mb-1 tracking-tight">1</h2>
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Staff <span class="mx-1 text-slate-600">&bull;</span> Current Branch</p>
+                </div>
+            </div>
+
+            <!-- Metric Card 2 -->
+            <div class="glass-card rounded-2xl p-6 flex items-center gap-6 group">
+                <div class="w-16 h-16 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:bg-emerald-500/20 group-hover:scale-110 transition-all duration-300">
+                    <i data-lucide="presentation" class="w-8 h-8"></i>
+                </div>
+                <div class="flex flex-col">
+                    <h2 class="text-4xl font-extrabold text-white mb-1 tracking-tight">1</h2>
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Active Teachers</p>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Staff List Section -->
+        <section class="glass-card rounded-2xl overflow-hidden relative z-10 flex flex-col">
+            
+            <!-- Section Header -->
+            <div class="px-6 py-5 border-b border-white/5 bg-white/[0.02] flex items-center gap-3">
+                <i data-lucide="contact" class="w-5 h-5 text-slate-400"></i>
+                <h3 class="text-sm font-bold text-slate-200 tracking-widest uppercase">All Staff</h3>
+                <span class="px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-bold border border-indigo-500/20">1</span>
+            </div>
+
+            <!-- List Container -->
+            <div class="p-4 md:p-6">
+                <!-- Single Staff Item -->
+                <div class="group flex flex-col md:flex-row md:items-center justify-between gap-6 p-4 rounded-xl bg-dark-800/50 border border-transparent hover:border-slate-700/50 hover:bg-dark-700/30 transition-all duration-300">
+                    
+                    <!-- Left: Identity & Details -->
+                    <div class="flex items-center gap-5">
+                        <!-- Avatar -->
+                        <div class="relative">
+                            <div class="w-14 h-14 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 p-[2px]">
+                                <div class="w-full h-full rounded-full bg-dark-900 flex items-center justify-center text-white font-bold text-xl">
+                                    S
+                                </div>
+                            </div>
+                            <!-- Status Indicator -->
+                            <div class="absolute bottom-0 right-0 w-4 h-4 rounded-full bg-emerald-500 border-2 border-dark-900"></div>
+                        </div>
+
+                        <!-- Info -->
+                        <div class="flex flex-col gap-1">
+                            <div class="flex items-center gap-3">
+                                <h4 class="text-lg font-bold text-white group-hover:text-indigo-300 transition-colors">Sowrab ha</h4>
+                                <span class="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
+                                    <i data-lucide="database" class="w-3 h-3"></i>
+                                    Database
+                                </span>
+                            </div>
+                            <p class="text-sm font-medium text-slate-400 flex items-center flex-wrap gap-2">
+                                <span class="text-slate-300 font-mono text-xs bg-white/5 px-1.5 py-0.5 rounded">ID: 787878</span>
+                                <span class="text-slate-600">&bull;</span>
+                                <span>Fundamentals of Computer</span>
+                                <span class="text-slate-600">&bull;</span>
+                                <span>Sem 1</span>
+                                <span class="text-slate-600">&bull;</span>
+                                <span class="text-indigo-200/70">Theory</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Right: Actions & Tags -->
+                    <div class="flex items-center gap-4 pl-14 md:pl-0">
+                        <span class="hidden lg:flex items-center px-3 py-1 rounded-full bg-dark-900 border border-slate-700 text-xs font-semibold text-slate-300 shadow-inner">
+                            INFORMATION SCIENCE
+                        </span>
+                        
+                        <button onclick="viewProfile('Sowrab ha')" class="relative overflow-hidden px-6 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold tracking-wider uppercase transition-all duration-300 shadow-[0_0_20px_rgba(79,70,229,0.3)] hover:shadow-[0_0_25px_rgba(79,70,229,0.5)] active:scale-95 flex items-center gap-2">
+                            <span>View Profile</span>
+                            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+        </section>
+        
+        <!-- Toast Notification Area (Hidden by default, triggered by JS) -->
+        <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3"></div>
+
+    </main>
+
+    <!-- Interactive Scripts -->
     <script>
-        // Initialize Icons
+        // Initialize Lucide Icons
         lucide.createIcons();
 
-        // View/Edit Toggle Logic
-        let isEditing = false;
-        function toggleEditMode() {
-            isEditing = !isEditing;
+        // Simple Toast Notification System for Interactivity
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
             
-            const viewMode = document.getElementById('view-mode');
-            const editMode = document.getElementById('edit-mode');
-            const editBtnText = document.getElementById('edit-btn-text');
-            const editBtnIcon = document.getElementById('edit-btn').querySelector('i');
-            const saveBtn = document.getElementById('save-btn');
-            const editBtn = document.getElementById('edit-btn');
-
-            if (isEditing) {
-                viewMode.classList.add('hidden');
-                editMode.classList.remove('hidden');
-                editBtnText.innerText = 'Cancel';
-                editBtnIcon.setAttribute('data-lucide', 'x');
-                saveBtn.classList.remove('hidden');
-                // Make cancel button look secondary
-                editBtn.classList.add('bg-gray-100', 'border-transparent');
-                editBtn.classList.remove('bg-white', 'border-gray-200');
-            } else {
-                viewMode.classList.remove('hidden');
-                editMode.classList.add('hidden');
-                editBtnText.innerText = 'Edit';
-                editBtnIcon.setAttribute('data-lucide', 'edit-2');
-                saveBtn.classList.add('hidden');
-                // Revert edit button
-                editBtn.classList.remove('bg-gray-100', 'border-transparent');
-                editBtn.classList.add('bg-white', 'border-gray-200');
+            // Setup toast styling based on type
+            let icon = 'info';
+            let colors = 'bg-dark-800 border-indigo-500/30 text-indigo-200';
+            
+            if (type === 'success') {
+                icon = 'check-circle';
+                colors = 'bg-dark-800 border-emerald-500/30 text-emerald-200';
             }
+
+            toast.className = `flex items-center gap-3 px-4 py-3 rounded-lg border shadow-xl transform translate-y-10 opacity-0 transition-all duration-300 ${colors}`;
+            toast.style.backdropFilter = "blur(12px)";
             
-            // Re-render the icons to update the edit/cancel icon
+            toast.innerHTML = `
+                <i data-lucide="${icon}" class="w-5 h-5"></i>
+                <span class="text-sm font-semibold">${message}</span>
+            `;
+
+            container.appendChild(toast);
             lucide.createIcons();
+
+            // Animate in
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-10', 'opacity-0');
+            });
+
+            // Remove after 3 seconds
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
         }
 
-        // Sidebar Tab Logic
-        function switchTab(tabId) {
-            // Hide all content sections
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
+        // Action Handlers
+        function viewProfile(name) {
+            showToast(`Loading profile for ${name}...`, 'success');
+        }
 
-            // Reset all sidebar buttons to inactive styling (Pill shape remains)
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('bg-gray-100/80', 'text-gray-900', 'font-semibold');
-                btn.classList.add('text-gray-500', 'hover:text-gray-800', 'hover:bg-gray-50', 'font-medium');
-            });
-
-            // Show target content
-            document.getElementById(`content-${tabId}`).classList.add('active');
-
-            // Highlight target sidebar button
-            const activeBtn = document.getElementById(`nav-${tabId}`);
-            activeBtn.classList.remove('text-gray-500', 'hover:text-gray-800', 'hover:bg-gray-50', 'font-medium');
-            activeBtn.classList.add('bg-gray-100/80', 'text-gray-900', 'font-semibold');
+        function toggleNotifications() {
+            showToast('You have no new notifications.', 'info');
+            // Remove pulse after checking
+            const badge = document.querySelector('.pulse-badge');
+            if(badge) {
+                badge.classList.remove('pulse-badge');
+                badge.style.backgroundColor = '#64748b'; // change to slate
+                badge.style.boxShadow = 'none';
+            }
         }
     </script>
 </body>
