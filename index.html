@@ -38451,19 +38451,20 @@ Easily access and review students' academic performance here. This section provi
                 </div>
             </div>
 
-            <!-- Step 2: Phone Number with Country Code -->
+            <!-- Step 2: Email & Phone for Verification -->
             <div class="setup-step-item" id="setup-step-2">
                 <svg class="setup-hero-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                 </svg>
-                <h1 class="setup-title-text">Enter Your Phone</h1>
-                <p class="setup-subtitle-text">We'll send a verification code to this number.</p>
+                <h1 class="setup-title-text">Verify Your Phone</h1>
+                <p class="setup-subtitle-text">Enter your email to receive verification code</p>
+                <input type="email" id="setup-email" class="setup-mac-input" placeholder="your.email@example.com" autocomplete="off" style="text-align:center;margin-bottom:12px;">
                 <div style="display:flex;gap:8px;justify-content:center;align-items:center;margin-bottom:16px;width:100%;">
-                    <input type="text" id="setup-country-code" class="setup-mac-input" placeholder="+91" style="width:80px;text-align:center;font-size:16px;" readonly>
+                    <input type="text" id="setup-country-code-2" class="setup-mac-input" placeholder="+91" style="width:80px;text-align:center;font-size:16px;" readonly>
                     <input type="tel" id="setup-phone" class="setup-mac-input" placeholder="9876543210" style="flex:1;text-align:center;font-size:16px;letter-spacing:0.05em;" maxlength="15">
                 </div>
                 <p id="setup-phone-error" style="color:#ff3b30;font-size:13px;margin-top:8px;display:none;"></p>
-                <button onclick="setupSendOTP()" style="margin-top:12px;padding:8px 24px;background:#007aff;color:white;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.2s;" id="setup-send-otp-btn">Send Verification Code</button>
+                <button onclick="setupSendOTP()" style="margin-top:12px;padding:8px 24px;background:#007aff;color:white;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.2s;" id="setup-send-otp-btn">Send Code to Email</button>
             </div>
 
             <!-- Step 3: OTP Verification -->
@@ -38521,6 +38522,7 @@ Easily access and review students' academic performance here. This section provi
         const setupTotalSteps = 6;
         let setupSelectedCountry = 'India';
         let setupOTPSent = false;
+        let setupOTPEmail = '';  // Store email for OTP verification
 
         function setupSelectItem(el) {
             document.querySelectorAll('.setup-mac-list-item').forEach(item => item.classList.remove('selected'));
@@ -38547,7 +38549,7 @@ Easily access and review students' academic performance here. This section provi
             // Show country code when on phone step
             if (setupCurrentStep === 2) {
                 const countryCode = COUNTRY_CODES[setupSelectedCountry] || COUNTRY_CODES['India'];
-                document.getElementById('setup-country-code').value = countryCode;
+                document.getElementById('setup-country-code-2').value = countryCode;
             }
 
             if (setupCurrentStep > 0 && setupCurrentStep < 3) {
@@ -38637,12 +38639,21 @@ Easily access and review students' academic performance here. This section provi
         }
 
         async function setupSendOTP() {
+            const email = document.getElementById('setup-email').value.trim();
             const phone = document.getElementById('setup-phone').value.trim();
             const errorEl = document.getElementById('setup-phone-error');
             const btn = document.getElementById('setup-send-otp-btn');
             
             errorEl.style.display = 'none';
             errorEl.textContent = '';
+            
+            // Validate email
+            const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+            if (!email || !emailRegex.test(email)) {
+                errorEl.textContent = 'Please enter a valid email address';
+                errorEl.style.display = 'block';
+                return;
+            }
             
             if (!phone || phone.length < 7) {
                 errorEl.textContent = 'Please enter a valid phone number';
@@ -38660,6 +38671,7 @@ Easily access and review students' academic performance here. This section provi
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
+                        email: email,
                         phone: phone,
                         countryCode: countryCode
                     })
@@ -38669,6 +38681,7 @@ Easily access and review students' academic performance here. This section provi
                 
                 if (data.success) {
                     setupOTPSent = true;
+                    setupOTPEmail = email; // Store email for verify step
                     btn.textContent = 'Code Sent ✓';
                     btn.style.background = '#34c759';
                     
@@ -38680,7 +38693,7 @@ Easily access and review students' academic performance here. This section provi
                     errorEl.textContent = data.error || 'Failed to send OTP';
                     errorEl.style.display = 'block';
                     btn.disabled = false;
-                    btn.textContent = 'Send Verification Code';
+                    btn.textContent = 'Send Code to Email';
                 }
             } catch (e) {
                 console.error('OTP Send Error:', e);
@@ -38699,7 +38712,6 @@ Easily access and review students' academic performance here. This section provi
         }
 
         async function setupVerifyOTP() {
-            const phone = document.getElementById('setup-phone').value.trim();
             const otp = document.getElementById('setup-otp').value.trim();
             const errorEl = document.getElementById('setup-otp-error');
             
@@ -38713,15 +38725,12 @@ Easily access and review students' academic performance here. This section provi
                 return false;
             }
             
-            const countryCode = COUNTRY_CODES[setupSelectedCountry] || COUNTRY_CODES['India'];
-            
             try {
                 const response = await fetch(`${API_BASE}/verify-otp`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
-                        phone: phone,
-                        countryCode: countryCode,
+                        email: setupOTPEmail,
                         otp: otp
                     })
                 });
@@ -38729,7 +38738,7 @@ Easily access and review students' academic performance here. This section provi
                 const data = await response.json();
                 
                 if (data.success) {
-                    console.log('OTP Verified:', data.verifiedPhone);
+                    console.log('OTP Verified:', data.verifiedEmail, data.verifiedPhone);
                     return true;
                 } else {
                     errorEl.textContent = data.error || 'Invalid OTP';
@@ -38788,6 +38797,7 @@ Easily access and review students' academic performance here. This section provi
             const setupData = {
                 fullName: document.getElementById('setup-fullname').value,
                 accountName: document.getElementById('setup-accountname').value,
+                email: document.getElementById('setup-email').value,
                 phone: document.getElementById('setup-phone').value,
                 setupCompleted: true,
                 setupDate: new Date().toISOString()
@@ -63132,7 +63142,6 @@ function renderAttendance() {
 
                 if (usernameExists) {
                     if (usernameError) {
-                        usernameError.textContent = 'This username already exists';
                         usernameError.style.display = 'block';
                     }
                     return;

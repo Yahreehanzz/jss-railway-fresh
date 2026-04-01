@@ -178,8 +178,11 @@ app.delete('/api/teachers/:id', async (req, res) => {
 });
 
 // ============================================================
-// OTP SYSTEM FOR TEACHER SETUP
 // ============================================================
+// EMAIL OTP SYSTEM FOR TEACHER SETUP
+// ============================================================
+
+const nodemailer = require('nodemailer');
 
 // In-memory OTP storage (expires after 10 minutes)
 const otpStore = {};
@@ -189,13 +192,56 @@ function generateOTP() {
     return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-// Send OTP endpoint
+// Email transporter - Test mode by default
+let transporter = null;
+
+// Initialize email service
+function initEmailService() {
+    const emailService = process.env.EMAIL_SERVICE || 'test'; // 'gmail', 'outlook', or 'test'
+    const emailUser = process.env.EMAIL_USER;
+    const emailPass = process.env.EMAIL_PASSWORD;
+    
+    if (emailService === 'gmail' && emailUser && emailPass) {
+        transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: emailUser,
+                pass: emailPass  // Use Gmail App Password, not your main password
+            }
+        });
+        console.log('✅ Email service configured: Gmail');
+    } else if (emailService === 'outlook' && emailUser && emailPass) {
+        transporter = nodemailer.createTransport({
+            host: 'smtp-mail.outlook.com',
+            port: 587,
+            secure: false,
+            auth: {
+                user: emailUser,
+                pass: emailPass
+            }
+        });
+        console.log('✅ Email service configured: Outlook');
+    } else {
+        console.log('ℹ️ Email service in TEST MODE - OTP will be logged to console');
+        transporter = null;
+    }
+}
+
+initEmailService();
+
+// Send OTP endpoint (via Email)
 app.post('/api/send-otp', async (req, res) => {
     try {
-        const { phone, countryCode } = req.body;
+        const { phone, countryCode, email } = req.body;
         
-        if (!phone || !countryCode) {
-            return res.status(400).json({ success: false, error: 'Phone and country code required' });
+        if (!email || !phone || !countryCode) {
+            return res.status(400).json({ success: false, error: 'Email, phone, and country code required' });
+        }
+
+        // Validate email format
+        const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({ success: false, error: 'Invalid email address' });
         }
 
         // Generate OTP
@@ -203,51 +249,90 @@ app.post('/api/send-otp', async (req, res) => {
         const fullPhone = `${countryCode}${phone}`;
         
         // Store OTP with 10-minute expiration
-        otpStore[fullPhone] = {
+        otpStore[email] = {
             otp,
+            phone: fullPhone,
             createdAt: Date.now(),
             expiresAt: Date.now() + (10 * 60 * 1000), // 10 minutes
             attempts: 0
         };
 
-        console.log(`📱 OTP Generated for ${fullPhone}: ${otp}`);
+        console.log(`📧 OTP Generated for ${email}: ${otp}`);
 
-        // Try to send SMS via Twilio (if credentials available)
-        const twilioSid = process.env.TWILIO_ACCOUNT_SID;
-        const twilioToken = process.env.TWILIO_AUTH_TOKEN;
-        const twilioPhone = process.env.TWILIO_PHONE_NUMBER;
+        // Email content
+        const emailContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; }
+                .container { max-width: 400px; margin: 0 auto; padding: 20px; }
+                .header { text-align: center; margin-bottom: 30px; }
+                .otp-box { 
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    padding: 20px;
+                    border-radius: 8px;
+                    text-align: center;
+                    margin: 20px 0;
+                }
+                .otp-code { font-size: 32px; font-weight: bold; letter-spacing: 4px; }
+                .footer { color: #666; font-size: 12px; text-align: center; margin-top: 30px; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h2>Phone Verification</h2>
+                </div>
+                <p>Hi there,</p>
+                <p>Your verification code for phone number <strong>${fullPhone}</strong> is:</p>
+                <div class="otp-box">
+                    <div class="otp-code">${otp}</div>
+                </div>
+                <p>This code will expire in 10 minutes.</p>
+                <p>If you didn't request this code, please ignore this email.</p>
+                <div class="footer">
+                    <p>JSS Teacher Management System</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        `;
 
-        if (twilioSid && twilioToken && twilioPhone) {
+        // Try to send email if service configured
+        if (transporter) {
             try {
-                const twilio = require('twilio');
-                const client = twilio(twilioSid, twilioToken);
-                
-                await client.messages.create({
-                    body: `Your verification code is: ${otp}. Valid for 10 minutes.`,
-                    from: twilioPhone,
-                    to: fullPhone
+                await transporter.sendMail({
+                    from: process.env.EMAIL_USER,
+                    to: email,
+                    subject: `Your Verification Code: ${otp}`,
+                    html: emailContent
                 });
                 
-                console.log(`✅ SMS sent successfully to ${fullPhone}`);
+                console.log(`✅ Email sent successfully to ${email}`);
                 return res.json({ 
                     success: true, 
-                    message: 'OTP sent via SMS',
-                    phone: `${countryCode}****${phone.slice(-2)}` // Masked for security
+                    message: 'OTP sent via email',
+                    email: email.replace(/(.{2})(.*)(@.*)/, '$1***$3')  // Masked email
                 });
-            } catch (twilioErr) {
-                console.warn('⚠️ Twilio SMS failed:', twilioErr.message);
-                // Fall through to simulation below
+            } catch (emailErr) {
+                console.warn('⚠️ Email send failed:', emailErr.message);
+                // Fall through to test mode below
             }
         }
 
-        // Fallback: OTP stored and ready for verification (for testing)
-        console.log(`ℹ️ OTP stored in memory (Twilio not configured). OTP: ${otp}`);
+        // Test mode: OTP logged to console
+        console.log(`\n${'='.repeat(60)}`);
+        console.log(`TEST MODE: OTP for ${email}`);
+        console.log(`CODE: ${otp}`);
+        console.log(`${'='.repeat(60)}\n`);
+        
         return res.json({ 
             success: true, 
-            message: 'OTP generated and ready for verification',
-            phone: `${countryCode}****${phone.slice(-2)}`,
-            // In development, you can see the OTP in console logs
-            testMode: !twilioSid || !twilioToken || !twilioPhone
+            message: 'OTP sent via email (check logs for test mode)',
+            email: email.replace(/(.{2})(.*)(@.*)/, '$1***$3'),
+            testMode: !transporter
         });
 
     } catch (e) {
@@ -259,29 +344,28 @@ app.post('/api/send-otp', async (req, res) => {
 // Verify OTP endpoint
 app.post('/api/verify-otp', async (req, res) => {
     try {
-        const { phone, countryCode, otp } = req.body;
+        const { email, otp } = req.body;
         
-        if (!phone || !countryCode || !otp) {
-            return res.status(400).json({ success: false, error: 'Phone, country code, and OTP required' });
+        if (!email || !otp) {
+            return res.status(400).json({ success: false, error: 'Email and OTP required' });
         }
 
-        const fullPhone = `${countryCode}${phone}`;
-        const storedData = otpStore[fullPhone];
+        const storedData = otpStore[email];
 
         // Check if OTP exists
         if (!storedData) {
-            return res.status(400).json({ success: false, error: 'No OTP sent for this number' });
+            return res.status(400).json({ success: false, error: 'No OTP sent for this email' });
         }
 
         // Check if OTP has expired
         if (Date.now() > storedData.expiresAt) {
-            delete otpStore[fullPhone];
+            delete otpStore[email];
             return res.status(400).json({ success: false, error: 'OTP expired. Please request a new one.' });
         }
 
         // Limit verification attempts
         if (storedData.attempts >= 5) {
-            delete otpStore[fullPhone];
+            delete otpStore[email];
             return res.status(400).json({ success: false, error: 'Too many attempts. Please request a new OTP.' });
         }
 
@@ -296,14 +380,16 @@ app.post('/api/verify-otp', async (req, res) => {
         }
 
         // OTP verified successfully!
-        delete otpStore[fullPhone];
+        const verifiedPhone = storedData.phone;
+        delete otpStore[email];
         
-        console.log(`✅ OTP verified successfully for ${fullPhone}`);
+        console.log(`✅ OTP verified successfully for ${email} (${verifiedPhone})`);
         
         return res.json({ 
             success: true, 
             message: 'Phone number verified',
-            verifiedPhone: fullPhone,
+            verifiedEmail: email,
+            verifiedPhone: verifiedPhone,
             timestamp: new Date().toISOString()
         });
 
