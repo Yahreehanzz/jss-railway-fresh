@@ -61932,35 +61932,48 @@ function renderAttendance() {
         }
 
         function finalizeAddTeacher(teacher) {
-            showLoader('Saving to database...');
+            showLoader('Testing API connection first...');
             
-            // Only save to Railway database API
-            fetch(`${API_BASE}/teachers`, {
+            // FIRST: Test if API is working at all
+            console.log('🧪 Testing API endpoint...');
+            fetch(`${API_BASE}/teachers-test`, {
                 method: 'POST',
                 headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({
-                    name: teacher.name,
-                    email: teacher.email,
-                    phone: teacher.phone,
-                    subject: teacher.subjects ? teacher.subjects.join(', ') : '',
-                    department: teacher.department,
-                    employee_id: teacher.id,
-                    photo_url: teacher.photo
-                })
+                body: JSON.stringify({ test: 'hello' })
+            }).then(r => r.text()).then(text => {
+                console.log('🧪 Test response:', text.substring(0, 200));
+                
+                // NOW: Try the real insert
+                console.log('💾 Saving teacher to database...');
+                showLoader('Saving to database...');
+                
+                return fetch(`${API_BASE}/teachers`, {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({
+                        name: teacher.name,
+                        email: teacher.email,
+                        phone: teacher.phone,
+                        subject: teacher.subjects ? teacher.subjects.join(', ') : '',
+                        department: teacher.department,
+                        employee_id: teacher.id,
+                        photo_url: teacher.photo
+                    })
+                });
             }).then(r => {
-                console.log('📊 Response status:', r.status);
-                console.log('📊 Response headers:', r.headers.get('content-type'));
+                console.log('📊 Main response status:', r.status);
+                console.log('📊 Content-Type:', r.headers.get('content-type'));
                 return r.text().then(text => {
-                    console.log('📊 Raw response (first 200 chars):', text.substring(0, 200));
+                    console.log('📊 Raw response (first 300 chars):', text.substring(0, 300));
                     try {
                         return JSON.parse(text);
                     } catch (e) {
-                        console.error('❌ Failed to parse JSON:', e.message);
-                        console.error('❌ Response was:', text.substring(0, 500));
-                        throw new Error(`Invalid JSON response: ${text.substring(0, 100)}`);
+                        console.error('❌ JSON parse failed:', e.message);
+                        throw new Error(`Invalid JSON: ${text.substring(0, 100)}`);
                     }
                 });
             }).then(res => {
+                console.log('✅ Parsed response:', JSON.stringify(res).substring(0, 200));
                 if (res.success && res.data && res.data.id) {
                     // Add to memory with database ID
                     teacher.db_id = res.data.id;
@@ -61976,7 +61989,7 @@ function renderAttendance() {
                     showMessageBox('Error', res.error || 'Failed to save teacher');
                 }
             }).catch(err => {
-                console.error('❌ Fetch error:', err);
+                console.error('❌ Full error chain:', err);
                 hideLoader();
                 showMessageBox('Error', 'Failed to save teacher: ' + err.message);
             });
