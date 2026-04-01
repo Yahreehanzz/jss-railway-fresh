@@ -46,8 +46,37 @@ pool.query('SELECT NOW()', (err, res) => {
         console.error('❌ Initial DB connection failed:', err.message); 
     } else { 
         console.log('✅ Connected to Railway PostgreSQL'); 
+        runMigrations();
     }
 });
+
+// Run database migrations
+async function runMigrations() {
+    try {
+        console.log('🔄 Running database migrations...');
+        
+        // Add missing columns to teachers table if they don't exist
+        await pool.query(`
+            ALTER TABLE teachers
+            ADD COLUMN IF NOT EXISTS employee_id VARCHAR(50) UNIQUE;
+        `);
+        
+        await pool.query(`
+            ALTER TABLE teachers
+            ADD COLUMN IF NOT EXISTS photo_url TEXT;
+        `);
+        
+        // Remove UNIQUE constraint from email to allow NULL values
+        await pool.query(`
+            ALTER TABLE teachers
+            DROP CONSTRAINT IF EXISTS teachers_email_key;
+        `);
+        
+        console.log('✅ Database migrations completed successfully');
+    } catch (err) {
+        console.error('⚠️ Migration warning (may have already run):', err.message);
+    }
+}
 
 // 
 // STUDENTS  table: students

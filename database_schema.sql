@@ -27,13 +27,15 @@ CREATE TABLE IF NOT EXISTS students (
 CREATE TABLE IF NOT EXISTS teachers (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) UNIQUE,
+    email VARCHAR(100),
     phone VARCHAR(20),
     subject VARCHAR(100),
     department VARCHAR(50),
     qualification VARCHAR(100),
     experience INTEGER,
     office_hours JSONB,
+    employee_id VARCHAR(50) UNIQUE,
+    photo_url TEXT,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
