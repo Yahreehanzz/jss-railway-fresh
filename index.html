@@ -45750,7 +45750,7 @@ function restoreTeacherZonePhoto() {
                             subjects: t.subject ? t.subject.split(',').map(s => s.trim()) : [],
                             department: t.department,
                             photo: t.photo_url || defaultTeacherAvatar,
-                            branch: selectedBranch
+                            branch: t.branch || selectedBranch || 'Default'
                         }));
                     }
                 } catch(_) {
@@ -61760,7 +61760,7 @@ function renderAttendance() {
                     console.warn('[WARN] No teachers loaded. Teachers are now loaded from database only.');
                 }
                 
-                const filteredByBranchTeachers = teachers.filter(t => t.branch === selectedBranch);
+                const filteredByBranchTeachers = teachers.filter(t => !selectedBranch || t.branch === selectedBranch || t.branch === 'Default');
                 console.log('[DEBUG] Filtered teachers by branch:', filteredByBranchTeachers.length);
 
                 const total = filteredByBranchTeachers.length;
@@ -61816,7 +61816,7 @@ function renderAttendance() {
                 const filterSubject = (filterEl || {value:'all'}).value;
 
                 const filteredTeachers = teachers.filter(t => {
-                    const matchesBranch = t.branch === selectedBranch;
+                    const matchesBranch = !selectedBranch || t.branch === selectedBranch || t.branch === 'Default';
                     const matchesSearch = (t.name || '').toLowerCase().includes(searchTerm) || (t.id || '').toLowerCase().includes(searchTerm);
                     const matchesSubject = filterSubject === 'all' || (t.subjects && t.subjects.includes(filterSubject));
                     return matchesBranch && matchesSearch && matchesSubject;
