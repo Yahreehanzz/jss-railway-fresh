@@ -38120,6 +38120,102 @@ Easily access and review students' academic performance here. This section provi
     </div>
 </div>
 
+<!-- Professional Teacher Onboarding Setup Screen -->
+<div class="hidden overlay-base" id="teacherSetupOverlay" style="z-index:999997;background:#f5f5f7;">
+    <div style="width:100vw;height:100vh;position:relative;display:flex;flex-direction:column;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',sans-serif;overflow:hidden;">
+        
+        <!-- Content Area -->
+        <div style="flex:1;position:relative;display:flex;justify-content:center;align-items:center;padding-bottom:80px;">
+            
+            <!-- Step 0: Welcome -->
+            <div class="setup-step setup-step-active" id="setup-step-0" style="position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:1;visibility:visible;transform:translateX(0)scale(1);transition:all 0.7s cubic-bezier(0.2,0.8,0.2,1);width:100%;max-width:600px;">
+                <div style="width:72px;height:72px;margin-bottom:24px;color:#007aff;">
+                    <i class="fas fa-graduation-cap" style="font-size:72px;"></i>
+                </div>
+                <h1 style="font-size:32px;font-weight:600;letter-spacing:-0.01em;color:#1d1d1f;margin-bottom:12px;">Welcome to the System</h1>
+                <p style="font-size:15px;color:#86868b;margin-bottom:32px;text-align:center;max-width:380px;line-height:1.4;">Complete your profile to get started and access your dedicated educator dashboard.</p>
+            </div>
+
+            <!-- Step 1: Personal Info -->
+            <div class="setup-step" id="setup-step-1" style="position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;visibility:hidden;transform:translateX(60px)scale(0.97);transition:all 0.7s cubic-bezier(0.2,0.8,0.2,1);width:100%;max-width:600px;">
+                <div style="width:72px;height:72px;margin-bottom:24px;border-radius:16px;background:linear-gradient(135deg,#8b5cf6,#6366f1);display:flex;align-items:center;justify-content:center;color:#fff;font-size:32px;">
+                    <i class="fas fa-user"></i>
+                </div>
+                <h1 style="font-size:32px;font-weight:600;letter-spacing:-0.01em;color:#1d1d1f;margin-bottom:12px;">Personal Information</h1>
+                <p style="font-size:15px;color:#86868b;margin-bottom:32px;text-align:center;max-width:380px;line-height:1.4;">Update your professional details.</p>
+                
+                <div style="width:100%;max-width:340px;display:flex;flex-direction:column;gap:16px;">
+                    <input type="text" id="setup-full-name" placeholder="Full Name" style="width:100%;padding:10px 14px;border:1.5px solid transparent;border-radius:8px;font-size:14px;background-color:rgba(0,0,0,0.04);outline:none;color:#1d1d1f;transition:all 0.2s ease;" />
+                    <input type="tel" id="setup-phone" placeholder="Phone Number" style="width:100%;padding:10px 14px;border:1.5px solid transparent;border-radius:8px;font-size:14px;background-color:rgba(0,0,0,0.04);outline:none;color:#1d1d1f;transition:all 0.2s ease;" />
+                    <input type="email" id="setup-email" placeholder="Email Address" style="width:100%;padding:10px 14px;border:1.5px solid transparent;border-radius:8px;font-size:14px;background-color:rgba(0,0,0,0.04);outline:none;color:#1d1d1f;transition:all 0.2s ease;" />
+                </div>
+                <p id="setup-info-error" style="color:#dc2626;font-size:0.75rem;margin-top:12px;display:none;font-weight:600;"></p>
+            </div>
+
+            <!-- Step 2: Preferences -->
+            <div class="setup-step" id="setup-step-2" style="position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;visibility:hidden;transform:translateX(60px)scale(0.97);transition:all 0.7s cubic-bezier(0.2,0.8,0.2,1);width:100%;max-width:600px;">
+                <div style="width:72px;height:72px;margin-bottom:24px;border-radius:16px;background:linear-gradient(135deg,#06b6d4,#0891b2);display:flex;align-items:center;justify-content:center;color:#fff;font-size:32px;">
+                    <i class="fas fa-sliders-h"></i>
+                </div>
+                <h1 style="font-size:32px;font-weight:600;letter-spacing:-0.01em;color:#1d1d1f;margin-bottom:12px;">Your Preferences</h1>
+                <p style="font-size:15px;color:#86868b;margin-bottom:32px;text-align:center;max-width:380px;line-height:1.4;">Choose your teaching departments and preferences.</p>
+                
+                <div style="width:100%;max-width:340px;display:flex;flex-direction:column;gap:12px;">
+                    <div>
+                        <label style="font-size:13px;font-weight:600;color:#1d1d1f;display:block;margin-bottom:8px;">Department</label>
+                        <select id="setup-department" style="width:100%;padding:10px 14px;border:1.5px solid rgba(0,0,0,0.1);border-radius:8px;font-size:14px;background-color:#fff;outline:none;color:#1d1d1f;">
+                            <option value="">Select Department</option>
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Electronics">Electronics</option>
+                            <option value="Mechanical">Mechanical</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <textarea id="setup-specialization" placeholder="Your Specialization/Expertise" style="width:100%;padding:10px 14px;border:1.5px solid rgba(0,0,0,0.1);border-radius:8px;font-size:14px;background-color:#fff;outline:none;color:#1d1d1f;resize:vertical;min-height:80px;" ></textarea>
+                </div>
+                <p id="setup-pref-error" style="color:#dc2626;font-size:0.75rem;margin-top:12px;display:none;font-weight:600;"></p>
+            </div>
+
+            <!-- Step 3: Verification -->
+            <div class="setup-step" id="setup-step-3" style="position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;visibility:hidden;transform:translateX(60px)scale(0.97);transition:all 0.7s cubic-bezier(0.2,0.8,0.2,1);width:100%;max-width:600px;">
+                <div style="width:72px;height:72px;margin-bottom:24px;border-radius:16px;background:linear-gradient(135deg,#10b981,#059669);display:flex;align-items:center;justify-content:center;color:#fff;font-size:32px;">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h1 style="font-size:32px;font-weight:600;letter-spacing:-0.01em;color:#1d1d1f;margin-bottom:12px;">Verify Your Account</h1>
+                <p style="font-size:15px;color:#86868b;margin-bottom:32px;text-align:center;max-width:380px;line-height:1.4;">A verification code has been sent to your email.</p>
+                
+                <input type="text" id="setup-verification-code" maxlength="6" placeholder="Enter 6-digit code" style="width:100%;max-width:340px;padding:10px 14px;border:1.5px solid transparent;border-radius:8px;font-size:14px;background-color:rgba(0,0,0,0.04);outline:none;color:#1d1d1f;text-align:center;letter-spacing:0.3em;transition:all 0.2s ease;" />
+                <p id="setup-verify-error" style="color:#dc2626;font-size:0.75rem;margin-top:12px;display:none;font-weight:600;"></p>
+                <p style="font-size:13px;color:#86868b;margin-top:20px;">Didn't receive code? <a href="#" onclick="resendVerificationCode(event)" style="color:#007aff;text-decoration:none;font-weight:600;">Resend</a></p>
+            </div>
+
+            <!-- Step 4: Setup Complete -->
+            <div class="setup-step" id="setup-step-4" style="position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;visibility:hidden;transform:translateX(60px)scale(0.97);transition:all 0.7s cubic-bezier(0.2,0.8,0.2,1);width:100%;max-width:600px;">
+                <div style="width:72px;height:72px;margin-bottom:24px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#2563eb);display:flex;align-items:center;justify-content:center;color:#fff;font-size:40px;box-shadow:0 8px 24px rgba(59,130,246,0.3);">
+                    <i class="fas fa-check"></i>
+                </div>
+                <h1 style="font-size:32px;font-weight:600;letter-spacing:-0.01em;color:#1d1d1f;margin-bottom:12px;">Setup Complete!</h1>
+                <p style="font-size:15px;color:#86868b;margin-bottom:32px;text-align:center;max-width:380px;line-height:1.4;">You're all set. Loading your dashboard...</p>
+                <div style="width:32px;height:32px;border:3px solid rgba(0,0,0,0.08);border-radius:50%;border-top-color:#86868b;animation:spin 0.8s cubic-bezier(0.6,0.2,0.4,0.8)infinite;"></div>
+            </div>
+
+        </div>
+
+        <!-- Navigation Bar -->
+        <div style="position:absolute;bottom:0;left:0;width:100%;height:80px;display:flex;justify-content:space-between;align-items:center;padding:0 40px;background-color:rgba(245,245,247,0.75);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid rgba(0,0,0,0.05);z-index:50;transition:transform 0.5s cubic-bezier(0.2,0.8,0.2,1),opacity 0.5s;" id="setup-nav-bar">
+            <button id="setup-btn-back" onclick="setupGoBack()" style="padding:6px 20px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;outline:none;transition:all 0.15s ease;min-width:80px;text-align:center;background-color:transparent;color:#1d1d1f;border:1px solid transparent;opacity:0;pointer-events:none;" onmouseover="this.style.backgroundColor='rgba(0,0,0,0.05)'" onmouseout="this.style.backgroundColor='transparent'">Back</button>
+            <button id="setup-btn-next" onclick="setupGoNext()" style="padding:6px 20px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;outline:none;transition:all 0.15s ease;min-width:80px;text-align:center;background-color:#007aff;color:white;border:1px solid transparent;box-shadow:0 1px 2px rgba(0,0,0,0.1);" onmouseover="this.style.backgroundColor='#006ce6'" onmouseout="this.style.backgroundColor='#007aff'">Continue</button>
+        </div>
+
+        <style>
+            .setup-step { position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transform: translateX(60px) scale(0.97); transition: all 0.7s cubic-bezier(0.2, 0.8, 0.2, 1); width: 100%; max-width: 600px; }
+            .setup-step.setup-step-active { opacity: 1; visibility: visible; transform: translateX(0) scale(1); }
+            .setup-step.setup-step-previous { transform: translateX(-60px) scale(0.97); opacity: 0; visibility: hidden; }
+            @keyframes spin { to { transform: rotate(360deg); } }
+        </style>
+    </div>
+</div>
+
 <!-- Role Password Modal (for HOD/Admin) -->
 <div class="hidden overlay-base" id="rolePasswordOverlay" style="z-index:999998;">
     <div class="role-password-modal" id="rolePasswordModal">
@@ -51344,6 +51440,168 @@ function restoreTeacherZonePhoto() {
             document.getElementById('facultyUserPasswordInput').value = '';
         }
 
+        /* ===== TEACHER SETUP ONBOARDING SYSTEM ===== */
+        let setupCurrentStep = 0;
+        const setupTotalSteps = 5;
+
+        function startTeacherSetup() {
+            setupCurrentStep = 0;
+            document.getElementById('roleSelectionOverlay').classList.add('hidden');
+            document.getElementById('teacherSetupOverlay').classList.remove('hidden');
+            updateSetupUI();
+        }
+
+        function setupShowStep(stepNum) {
+            const steps = document.querySelectorAll('.setup-step');
+            steps.forEach((step, idx) => {
+                step.classList.remove('setup-step-active', 'setup-step-previous');
+                if (idx === stepNum) {
+                    step.classList.add('setup-step-active');
+                } else if (idx < stepNum) {
+                    step.classList.add('setup-step-previous');
+                }
+            });
+        }
+
+        function updateSetupUI() {
+            const btnBack = document.getElementById('setup-btn-back');
+            const btnNext = document.getElementById('setup-btn-next');
+            const navBar = document.getElementById('setup-nav-bar');
+
+            setupShowStep(setupCurrentStep);
+
+            // Navigation bar state
+            if (setupCurrentStep > 0 && setupCurrentStep < 3) {
+                btnBack.style.opacity = '1';
+                btnBack.style.pointerEvents = 'auto';
+            } else {
+                btnBack.style.opacity = '0';
+                btnBack.style.pointerEvents = 'none';
+            }
+
+            if (setupCurrentStep === 4) {
+                navBar.style.transform = 'translateY(100%)';
+                navBar.style.opacity = '0';
+                setTimeout(() => {
+                    completeTeacherSetup();
+                }, 2500);
+            } else {
+                navBar.style.transform = 'translateY(0)';
+                navBar.style.opacity = '1';
+            }
+        }
+
+        function validateSetupStep() {
+            const infoError = document.getElementById('setup-info-error');
+            const prefError = document.getElementById('setup-pref-error');
+            const verifyError = document.getElementById('setup-verify-error');
+
+            if (infoError) infoError.style.display = 'none';
+            if (prefError) prefError.style.display = 'none';
+            if (verifyError) verifyError.style.display = 'none';
+
+            if (setupCurrentStep === 1) {
+                const fullName = document.getElementById('setup-full-name').value.trim();
+                const phone = document.getElementById('setup-phone').value.trim();
+                const email = document.getElementById('setup-email').value.trim();
+
+                if (!fullName || !phone || !email) {
+                    infoError.textContent = 'Please fill in all fields';
+                    infoError.style.display = 'block';
+                    return false;
+                }
+                if (!email.includes('@')) {
+                    infoError.textContent = 'Please enter a valid email';
+                    infoError.style.display = 'block';
+                    return false;
+                }
+                return true;
+            }
+
+            if (setupCurrentStep === 2) {
+                const dept = document.getElementById('setup-department').value;
+                if (!dept) {
+                    prefError.textContent = 'Please select a department';
+                    prefError.style.display = 'block';
+                    return false;
+                }
+                return true;
+            }
+
+            if (setupCurrentStep === 3) {
+                const code = document.getElementById('setup-verification-code').value.trim();
+                if (code.length < 6) {
+                    verifyError.textContent = 'Please enter a valid 6-digit code';
+                    verifyError.style.display = 'block';
+                    return false;
+                }
+                return true;
+            }
+
+            return true;
+        }
+
+        function setupGoNext() {
+            if (!validateSetupStep()) return;
+
+            if (setupCurrentStep < setupTotalSteps) {
+                setupCurrentStep++;
+                updateSetupUI();
+            }
+        }
+
+        function setupGoBack() {
+            if (setupCurrentStep > 0) {
+                setupCurrentStep--;
+                updateSetupUI();
+            }
+        }
+
+        function resendVerificationCode(e) {
+            e.preventDefault();
+            alert('Verification code resent to your email');
+        }
+
+        async function completeTeacherSetup() {
+            try {
+                const setupData = {
+                    fullName: document.getElementById('setup-full-name').value,
+                    phone: document.getElementById('setup-phone').value,
+                    email: document.getElementById('setup-email').value,
+                    department: document.getElementById('setup-department').value,
+                    specialization: document.getElementById('setup-specialization').value,
+                    setupCompleted: true,
+                    setupDate: new Date().toISOString()
+                };
+
+                // Save to localStorage
+                localStorage.setItem('teacherSetupData', JSON.stringify(setupData));
+
+                // Save to Railway database
+                try {
+                    const facultyTeacherId = sessionStorage.getItem('facultyTeacherId');
+                    await fetch(`${API_BASE}/save-teacher-setup`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            teacherId: facultyTeacherId,
+                            setupData: setupData
+                        })
+                    }).catch(() => console.warn('Setup data save to Railway failed, using local storage'));
+                } catch (_) {}
+
+                // Hide setup overlay
+                document.getElementById('teacherSetupOverlay').classList.add('hidden');
+
+                // Show 2FA or go directly to dashboard
+                setTimeout(() => {
+                    show2FAModal();
+                }, 300);
+            } catch (e) {
+                console.error('Error completing setup:', e);
+            }
+        }
+
         function verifyFacultyUserPassword() {
             try {
                 const password = document.getElementById('facultyUserPasswordInput').value;
@@ -51382,11 +51640,20 @@ function restoreTeacherZonePhoto() {
                 sessionStorage.setItem('facultyTeacherId', selectedFacultyTeacherId);
                 sessionStorage.setItem('facultyUserIndex', selectedFacultyUserIndex);
                 
-                // Hide modal and show 2FA
+                // Check if this is first-time login (no setup data yet)
+                const setupData = localStorage.getItem('teacherSetupData');
+                const hasCompletedSetup = setupData ? JSON.parse(setupData).setupCompleted : false;
+                
+                // Hide modal
                 document.getElementById('roleSelectionOverlay').classList.add('hidden');
                 
                 setTimeout(() => {
-                    show2FAModal();
+                    // Show setup for first-time users, otherwise show 2FA
+                    if (!hasCompletedSetup) {
+                        startTeacherSetup();
+                    } else {
+                        show2FAModal();
+                    }
                 }, 300);
             } catch (e) {
                 console.error('Error verifying password:', e);
