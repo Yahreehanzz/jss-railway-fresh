@@ -34,6 +34,33 @@ app.get('/health', (req, res) => {
     res.json({ status: 'ok', message: 'Server is running' });
 });
 
+// Database diagnostic endpoint
+app.get('/api/db-check', (req, res) => {
+    pool.query(`
+        SELECT column_name, data_type, is_nullable
+        FROM information_schema.columns
+        WHERE table_name='teachers'
+        ORDER BY ordinal_position;
+    `, (err, result) => {
+        if (err) {
+            return res.json({ success: false, error: err.message });
+        }
+        const columns = result.rows.map(r => ({
+            name: r.column_name,
+            type: r.data_type,
+            nullable: r.is_nullable
+        }));
+        const hasEmployeeId = columns.some(c => c.name === 'employee_id');
+        const hasPhotoUrl = columns.some(c => c.name === 'photo_url');
+        res.json({ 
+            success: true, 
+            database_ready: hasEmployeeId && hasPhotoUrl,
+            columns: columns,
+            message: hasEmployeeId && hasPhotoUrl ? '✅ Database ready for teachers' : '⏳ Waiting for migrations to complete'
+        });
+    });
+});
+
 //  Database 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
