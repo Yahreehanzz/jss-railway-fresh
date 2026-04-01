@@ -61954,43 +61954,53 @@ function renderAttendance() {
             
             fetch(`${API_BASE}/teachers`, {
                 method: 'POST',
-                headers: {'Content-Type':'application/json'},
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
                 body: JSON.stringify(payload)
             })
             .then(r => {
-                console.log('📥 Got response, status:', r.status);
+                console.log('📥 Response received');
+                console.log('   Status:', r.status, r.statusText);
+                console.log('   Headers:', {
+                    'content-type': r.headers.get("content-type"),
+                    'content-length': r.headers.get("content-length")
+                });
+                
                 const contentType = r.headers.get("content-type");
-                console.log('📝 Content-Type:', contentType);
                 
                 if (!contentType || !contentType.includes("application/json")) {
+                    console.warn('⚠️  Content-Type is not JSON:', contentType);
                     return r.text().then(text => {
-                        console.error('❌ Response is not JSON! Got:', text.substring(0, 200));
-                        throw new Error('Server returned non-JSON response: ' + text.substring(0, 100));
+                        console.error('❌ Non-JSON Response Body:', text.substring(0, 500));
+                        throw new Error(`Server returned ${r.status} with ${contentType || 'no'} content-type. Response: ${text.substring(0, 100)}`);
                     });
                 }
                 return r.json();
             })
             .then(res => {
-                console.log('✅ Parsed response:', res);
+                console.log('✅✅ Parsed JSON Response:', res);
                 if (res.success && res.data && res.data.id) {
                     teacher.db_id = res.data.id;
                     teachers.push(teacher);
                     hideLoader();
-                    showMessageBox('Success', 'Teacher saved successfully! ✓');
+                    showMessageBox('Success', `✅ Teacher "${teacher.name}" saved to database!`, 'success');
                     document.getElementById("addTeacher").querySelectorAll('input:not([type="file"])').forEach(input => input.value = '');
                     document.getElementById("addTeacherPhoto").value = '';
                     document.getElementById("addTeacherPreviewPhoto").classList.add('hidden');
-                    renderTeacherDashboard();
+                    setTimeout(() => renderTeacherDashboard(), 500);
                 } else {
                     hideLoader();
-                    console.error('Server error response:', res);
-                    showMessageBox('Error', res.error || 'Failed to save teacher');
+                    console.error('Response was JSON but success=false:', res);
+                    showMessageBox('Error', res.error || 'Failed to save teacher to database', 'error');
                 }
             })
             .catch(err => {
                 hideLoader();
-                console.error('🚨 Teacher save error:', err);
-                showMessageBox('Error', 'Save failed: ' + err.message);
+                console.error('🚨🚨 Fetch Error:', err.message);
+                console.error('Full error:', err);
+                showMessageBox('Error', 'Save failed: ' + err.message, 'error');
             });
         }
 

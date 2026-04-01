@@ -8,8 +8,16 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // MIDDLEWARE
-app.use(cors());
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    credentials: false
+}));
 app.use(express.json({ limit: '50mb' }));
+app.use((req, res, next) => {
+    res.setHeader('Content-Type', 'application/json');
+    next();
+});
 
 // DATABASE
 const pool = new Pool({
@@ -82,27 +90,28 @@ process.on('unhandledRejection', (reason, promise) => {
 // ============================================================
 
 app.get('/health', (req, res) => {
-    res.setHeader('Content-Type', 'application/json');
-    return res.json({ ok: true });
+    return res.json({ ok: true, timestamp: new Date().toISOString() });
+});
+
+app.get('/api/health', (req, res) => {
+    return res.json({ status: 'ok', message: 'API is running', timestamp: new Date().toISOString() });
 });
 
 app.get('/api/teachers', async (req, res) => {
-    res.setHeader('Content-Type', 'application/json');
     try {
         const result = await pool.query('SELECT * FROM teachers ORDER BY name');
-        return res.json({ success: true, data: result.rows });
+        return res.json({ success: true, data: result.rows, count: result.rows.length });
     } catch (e) {
         console.error('GET /api/teachers error:', e.message);
-        return res.json({ success: false, error: e.message });
+        return res.status(500).json({ success: false, error: e.message });
     }
 });
 
 app.post('/api/teachers', async (req, res) => {
-    res.setHeader('Content-Type', 'application/json');
     try {
         const { name, email, phone, subject, department, employee_id, photo_url, designation, gender, date_of_joining, qualification, experience } = req.body;
         
-        console.log('POST /api/teachers received:', { name, employee_id, designation, gender, date_of_joining });
+        console.log('📝 POST /api/teachers received:', { name, employee_id, designation });
         
         if (!name || !employee_id) {
             return res.status(400).json({ success: false, error: 'Name and employee_id are required' });
@@ -116,26 +125,37 @@ app.post('/api/teachers', async (req, res) => {
         `;
         
         const values = [
-            name.trim(),
-            email || null,
-            phone || null,
-            subject || null,
-            department || null,
-            employee_id.trim(),
-            photo_url || null,
-            designation || null,
-            gender || null,
-            date_of_joining || null,
-            qualification || null,
-            experience || null
+            String(name).trim(),
+            email ? String(email).trim() : null,
+            phone ? String(phone).trim() : null,
+            subject ? String(subject).trim() : null,
+            department ? String(department).trim() : null,
+            String(employee_id).trim(),
+            photo_url ? String(photo_url).trim() : null,
+            designation ? String(designation).trim() : null,
+            gender ? String(gender).trim() : null,
+            date_of_joining ? String(date_of_joining).trim() : null,
+            qualification ? String(qualification).trim() : null,
+            experience !== null && experience !== undefined ? parseInt(experience) : null
         ];
         
+        console.log('🔄 Executing INSERT query...');
         const result = await pool.query(insertQuery, values);
-        console.log('✅ Teacher saved successfully, ID:', result.rows[0].id);
-        return res.status(201).json({ success: true, data: result.rows[0] });
+        console.log('✅ Teacher saved! ID:', result.rows[0].id);
+        
+        return res.status(201).json({ 
+            success: true, 
+            data: result.rows[0],
+            message: 'Teacher saved successfully'
+        });
     } catch (e) {
-        console.error('❌ POST /api/teachers error:', e.message, e.stack);
-        return res.status(500).json({ success: false, error: e.message });
+        console.error('❌ POST /api/teachers ERROR:', e.message);
+        console.error('Stack:', e.stack);
+        return res.status(500).json({ 
+            success: false, 
+            error: e.message,
+            code: e.code 
+        });
     }
 });
 
