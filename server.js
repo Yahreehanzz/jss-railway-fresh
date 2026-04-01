@@ -32,6 +32,12 @@ pool.query(`
     );
 `).catch(err => console.error('DB Error:', err));
 
+// Add missing columns
+pool.query(`ALTER TABLE teachers ADD COLUMN IF NOT EXISTS qualification VARCHAR(100);`).catch(err => {});
+pool.query(`ALTER TABLE teachers ADD COLUMN IF NOT EXISTS experience INTEGER;`).catch(err => {});
+pool.query(`ALTER TABLE teachers ADD COLUMN IF NOT EXISTS office_hours JSONB;`).catch(err => {});
+pool.query(`ALTER TABLE teachers ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW();`).catch(err => {});
+
 // ============================================================
 // API ENDPOINTS - THESE ARE THE ONLY ROUTES BEFORE FILES
 // ============================================================
