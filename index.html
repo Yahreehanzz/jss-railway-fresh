@@ -61932,18 +61932,20 @@ function renderAttendance() {
         }
 
         function finalizeAddTeacher(teacher) {
-            showLoader('Testing API connection first...');
+            showLoader('Testing API connection...');
             
-            // FIRST: Test if API is working at all
-            console.log('🧪 Testing API endpoint...');
-            fetch(`${API_BASE}/teachers-test`, {
-                method: 'POST',
-                headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({ test: 'hello' })
-            }).then(r => r.text()).then(text => {
-                console.log('🧪 Test response:', text.substring(0, 200));
+            // FIRST: Test ultra-simple endpoint
+            console.log('🧪 Testing /api/test-simple endpoint...');
+            fetch(`${API_BASE}/test-simple`, {
+                method: 'GET',
+                headers: {'Content-Type':'application/json'}
+            }).then(r => {
+                console.log('✅ Simple test status:', r.status);
+                return r.json();
+            }).then(res => {
+                console.log('✅ Simple test response:', res);
                 
-                // NOW: Try the real insert
+                // NOW: Test teachers endpoint
                 console.log('💾 Saving teacher to database...');
                 showLoader('Saving to database...');
                 
@@ -61961,10 +61963,9 @@ function renderAttendance() {
                     })
                 });
             }).then(r => {
-                console.log('📊 Main response status:', r.status);
-                console.log('📊 Content-Type:', r.headers.get('content-type'));
+                console.log('📊 Teachers POST status:', r.status);
                 return r.text().then(text => {
-                    console.log('📊 Raw response (first 300 chars):', text.substring(0, 300));
+                    console.log('📊 Teachers response (first 200 chars):', text.substring(0, 200));
                     try {
                         return JSON.parse(text);
                     } catch (e) {
@@ -61989,7 +61990,7 @@ function renderAttendance() {
                     showMessageBox('Error', res.error || 'Failed to save teacher');
                 }
             }).catch(err => {
-                console.error('❌ Full error chain:', err);
+                console.error('❌ Full error:', err);
                 hideLoader();
                 showMessageBox('Error', 'Failed to save teacher: ' + err.message);
             });
