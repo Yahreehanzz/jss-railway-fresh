@@ -51,31 +51,55 @@ pool.query('SELECT NOW()', (err, res) => {
 });
 
 // Run database migrations
-async function runMigrations() {
-    try {
-        console.log('🔄 Running database migrations...');
-        
-        // Add missing columns to teachers table if they don't exist
-        await pool.query(`
-            ALTER TABLE teachers
-            ADD COLUMN IF NOT EXISTS employee_id VARCHAR(50) UNIQUE;
-        `);
-        
-        await pool.query(`
-            ALTER TABLE teachers
-            ADD COLUMN IF NOT EXISTS photo_url TEXT;
-        `);
-        
-        // Remove UNIQUE constraint from email to allow NULL values
-        await pool.query(`
-            ALTER TABLE teachers
-            DROP CONSTRAINT IF EXISTS teachers_email_key;
-        `);
-        
-        console.log('✅ Database migrations completed successfully');
-    } catch (err) {
-        console.error('⚠️ Migration warning (may have already run):', err.message);
-    }
+function runMigrations() {
+    console.log('🔄 Running database migrations...');
+    
+    // Step 1: Add employee_id column
+    pool.query(`ALTER TABLE teachers ADD COLUMN IF NOT EXISTS employee_id VARCHAR(50) UNIQUE;`, (err) => {
+        if (err && err.message.includes('already exists')) {
+            console.log('ℹ️ employee_id column already exists');
+        } else if (err) {
+            console.error('❌ Error adding employee_id column:', err.message);
+        } else {
+            console.log('✅ Added employee_id column');
+        }
+    });
+    
+    // Step 2: Add photo_url column
+    pool.query(`ALTER TABLE teachers ADD COLUMN IF NOT EXISTS photo_url TEXT;`, (err) => {
+        if (err && err.message.includes('already exists')) {
+            console.log('ℹ️ photo_url column already exists');
+        } else if (err) {
+            console.error('❌ Error adding photo_url column:', err.message);
+        } else {
+            console.log('✅ Added photo_url column');
+        }
+    });
+    
+    // Step 3: Remove UNIQUE constraint from email
+    pool.query(`ALTER TABLE teachers DROP CONSTRAINT IF EXISTS teachers_email_key;`, (err) => {
+        if (err && err.message.includes('does not exist')) {
+            console.log('ℹ️ teachers_email_key constraint already removed');
+        } else if (err) {
+            console.error('❌ Error removing email constraint:', err.message);
+        } else {
+            console.log('✅ Removed UNIQUE constraint from email');
+        }
+    });
+    
+    // Step 4: Verify table structure
+    setTimeout(() => {
+        pool.query(`SELECT column_name, data_type FROM information_schema.columns WHERE table_name='teachers' ORDER BY ordinal_position;`, (err, result) => {
+            if (err) {
+                console.error('❌ Error checking table structure:', err.message);
+            } else {
+                console.log('✅ Teachers table structure:');
+                result.rows.forEach(row => {
+                    console.log(`  - ${row.column_name}: ${row.data_type}`);
+                });
+            }
+        });
+    }, 1000);
 }
 
 // 
@@ -239,14 +263,22 @@ app.get('/api/teachers', async (req, res) => {
 app.post('/api/teachers', async (req, res) => {
     try {
         const { name, email, phone, subject, department, employee_id, photo_url } = req.body;
+        
+        // Validate required fields
+        if (!name || !employee_id) {
+            return res.status(400).json({ success: false, error: 'Name and employee_id are required' });
+        }
+        
         const r = await pool.query(
             `INSERT INTO teachers (name, email, phone, subject, department, employee_id, photo_url)
              VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
-            [name, email||null, phone||null, subject||null, department||null, employee_id||null, photo_url||null]
+            [name, email||null, phone||null, subject||null, department||null, employee_id, photo_url||null]
         );
         res.json({ success: true, data: r.rows[0] });
     } catch (e) {
-        if (e.code === '23505') return res.status(409).json({ success: false, error: 'Employee ID exists' });
+        console.error('❌ Error adding teacher:', e.message, e.code);
+        if (e.code === '23505') return res.status(409).json({ success: false, error: 'Employee ID or email already exists' });
+        if (e.code === '42703') return res.status(400).json({ success: false, error: 'Database column not found. Migrations may not have completed. Try refreshing the page.' });
         res.status(500).json({ success: false, error: e.message });
     }
 });
@@ -835,6 +867,15 @@ app.use((req, res) => {
             console.error('[ERROR] Failed to serve index.html:', err.code);
             res.status(500).send('Server error');
         }
+    });
+});
+
+// Global error handler - ensure JSON errors
+app.use((err, req, res, next) => {
+    console.error('❌ Unhandled error:', err.message);
+    res.status(err.status || 500).json({ 
+        success: false, 
+        error: err.message || 'Internal server error'
     });
 });
 
