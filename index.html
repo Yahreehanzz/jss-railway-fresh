@@ -45636,7 +45636,20 @@ function restoreTeacherZonePhoto() {
                     try {
                         const tr = await fetch(`${API_BASE}/teachers`);
                         const tj = await tr.json();
-                        if (tj.success && tj.data.length > 0) { teachers = tj.data; localStorage.setItem('teachers', JSON.stringify(teachers)); }
+                        if (tj.success && tj.data.length > 0) { 
+                            teachers = tj.data.map(t => ({
+                                db_id: t.id,
+                                id: t.employee_id || t.id,
+                                name: t.name,
+                                email: t.email,
+                                phone: t.phone,
+                                subjects: t.subject ? t.subject.split(',').map(s => s.trim()) : [],
+                                department: t.department,
+                                photo: t.photo_url || defaultTeacherAvatar,
+                                branch: selectedBranch
+                            }));
+                            localStorage.setItem('teachers', JSON.stringify(teachers)); 
+                        }
                     } catch(_) {}
                 }
 
@@ -61892,7 +61905,35 @@ function renderAttendance() {
         function finalizeAddTeacher(teacher) {
             teachers.push(teacher);
             localStorage.setItem("teachers", JSON.stringify(teachers));
-            syncSettingToRailway('teachers_data', teachers);
+            
+            // Save to Railway database via API
+            if (apiConnected) {
+                fetch(`${API_BASE}/teachers`, {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({
+                        name: teacher.name,
+                        email: teacher.email,
+                        phone: teacher.phone,
+                        subject: teacher.subjects ? teacher.subjects.join(', ') : '',
+                        department: teacher.department,
+                        employee_id: teacher.id,
+                        photo_url: teacher.photo
+                    })
+                }).then(r => r.json()).then(res => {
+                    if (res.success && res.data && res.data.id) {
+                        // Store the database ID for future updates/deletes
+                        teacher.db_id = res.data.id;
+                        localStorage.setItem("teachers", JSON.stringify(teachers));
+                    } else if (res.success) {
+                        console.log('Teacher saved to database');
+                    } else {
+                        console.error('Failed to save teacher to database:', res.error);
+                    }
+                }).catch(err => {
+                    console.error('API error saving teacher:', err);
+                });
+            }
             
             hideLoader();
             showMessageBox('Success', "Teacher Added!");
@@ -62600,14 +62641,29 @@ function renderAttendance() {
                 };
                 reader.readAsDataURL(photoFile);
             } else {
-                updatedTeacher.photo = document.getElementById("editTeacherPreviewPhoto").src; /* Retain existing photo if no new one */
+                updatedTeacher.photo = document.getElementById("editTeacherPreviewPhoto").src;
                 finalizeUpdateTeacher();
             }
 
             function finalizeUpdateTeacher() {
                 teachers[index] = updatedTeacher;
                 localStorage.setItem("teachers", JSON.stringify(teachers));
-                syncSettingToRailway('teachers_data', teachers);
+                
+                // Sync to Railway database via API
+                if (apiConnected && updatedTeacher.db_id) {
+                    fetch(`${API_BASE}/teachers/${updatedTeacher.db_id}`, {
+                        method: 'PUT',
+                        headers: {'Content-Type':'application/json'},
+                        body: JSON.stringify({
+                            name: updatedTeacher.name,
+                            email: updatedTeacher.email,
+                            phone: updatedTeacher.phone,
+                            subject: updatedTeacher.subjects ? updatedTeacher.subjects.join(', ') : '',
+                            photo_url: updatedTeacher.photo
+                        })
+                    }).catch(err => console.error('API error updating teacher:', err));
+                }
+                
                 hideLoader();
                 showMessageBox('Success', "Teacher details updated successfully!");
                 closeEditTeacherForm();
@@ -62619,14 +62675,23 @@ function renderAttendance() {
 
         function deleteTeacherFromProfile() {
             showLoader('Deleting teacher...');
+            const teacherToDelete = teachers.find(t => t.id === activeTeacherId && t.branch === selectedBranch);
             teachers = teachers.filter(t => !(t.id === activeTeacherId && t.branch === selectedBranch));
             localStorage.setItem("teachers", JSON.stringify(teachers));
-            syncSettingToRailway('teachers_data', teachers);
+            
+            // Sync to Railway database via API
+            if (apiConnected && teacherToDelete && teacherToDelete.db_id) {
+                fetch(`${API_BASE}/teachers/${teacherToDelete.db_id}`, {
+                    method: 'DELETE',
+                    headers: {'Content-Type':'application/json'}
+                }).catch(err => console.error('API error deleting teacher:', err));
+            }
             
             hideLoader();
             showMessageBox('Success', "Teacher deleted successfully!");
             closeTeacherProfile();
-            showSection('teacherZone', document.querySelector('#teacherNav a')); switchTeacherTab('dashboard');
+            showSection('teacherZone', document.querySelector('#teacherNav a')); 
+            switchTeacherTab('dashboard');
         }
 
         /* --- Student Data Overview Functions (NEW) --- */
