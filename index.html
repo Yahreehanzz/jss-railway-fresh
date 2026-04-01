@@ -41170,57 +41170,100 @@ function restoreTeacherZonePhoto() {
         </div>
     </div>
 
-  <!-- DASHBOARD panel -->
-  <div class="tc-panel" id="tcp-dashboard">
-    <div class="tcd-layout">
-      <!-- HERO HEADER -->
-      <div class="tcd-hero">
-        <div class="tcd-grid-overlay"></div>
-        <div class="tcd-hero-top">
-          <div>
-            <div class="tcd-eyebrow">GOVT. POLYTECHNIC, BEELAGI &nbsp;?&nbsp; STAFF PORTAL</div>
-            <h1 class="tcd-h1">Staff <span>Dashboard</span></h1>
-          </div>
-          <div class="tcd-search-bar" style="display:none;">
-            <i class="fas fa-search"></i>
-            <input id="teacherSearch" onkeyup="renderTeacherList()" placeholder="Search by name, ID, subject?"/>
-            <select id="teacherFilterSubject" style="display:none;" onchange="renderTeacherList()"><option value="all">All Depts</option></select>
-            <button onclick="switchTeacherTab('add')" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;color:#fff;padding:9px 18px;border-radius:10px;font-size:11px;font-weight:700;letter-spacing:1.5px;cursor:pointer;white-space:nowrap;"><i class="fas fa-user-plus"></i> ADD</button>
-          </div>
-        </div>
-        <!-- STAT CARDS -->
-        <!-- Hidden elements to preserve JS compatibility -->
-        <span id="csTeachersCount" style="display:none">0</span>
-        <span id="ecTeachersCount" style="display:none">0</span>
-        <span id="meTeachersCount" style="display:none">0</span>
-        <div style="display:flex;gap:16px;position:relative;z-index:1;">
-          <div class="tcd-stat" style="flex:1;">
-            <div class="tcd-stat-icon all"><i class="fas fa-users"></i></div>
-            <div class="tcd-stat-info">
-              <div class="tcd-stat-num" id="totalTeachersCount">0</div>
-              <div class="tcd-stat-label">Total Staff ? Current Branch</div>
-            </div>
-          </div>
-          <span id="tcBranchDeptCount" style="display:none">0</span>
-          <span id="tcBranchDeptLabel" style="display:none"></span>
-          <div class="tcd-stat" style="flex:1;">
-            <div class="tcd-stat-icon" style="background:rgba(20,184,166,0.2);color:#5eead4;box-shadow:0 0 20px rgba(20,184,166,0.2);"><i class="fas fa-chalkboard-teacher"></i></div>
-            <div class="tcd-stat-info">
-              <div class="tcd-stat-num" id="tcHODCount">0</div>
-              <div class="tcd-stat-label">Teachers</div>
-            </div>
-          </div>
-        </div>
+  <!-- DASHBOARD panel - PREMIUM UI -->
+  <div class="tc-panel" id="tcp-dashboard" style="background:#070B14;position:relative;overflow:hidden;">
+    <!-- Ambient Background Elements -->
+    <div style="position:fixed;top:0;left:0;width:100vw;height:100vh;background-size:50px 50px;background-image:linear-gradient(to right,rgba(255,255,255,0.02) 1px,transparent 1px),linear-gradient(to bottom,rgba(255,255,255,0.02) 1px,transparent 1px);mask-image:radial-gradient(ellipse at top,black 20%,transparent 70%);z-index:-1;pointer-events:none;"></div>
+    <div style="position:fixed;top:-10%;left:-10%;width:500px;height:500px;background:radial-gradient(circle,rgba(99,102,241,0.15) 0%,transparent 70%);z-index:-1;pointer-events:none;"></div>
+    <div style="position:fixed;top:20%;right:-10%;width:600px;height:600px;background:radial-gradient(circle,rgba(16,185,129,0.1) 0%,transparent 70%);z-index:-1;pointer-events:none;"></div>
+
+    <!-- Floating Notification Bar -->
+    <div style="position:fixed;right:0;top:50%;transform:translateY(-50%);background:rgba(15,22,41,0.8);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.08);border-right:none;padding:1rem 0.75rem;border-radius:16px 0 0 16px;display:flex;flex-direction:column;align-items:center;gap:0.5rem;cursor:pointer;transition:all 0.3s ease;box-shadow:-4px 0 20px rgba(0,0,0,0.3);z-index:50;" onclick="toggleNotifications()">
+      <div style="position:relative;">
+        <i class="fas fa-bell" style="font-size:1.5rem;color:#818cf8;"></i>
+        <span style="position:absolute;top:8px;right:8px;width:8px;height:8px;background-color:#ef4444;border-radius:50%;box-shadow:0 0 10px #ef4444;animation:pulse-red 2s infinite;"></span>
       </div>
-      <!-- BODY -->
-      <div class="tcd-body">
-        <!-- Staff list -->
-        <div class="tcd-glass-card" style="display:flex;flex-direction:column;">
-          <div class="tcd-card-title"><i class="fas fa-id-badge"></i> All Staff &nbsp;<span id="tcStaffCountBadge" style="background:rgba(99,102,241,0.3);color:#a5b4fc;border-radius:99px;padding:2px 10px;font-size:10px;letter-spacing:1px;">0</span></div>
-          <ul class="tcd-teacher-list" id="teacherList"></ul>
-        </div>
-      </div>
+      <span style="font-size:10px;font-weight:bold;letter-spacing:1px;color:#94a3b8;writing-mode:vertical-rl;transform:rotate(180deg);">NOTIF</span>
     </div>
+
+    <!-- Main Content -->
+    <main style="max-width:100%;margin:0;padding:48px 24px;min-height:100vh;display:flex;flex-direction:column;gap:40px;position:relative;z-index:10;">
+    
+      <!-- Header Section -->
+      <header style="display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;align-items:center;gap:12px;font-size:12px;font-weight:bold;letter-spacing:1px;color:#64748b;text-transform:uppercase;">
+          <i class="fas fa-building" style="font-size:14px;color:#475569;"></i>
+          <span>Govt. Polytechnic, Beelagi</span>
+          <span style="color:#334155;">&bull;</span>
+          <span style="color:#818cf8;">Staff Portal</span>
+        </div>
+        <h1 style="font-size:48px;font-weight:900;color:#fff;letter-spacing:-1px;margin:8px 0 0 0;">
+          Staff <span style="background:linear-gradient(to right,#34d399,#22d3ee,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Dashboard</span>
+        </h1>
+      </header>
+
+      <!-- Metrics Grid -->
+      <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;position:relative;z-index:10;">
+        
+        <!-- Metric Card 1 -->
+        <div style="background:rgba(15,22,41,0.6);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.05);box-shadow:0 4px 30px rgba(0,0,0,0.1);border-radius:16px;padding:24px;display:flex;align-items:center;gap:24px;transition:all 0.3s ease;cursor:pointer;" onmouseover="this.style.transform='translateY(-4px)';this.style.borderColor='rgba(255,255,255,0.1)';this.style.boxShadow='0 20px 40px rgba(0,0,0,0.4)'" onmouseout="this.style.transform='';this.style.borderColor='rgba(255,255,255,0.05)';this.style.boxShadow='0 4px 30px rgba(0,0,0,0.1)'">
+          <div style="width:64px;height:64px;border-radius:12px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.2);display:flex;align-items:center;justify-content:center;color:#818cf8;font-size:32px;transition:all 0.3s ease;" onmouseover="this.style.background='rgba(99,102,241,0.2)';this.style.transform='scale(1.1)'" onmouseout="this.style.background='rgba(99,102,241,0.1)';this.style.transform='scale(1)'">
+            <i class="fas fa-users"></i>
+          </div>
+          <div style="display:flex;flex-direction:column;">
+            <h2 style="font-size:32px;font-weight:900;color:#fff;margin:0;letter-spacing:-0.5px;" id="totalTeachersCount">0</h2>
+            <p style="font-size:12px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin:4px 0 0 0;">Total Staff &bull; Current Branch</p>
+          </div>
+        </div>
+
+        <!-- Metric Card 2 -->
+        <div style="background:rgba(15,22,41,0.6);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.05);box-shadow:0 4px 30px rgba(0,0,0,0.1);border-radius:16px;padding:24px;display:flex;align-items:center;gap:24px;transition:all 0.3s ease;cursor:pointer;" onmouseover="this.style.transform='translateY(-4px)';this.style.borderColor='rgba(255,255,255,0.1)';this.style.boxShadow='0 20px 40px rgba(0,0,0,0.4)'" onmouseout="this.style.transform='';this.style.borderColor='rgba(255,255,255,0.05)';this.style.boxShadow='0 4px 30px rgba(0,0,0,0.1)'">
+          <div style="width:64px;height:64px;border-radius:12px;background:rgba(20,184,166,0.1);border:1px solid rgba(20,184,166,0.2);display:flex;align-items:center;justify-content:center;color:#5eead4;font-size:32px;transition:all 0.3s ease;" onmouseover="this.style.background='rgba(20,184,166,0.2)';this.style.transform='scale(1.1)'" onmouseout="this.style.background='rgba(20,184,166,0.1)';this.style.transform='scale(1)'">
+            <i class="fas fa-chalkboard-teacher"></i>
+          </div>
+          <div style="display:flex;flex-direction:column;">
+            <h2 style="font-size:32px;font-weight:900;color:#fff;margin:0;letter-spacing:-0.5px;" id="tcHODCount">0</h2>
+            <p style="font-size:12px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin:4px 0 0 0;">Active Teachers</p>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Staff List Section -->
+      <section style="background:rgba(15,22,41,0.6);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.05);box-shadow:0 4px 30px rgba(0,0,0,0.1);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;position:relative;z-index:10;">
+        
+        <!-- Section Header -->
+        <div style="padding:20px 24px;border-bottom:1px solid rgba(255,255,255,0.05);background:rgba(255,255,255,0.02);display:flex;align-items:center;gap:12px;">
+          <i class="fas fa-id-card" style="font-size:16px;color:#94a3b8;"></i>
+          <h3 style="font-size:12px;font-weight:bold;color:#cbd5e1;letter-spacing:1px;text-transform:uppercase;margin:0;">All Staff</h3>
+          <span style="margin-left:auto;padding:4px 10px;border-radius:999px;background:rgba(99,102,241,0.2);color:#818cf8;font-size:12px;font-weight:bold;border:1px solid rgba(99,102,241,0.2);" id="tcStaffCountBadge">0</span>
+        </div>
+
+        <!-- List Container -->
+        <div style="padding:16px 24px;">
+          <ul class="tcd-teacher-list" id="teacherList" style="list-style:none;padding:0;margin:0;"></ul>
+        </div>
+      </section>
+
+      <!-- Hidden elements to preserve JS compatibility -->
+      <span id="csTeachersCount" style="display:none">0</span>
+      <span id="ecTeachersCount" style="display:none">0</span>
+      <span id="meTeachersCount" style="display:none">0</span>
+      <span id="tcBranchDeptCount" style="display:none">0</span>
+      <span id="tcBranchDeptLabel" style="display:none"></span>
+
+    </main>
+
+    <!-- Toast Notification Area -->
+    <div id="toast-container" style="position:fixed;bottom:24px;right:24px;z-index:50;display:flex;flex-direction:column;gap:12px;"></div>
+
+    <style>
+      @keyframes pulse-red {
+        0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.7); }
+        70% { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
+        100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+      }
+    </style>
   </div>
 
   <!-- ADD TEACHER panel -->
@@ -61767,22 +61810,80 @@ function renderAttendance() {
                         const initial = t.name ? t.name.charAt(0).toUpperCase() : '?';
                         const avatarHtml = t.photo && t.photo !== defaultTeacherAvatar
                             ? `<img src="${t.photo}" alt="${t.name}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`
-                            : `<span>${initial}</span>`;
+                            : `<span style="color:#fff;font-weight:bold;font-size:20px;">${initial}</span>`;
 
                         const li = document.createElement("li");
-                        li.className = "tcd-teacher-card";
-                        li.innerHTML = `
-                            <div class="tcd-tcard-avatar">${avatarHtml}</div>
-                            <div class="tcd-tcard-info">
-                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                                    <div class="tcd-tcard-name">${t.name || 'Unknown'}</div>
-                                    <span class="db-badge" style="font-size: 9px; padding: 2px 8px;">Database</span>
-                                </div>
-                                <div class="tcd-tcard-sub">${t.id || 'N/A'} &nbsp;?&nbsp; ${(t.subjects || []).join(', ') || 'No subjects'}</div>
-                            </div>
-                            <span class="tcd-tcard-dept ${deptClass}">${deptLabel}</span>
-                            <button class="tcd-tcard-view" onclick="event.stopPropagation();showTeacherProfile(teachers.find(x=>x.id==='${(t.id || '').replace(/'/g, "\\'")}'))">VIEW PROFILE</button>
+                        li.style.cssText = `
+                            list-style:none;
+                            display:flex;
+                            flex-direction:column;
+                            md:flex-row;
+                            md:align-items:center;
+                            justify-content:space-between;
+                            gap:24px;
+                            padding:16px;
+                            border-radius:12px;
+                            background:rgba(30,41,59,0.5);
+                            border:1px solid transparent;
+                            transition:all 0.3s ease;
+                            margin-bottom:12px;
                         `;
+                        
+                        li.onmouseover = function() {
+                            this.style.borderColor = 'rgba(51,65,85,0.5)';
+                            this.style.backgroundColor = 'rgba(26,35,58,0.3)';
+                        };
+                        
+                        li.onmouseout = function() {
+                            this.style.borderColor = 'transparent';
+                            this.style.backgroundColor = 'rgba(30,41,59,0.5)';
+                        };
+
+                        li.innerHTML = `
+                            <!-- Left: Identity & Details -->
+                            <div style="display:flex;align-items:center;gap:20px;flex:1;">
+                                <!-- Avatar -->
+                                <div style="position:relative;">
+                                    <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#9333ea);padding:2px;">
+                                        <div style="width:100%;height:100%;border-radius:50%;background:#0f1629;display:flex;align-items:center;justify-content:center;">
+                                            ${avatarHtml}
+                                        </div>
+                                    </div>
+                                    <div style="position:absolute;bottom:0;right:0;width:16px;height:16px;border-radius:50%;background:#10b981;border:2px solid #0f1629;"></div>
+                                </div>
+
+                                <!-- Info -->
+                                <div style="display:flex;flex-direction:column;gap:4px;flex:1;">
+                                    <div style="display:flex;align-items:center;gap:12px;">
+                                        <h4 style="font-size:16px;font-weight:bold;color:#fff;margin:0;transition:all 0.3s ease;" onmouseover="this.style.color='#818cf8'" onmouseout="this.style.color='#fff'">${t.name || 'Unknown'}</h4>
+                                        <span style="display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:6px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);font-size:9px;font-weight:bold;color:#5eead4;text-transform:uppercase;letter-spacing:0.5px;">
+                                            <i class="fas fa-database" style="font-size:10px;"></i>
+                                            Database
+                                        </span>
+                                    </div>
+                                    <p style="font-size:13px;font-weight:500;color:#94a3b8;margin:0;display:flex;align-items:center;flex-wrap:wrap;gap:8px;">
+                                        <span style="font-family:monospace;font-size:11px;background:rgba(255,255,255,0.05);padding:4px 6px;border-radius:4px;color:#cbd5e1;">ID: ${t.id || 'N/A'}</span>
+                                        <span style="color:#475569;">&bull;</span>
+                                        <span>${(t.subjects || []).join(', ') || 'No subjects'}</span>
+                                        <span style="color:#475569;" ${!(t.department || t.designation) ? 'style="display:none;"' : ''}>&bull;</span>
+                                        <span style="color:#cbd5e1/70;">${t.designation || t.department || ''}</span>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Right: Tags & Actions -->
+                            <div style="display:flex;align-items:center;gap:16px;padding-left:56px;md:padding-left:0;">
+                                <span style="display:none;align-items:center;padding:6px 12px;border-radius:999px;background:#0f1629;border:1px solid #334155;font-size:12px;font-weight:600;color:#cbd5e1;box-shadow:inset 0 1px 3px rgba(0,0,0,0.3);@media (min-width:1024px) { display:flex; }">
+                                    ${deptLabel}
+                                </span>
+                                
+                                <button onclick="event.stopPropagation();showTeacherProfile(teachers.find(x=>x.id==='${(t.id || '').replace(/'/g, "\\'")}'))" style="position:relative;overflow:hidden;padding:10px 16px;border-radius:8px;background:#4f46e5;border:none;color:#fff;font-size:11px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;transition:all 0.3s ease;cursor:pointer;box-shadow:0 0 20px rgba(79,70,229,0.3);display:flex;align-items:center;gap:8px;">
+                                    <span>View Profile</span>
+                                    <i class="fas fa-arrow-right" style="font-size:10px;"></i>
+                                </button>
+                            </div>
+                        `;
+                        
                         list.appendChild(li);
                     } catch (itemError) {
                         console.warn('[WARN] Error rendering teacher item:', t, itemError);
