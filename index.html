@@ -61934,24 +61934,44 @@ function renderAttendance() {
         function finalizeAddTeacher(teacher) {
             showLoader('Saving to database...');
             
+            const payload = {
+                name: teacher.name || '',
+                email: teacher.email || '',
+                phone: teacher.phone || '',
+                subject: teacher.subjects ? (Array.isArray(teacher.subjects) ? teacher.subjects.join(', ') : teacher.subjects) : '',
+                department: teacher.department || '',
+                employee_id: teacher.id || '',
+                photo_url: teacher.photo || '',
+                designation: teacher.designation || '',
+                gender: teacher.gender || '',
+                date_of_joining: teacher.joining || '',
+                qualification: teacher.qualification || '',
+                experience: null
+            };
+            
+            console.log('📤 Sending teacher to API:', payload);
+            console.log('🔗 API URL:', `${API_BASE}/teachers`);
+            
             fetch(`${API_BASE}/teachers`, {
                 method: 'POST',
                 headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({
-                    name: teacher.name || '',
-                    email: teacher.email || '',
-                    phone: teacher.phone || '',
-                    subject: teacher.subjects ? (Array.isArray(teacher.subjects) ? teacher.subjects.join(', ') : teacher.subjects) : '',
-                    department: teacher.department || '',
-                    employee_id: teacher.id || '',
-                    photo_url: teacher.photo || '',
-                    designation: teacher.designation || '',
-                    gender: teacher.gender || '',
-                    date_of_joining: teacher.joining || '',
-                    qualification: teacher.qualification || '',
-                    experience: null
-                })
-            }).then(r => r.json()).then(res => {
+                body: JSON.stringify(payload)
+            })
+            .then(r => {
+                console.log('📥 Got response, status:', r.status);
+                const contentType = r.headers.get("content-type");
+                console.log('📝 Content-Type:', contentType);
+                
+                if (!contentType || !contentType.includes("application/json")) {
+                    return r.text().then(text => {
+                        console.error('❌ Response is not JSON! Got:', text.substring(0, 200));
+                        throw new Error('Server returned non-JSON response: ' + text.substring(0, 100));
+                    });
+                }
+                return r.json();
+            })
+            .then(res => {
+                console.log('✅ Parsed response:', res);
                 if (res.success && res.data && res.data.id) {
                     teacher.db_id = res.data.id;
                     teachers.push(teacher);
@@ -61963,11 +61983,13 @@ function renderAttendance() {
                     renderTeacherDashboard();
                 } else {
                     hideLoader();
-                    showMessageBox('Error', res.error || 'Failed to save');
+                    showMessageBox('Error', res.error || 'Failed to save teacher');
                 }
-            }).catch(err => {
+            })
+            .catch(err => {
                 hideLoader();
-                showMessageBox('Error', 'Error: ' + err.message);
+                console.error('🚨 Teacher save error:', err);
+                showMessageBox('Error', 'Save failed: ' + err.message);
             });
         }
 
@@ -62699,17 +62721,38 @@ function renderAttendance() {
                     return;
                 }
                 
+                const payload = {
+                    name: updatedTeacher.name,
+                    email: updatedTeacher.email,
+                    phone: updatedTeacher.phone,
+                    subject: updatedTeacher.subjects ? updatedTeacher.subjects.join(', ') : '',
+                    designation: updatedTeacher.designation || '',
+                    gender: updatedTeacher.gender || '',
+                    date_of_joining: updatedTeacher.joining || '',
+                    qualification: updatedTeacher.qualification || '',
+                    photo_url: updatedTeacher.photo || ''
+                };
+                
+                console.log('📤 Updating teacher:', payload);
+                
                 fetch(`${API_BASE}/teachers/${updatedTeacher.db_id}`, {
                     method: 'PUT',
                     headers: {'Content-Type':'application/json'},
-                    body: JSON.stringify({
-                        name: updatedTeacher.name,
-                        email: updatedTeacher.email,
-                        phone: updatedTeacher.phone,
-                        subject: updatedTeacher.subjects ? updatedTeacher.subjects.join(', ') : '',
-                        photo_url: updatedTeacher.photo
-                    })
-                }).then(r => r.json()).then(res => {
+                    body: JSON.stringify(payload)
+                })
+                .then(r => {
+                    console.log('📥 Update response status:', r.status);
+                    const contentType = r.headers.get("content-type");
+                    if (!contentType || !contentType.includes("application/json")) {
+                        return r.text().then(text => {
+                            console.error('❌ Response is not JSON! Got:', text.substring(0, 200));
+                            throw new Error('Server returned non-JSON response');
+                        });
+                    }
+                    return r.json();
+                })
+                .then(res => {
+                    console.log('✅ Update parsed response:', res);
                     if (res.success) {
                         // Update in memory
                         teachers[index] = updatedTeacher;
@@ -62723,8 +62766,10 @@ function renderAttendance() {
                         hideLoader();
                         showMessageBox('Error', 'Failed to update teacher: ' + (res.error || 'Unknown error'));
                     }
-                }).catch(err => {
+                })
+                .catch(err => {
                     hideLoader();
+                    console.error('🚨 Update error:', err);
                     showMessageBox('Error', 'Failed to update teacher: ' + err.message);
                 });
             }
@@ -62741,10 +62786,25 @@ function renderAttendance() {
                 return;
             }
             
+            console.log('🗑️ Deleting teacher ID:', teacherToDelete.db_id);
+            
             fetch(`${API_BASE}/teachers/${teacherToDelete.db_id}`, {
                 method: 'DELETE',
                 headers: {'Content-Type':'application/json'}
-            }).then(r => r.json()).then(res => {
+            })
+            .then(r => {
+                console.log('📥 Delete response status:', r.status);
+                const contentType = r.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    return r.text().then(text => {
+                        console.error('❌ Response is not JSON! Got:', text.substring(0, 200));
+                        throw new Error('Server returned non-JSON response');
+                    });
+                }
+                return r.json();
+            })
+            .then(res => {
+                console.log('✅ Delete parsed response:', res);
                 if (res.success) {
                     // Remove from memory
                     teachers = teachers.filter(t => !(t.id === activeTeacherId && t.branch === selectedBranch));
@@ -62757,8 +62817,10 @@ function renderAttendance() {
                     hideLoader();
                     showMessageBox('Error', 'Failed to delete teacher: ' + (res.error || 'Unknown error'));
                 }
-            }).catch(err => {
+            })
+            .catch(err => {
                 hideLoader();
+                console.error('🚨 Delete error:', err);
                 showMessageBox('Error', 'Failed to delete teacher: ' + err.message);
             });
         }
