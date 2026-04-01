@@ -178,6 +178,142 @@ app.delete('/api/teachers/:id', async (req, res) => {
 });
 
 // ============================================================
+// OTP SYSTEM FOR TEACHER SETUP
+// ============================================================
+
+// In-memory OTP storage (expires after 10 minutes)
+const otpStore = {};
+
+// Generate random 6-digit OTP
+function generateOTP() {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+// Send OTP endpoint
+app.post('/api/send-otp', async (req, res) => {
+    try {
+        const { phone, countryCode } = req.body;
+        
+        if (!phone || !countryCode) {
+            return res.status(400).json({ success: false, error: 'Phone and country code required' });
+        }
+
+        // Generate OTP
+        const otp = generateOTP();
+        const fullPhone = `${countryCode}${phone}`;
+        
+        // Store OTP with 10-minute expiration
+        otpStore[fullPhone] = {
+            otp,
+            createdAt: Date.now(),
+            expiresAt: Date.now() + (10 * 60 * 1000), // 10 minutes
+            attempts: 0
+        };
+
+        console.log(`📱 OTP Generated for ${fullPhone}: ${otp}`);
+
+        // Try to send SMS via Twilio (if credentials available)
+        const twilioSid = process.env.TWILIO_ACCOUNT_SID;
+        const twilioToken = process.env.TWILIO_AUTH_TOKEN;
+        const twilioPhone = process.env.TWILIO_PHONE_NUMBER;
+
+        if (twilioSid && twilioToken && twilioPhone) {
+            try {
+                const twilio = require('twilio');
+                const client = twilio(twilioSid, twilioToken);
+                
+                await client.messages.create({
+                    body: `Your verification code is: ${otp}. Valid for 10 minutes.`,
+                    from: twilioPhone,
+                    to: fullPhone
+                });
+                
+                console.log(`✅ SMS sent successfully to ${fullPhone}`);
+                return res.json({ 
+                    success: true, 
+                    message: 'OTP sent via SMS',
+                    phone: `${countryCode}****${phone.slice(-2)}` // Masked for security
+                });
+            } catch (twilioErr) {
+                console.warn('⚠️ Twilio SMS failed:', twilioErr.message);
+                // Fall through to simulation below
+            }
+        }
+
+        // Fallback: OTP stored and ready for verification (for testing)
+        console.log(`ℹ️ OTP stored in memory (Twilio not configured). OTP: ${otp}`);
+        return res.json({ 
+            success: true, 
+            message: 'OTP generated and ready for verification',
+            phone: `${countryCode}****${phone.slice(-2)}`,
+            // In development, you can see the OTP in console logs
+            testMode: !twilioSid || !twilioToken || !twilioPhone
+        });
+
+    } catch (e) {
+        console.error('❌ /api/send-otp ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// Verify OTP endpoint
+app.post('/api/verify-otp', async (req, res) => {
+    try {
+        const { phone, countryCode, otp } = req.body;
+        
+        if (!phone || !countryCode || !otp) {
+            return res.status(400).json({ success: false, error: 'Phone, country code, and OTP required' });
+        }
+
+        const fullPhone = `${countryCode}${phone}`;
+        const storedData = otpStore[fullPhone];
+
+        // Check if OTP exists
+        if (!storedData) {
+            return res.status(400).json({ success: false, error: 'No OTP sent for this number' });
+        }
+
+        // Check if OTP has expired
+        if (Date.now() > storedData.expiresAt) {
+            delete otpStore[fullPhone];
+            return res.status(400).json({ success: false, error: 'OTP expired. Please request a new one.' });
+        }
+
+        // Limit verification attempts
+        if (storedData.attempts >= 5) {
+            delete otpStore[fullPhone];
+            return res.status(400).json({ success: false, error: 'Too many attempts. Please request a new OTP.' });
+        }
+
+        // Verify OTP
+        if (otp !== storedData.otp) {
+            storedData.attempts++;
+            const remaining = 5 - storedData.attempts;
+            return res.status(400).json({ 
+                success: false, 
+                error: `Invalid OTP. ${remaining} attempts remaining.`
+            });
+        }
+
+        // OTP verified successfully!
+        delete otpStore[fullPhone];
+        
+        console.log(`✅ OTP verified successfully for ${fullPhone}`);
+        
+        return res.json({ 
+            success: true, 
+            message: 'Phone number verified',
+            verifiedPhone: fullPhone,
+            timestamp: new Date().toISOString()
+        });
+
+    } catch (e) {
+        console.error('❌ /api/verify-otp ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// ============================================================
 // STATIC FILES & SPA FALLBACK (AFTER ALL API ROUTES!)
 // ============================================================
 
