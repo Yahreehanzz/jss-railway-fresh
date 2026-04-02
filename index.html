@@ -41188,11 +41188,11 @@ function restoreTeacherZonePhoto() {
     <div id="toast-container" style="position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 50; display: flex; flex-direction: column; gap: 0.75rem;"></div>
 
     <!-- Profile Modal -->
-    <div id="profileModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 1rem;">
+    <div id="profileModal" style="display: none !important; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: 1rem;">
       <div style="background: linear-gradient(135deg, rgba(15, 22, 41, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%); border: 1px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(16px); border-radius: 1.5rem; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 2rem; position: relative;">
         
         <!-- Close Button -->
-        <button onclick="document.getElementById('profileModal').style.display='none'" style="position: absolute; top: 1rem; right: 1rem; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; font-size: 20px; transition: all 0.3s;">
+        <button onclick="closeProfileModal()" style="position: absolute; top: 1rem; right: 1rem; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; font-size: 20px; transition: all 0.3s;">
           <i class="fas fa-times"></i>
         </button>
 
@@ -41276,7 +41276,7 @@ function restoreTeacherZonePhoto() {
 
         <!-- Action Buttons -->
         <div style="display: flex; gap: 1rem; justify-content: flex-end;">
-          <button onclick="document.getElementById('profileModal').style.display='none'" style="padding: 0.75rem 1.5rem; border-radius: 0.5rem; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: white; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.3s;">
+          <button onclick="closeProfileModal()" style="padding: 0.75rem 1.5rem; border-radius: 0.5rem; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: white; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.3s;">
             Close
           </button>
           <button onclick="showToast('Edit profile feature coming soon!', 'info')" style="padding: 0.75rem 1.5rem; border-radius: 0.5rem; background: linear-gradient(135deg, #4f46e5, #6366f1); border: none; color: white; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.3s; box-shadow: 0 0 20px rgba(79, 70, 229, 0.3);">
@@ -41414,7 +41414,18 @@ function restoreTeacherZonePhoto() {
         // Show modal
         console.log('[DEBUG] Showing modal...');
         modal.style.display = 'flex';
+        modal.style.alignItems = 'center';
+        modal.style.justifyContent = 'center';
         console.log('[DEBUG] Modal displayed');
+      }
+
+      // Close profile modal
+      function closeProfileModal() {
+        const modal = document.getElementById('profileModal');
+        if (modal) {
+          console.log('[DEBUG] Closing modal');
+          modal.style.display = 'none';
+        }
       }
 
       // Populate staff list from existing teachers data
@@ -41567,14 +41578,24 @@ function restoreTeacherZonePhoto() {
       });
 
       // Close modal on background click
-      document.getElementById('profileModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-          this.style.display = 'none';
-        }
-      });
+      const profileModal = document.getElementById('profileModal');
+      if (profileModal) {
+        profileModal.addEventListener('click', function(e) {
+          if (e.target === this) {
+            closeProfileModal();
+          }
+        });
+      }
 
       // Initial call - ensure teachers load
       console.log('[DEBUG] Initial setup timeout starting...');
+      
+      // Ensure modal is hidden on init
+      const profileModalInit = document.getElementById('profileModal');
+      if (profileModalInit) {
+        profileModalInit.style.display = 'none';
+      }
+
       setTimeout(() => {
         console.log('[DEBUG] Initial setup timeout triggered');
         setupModernDashboard();
