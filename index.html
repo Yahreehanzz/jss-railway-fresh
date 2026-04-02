@@ -61736,6 +61736,7 @@ function renderAttendance() {
             const phone = document.getElementById("addTeacherPhone").value.trim();
             const dept = (document.getElementById("addTeacherDept") || {value:''}).value;
             const designation = (document.getElementById("addTeacherDesignation") || {value:''}).value;
+            const gender = (document.getElementById("addTeacherGender") || {value:''}).value;
             const joining = (document.getElementById("addTeacherJoining") || {value:''}).value;
             const qualification = (document.getElementById("addTeacherQualification") || {value:''}).value;
             const photoFile = document.getElementById("addTeacherPhoto").files[0];
@@ -61759,6 +61760,7 @@ function renderAttendance() {
                 phone, 
                 department: dept,
                 designation,
+                gender,
                 joining,
                 qualification,
                 photo: defaultTeacherAvatar,
@@ -61855,46 +61857,51 @@ function renderAttendance() {
             syncSettingToRailway('teachers_data', teachers);
             
             // ✅ SAVE TO DATABASE VIA API
-            const genderValue = (document.getElementById("addTeacherGender") || {value:''}).value;
             const teacherData = {
                 name: teacher.name,
-                employee_id: teacher.id,  // Maps to employee_id in database
+                employee_id: teacher.id,
                 email: teacher.email || null,
                 phone: teacher.phone || null,
                 subject: teacher.subjects ? teacher.subjects.join(', ') : null,
                 department: teacher.department || null,
                 designation: teacher.designation || null,
-                gender: genderValue || null,
+                gender: teacher.gender || null,
                 date_of_joining: teacher.joining || null,
                 qualification: teacher.qualification || null,
                 experience: null
             };
             
             console.log('💾 Saving teacher to database:', teacherData);
+            console.log('📍 API URL:', window.API_BASE + '/teachers');
             
             fetch(`${window.API_BASE}/teachers`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(teacherData)
             })
-            .then(res => res.json())
+            .then(res => {
+                console.log('📊 Response status:', res.status, res.statusText);
+                return res.json();
+            })
             .then(data => {
+                hideLoader();
                 if (data.success) {
                     console.log('✅ Teacher saved to database! ID:', data.data.id);
+                    showMessageBox('✅ Success', 'Teacher Saved to Database Successfully!');
+                    document.getElementById("addTeacher").querySelectorAll('input:not([type="file"])').forEach(input => input.value = '');
+                    document.getElementById("addTeacher").querySelectorAll('select').forEach(sel => sel.value = '');
+                    try { document.getElementById("addTeacherPhoto").value = ''; } catch(e) {}
+                    renderTeacherDashboard();
                 } else {
                     console.error('❌ Database save failed:', data.error);
+                    showMessageBox('❌ Error', 'Failed to save: ' + (data.error || 'Unknown error'));
                 }
             })
             .catch(err => {
                 console.error('❌ API call failed:', err);
+                hideLoader();
+                showMessageBox('❌ Network Error', err.message || 'Failed to connect to server');
             });
-            
-            hideLoader();
-            showMessageBox('Success', "Teacher Added!");
-            document.getElementById("addTeacher").querySelectorAll('input:not([type="file"])').forEach(input => input.value = '');
-            document.getElementById("addTeacherPhoto").value = '';
-            document.getElementById("addTeacherPreviewPhoto").classList.add('hidden');
-            renderTeacherDashboard();
         }
 
         let sortDirectionTeachers = {};
