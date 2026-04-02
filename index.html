@@ -82440,474 +82440,94 @@ Govt. Polytechnic, Beelagi`;
 <!-- =============================================
      macOS System Settings Style Profile Modal
      ============================================= -->
-<div class="profile-modal-overlay" id="profileModal">
-  <div class="profile-modal">
+<!-- Teacher Profile Modal -->
+<div id="profileModal" style="display: none !important; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
+  <div style="background: linear-gradient(135deg, rgba(20, 25, 40, 0.98) 0%, rgba(30, 40, 60, 0.98) 100%); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); border-radius: 20px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6); max-width: 700px; width: 100%; max-height: 85vh; overflow-y: auto; padding: 40px; position: relative;">
+    
+    <!-- Close Button -->
+    <button onclick="closeProfileModal()" style="position: absolute; top: 20px; right: 20px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; font-size: 18px; transition: all 0.3s; hover: {background: rgba(255, 255, 255, 0.2);}">
+      <i class="fas fa-times"></i>
+    </button>
 
-    <!-- Title Bar -->
-    <div class="profile-modal-titlebar">
-      <div class="mac-dot close" onclick="closeProfileModal()" title="Close">
-        <span class="mac-dot-icon"><i class="fas fa-times"></i></span>
+    <!-- Profile Header -->
+    <div style="display: flex; align-items: flex-start; gap: 24px; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+      
+      <!-- Avatar -->
+      <div id="profileAvatar" style="width: 100px; height: 100px; border-radius: 50%; background: linear-gradient(to bottom right, #818cf8, #a78bfa); padding: 3px; flex-shrink: 0;">
+        <div style="width: 100%; height: 100%; border-radius: 50%; background: #070B14; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 40px;">?</div>
       </div>
-      <div class="mac-dot minimize" title="Minimize">
-        <span class="mac-dot-icon"><i class="fas fa-minus"></i></span>
+
+      <!-- Header Info -->
+      <div style="flex: 1;">
+        <h2 id="profileName" style="font-size: 28px; font-weight: 800; color: white; margin: 0 0 8px 0; letter-spacing: -0.5px;">Teacher Name</h2>
+        <p id="profileId" style="font-size: 14px; color: #94a3b8; margin: 0 0 12px 0;">ID: N/A</p>
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+          <span id="profileBadge" style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 20px; background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); font-size: 12px; font-weight: 700; color: #4ade80; text-transform: uppercase; letter-spacing: 0.5px;">
+            <i class="fas fa-database" style="font-size: 12px;"></i> SAVED
+          </span>
+        </div>
       </div>
-      <div class="mac-dot expand" title="Expand">
-        <span class="mac-dot-icon"><i class="fas fa-expand"></i></span>
-      </div>
-      <span class="mac-title-text">System Settings</span>
+
     </div>
 
-    <!-- Body -->
-    <div class="profile-mac-body">
-
-      <!-- -- Sidebar -- -->
-      <div class="profile-mac-sidebar">
-
-        <!-- Avatar + Name -->
-        <div class="mac-sidebar-profile">
-          <div class="mac-avatar-wrapper">
-            <img src="https://i.pravatar.cc/150?img=12" alt="Avatar" class="mac-avatar" id="modal-user-avatar"/>
-            <div class="mac-avatar-badge" onclick="document.getElementById('avatarImageInput').click()" title="Change photo">
-              <i class="fas fa-camera"></i>
-            </div>
-            <input type="file" id="avatarImageInput" accept="image/*" style="display:none;" onchange="updateAvatarImage(event)">
-          </div>
-          <div class="mac-sidebar-name" id="modal-user-name">Govt. Polytechnic, Beelagi</div>
-          <div class="mac-sidebar-role" id="modal-user-role">Administrator</div>
-          <button class="mac-sidebar-btn" onclick="openEditProfileModal()">Edit Profile?</button>
-        </div>
-
-        <!-- Search -->
-        <div class="mac-sidebar-search">
-          <i class="fas fa-search search-icon"></i>
-          <input type="text" placeholder="Search settings" oninput="filterMacSettings(this.value)">
-        </div>
-
-        <!-- Nav -->
-        <div class="mac-nav-section">
-          <div class="mac-nav-section-label">Profile</div>
-
-          <button class="mac-nav-item active" onclick="switchMacPanel('general')" data-panel="general">
-            <div class="mac-nav-icon-wrap" style="background:#5e5ce6;">
-              <i class="fas fa-user" style="font-size:12px;"></i>
-            </div>
-            <span class="mac-nav-label">General</span>
-            <i class="fas fa-chevron-right mac-nav-chevron"></i>
-          </button>
-
-          <button class="mac-nav-item" onclick="switchMacPanel('appearance')" data-panel="appearance">
-            <div class="mac-nav-icon-wrap" style="background:#ff9500;">
-              <i class="fas fa-palette" style="font-size:12px;"></i>
-            </div>
-            <span class="mac-nav-label">Appearance</span>
-            <i class="fas fa-chevron-right mac-nav-chevron"></i>
-          </button>
-
-          <button class="mac-nav-item" onclick="switchMacPanel('security')" data-panel="security">
-            <div class="mac-nav-icon-wrap" style="background:#30d158;">
-              <i class="fas fa-lock" style="font-size:12px;"></i>
-            </div>
-            <span class="mac-nav-label">Password &amp; Security</span>
-            <i class="fas fa-chevron-right mac-nav-chevron"></i>
-          </button>
-
-          <button class="mac-nav-item" onclick="switchMacPanel('languages')" data-panel="languages">
-            <div class="mac-nav-icon-wrap" style="background:#007aff;">
-              <i class="fas fa-globe" style="font-size:12px;"></i>
-            </div>
-            <span class="mac-nav-label">Language &amp; Region</span>
-            <i class="fas fa-chevron-right mac-nav-chevron"></i>
-          </button>
-
-          <button class="mac-nav-item" onclick="switchMacPanel('notifications')" data-panel="notifications">
-            <div class="mac-nav-icon-wrap" style="background:#ff3b30;">
-              <i class="fas fa-bell" style="font-size:12px;"></i>
-            </div>
-            <span class="mac-nav-label">Notifications</span>
-            <i class="fas fa-chevron-right mac-nav-chevron"></i>
-          </button>
-
-          <button class="mac-nav-item" onclick="switchMacPanel('documents')" data-panel="documents">
-            <div class="mac-nav-icon-wrap" style="background:#ff6b35;">
-              <i class="fas fa-folder" style="font-size:12px;"></i>
-            </div>
-            <span class="mac-nav-label">Documents</span>
-            <i class="fas fa-chevron-right mac-nav-chevron"></i>
-          </button>
-
-          <button class="mac-nav-item" onclick="switchMacPanel('about')" data-panel="about">
-            <div class="mac-nav-icon-wrap" style="background:#6e6e73;">
-              <i class="fas fa-info-circle" style="font-size:12px;"></i>
-            </div>
-            <span class="mac-nav-label">About</span>
-            <i class="fas fa-chevron-right mac-nav-chevron"></i>
-          </button>
-        </div>
-
+    <!-- Profile Details Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
+      
+      <!-- Email Section -->
+      <div>
+        <p style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 8px 0;">Email Address</p>
+        <p id="profileEmail" style="font-size: 15px; font-weight: 600; color: #cbd5e1; margin: 0;">Not provided</p>
       </div>
-      <!-- / Sidebar -->
 
-      <!-- -- Content Pane -- -->
-      <div class="profile-mac-content">
-
-        <!-- General -->
-        <div class="mac-panel active" id="mac-panel-general">
-          <div class="mac-panel-title">General</div>
-
-          <div class="mac-group-title">IDENTITY</div>
-          <div class="mac-group">
-            <div class="mac-row">
-              <div class="mac-row-icon" style="background:#5e5ce6;"><i class="fas fa-user"></i></div>
-              <div class="mac-row-text">
-                <span class="mac-row-label">College Name</span>
-                <span class="mac-row-sub" id="mac-college-name">Govt. Polytechnic, Beelagi</span>
-              </div>
-              <span class="mac-row-value" style="font-size:11px;color:#aaa;">Read-only</span>
-            </div>
-            <div class="mac-row">
-              <div class="mac-row-icon" style="background:#007aff;"><i class="fas fa-code-branch"></i></div>
-              <div class="mac-row-text">
-                <span class="mac-row-label">Branch / Department</span>
-                <span class="mac-row-sub" id="mac-branch-name">—</span>
-              </div>
-              <span class="mac-row-value" style="font-size:11px;color:#aaa;">Read-only</span>
-            </div>
-            <div class="mac-row">
-              <div class="mac-row-icon" style="background:#ff9500;"><i class="fas fa-id-badge"></i></div>
-              <div class="mac-row-text">
-                <span class="mac-row-label">Role</span>
-              </div>
-              <span class="mac-row-value">Teacher</span>
-              <i class="fas fa-chevron-right mac-row-arrow"></i>
-            </div>
-          </div>
-
-          <div class="mac-group-title">BIO</div>
-          <div class="mac-group">
-            <div class="mac-row" style="align-items: flex-start; padding: 14px 16px;">
-              <div style="flex:1;">
-                <textarea class="mac-textarea" id="macAboutTextarea" placeholder="Write a short bio?">Write something about yourself...</textarea>
-                <div style="display:flex;gap:8px;margin-top:8px;justify-content:flex-end;">
-                  <button class="mac-btn mac-btn-gray" onclick="cancelEditAbout()">Cancel</button>
-                  <button class="mac-btn mac-btn-blue" onclick="saveMacAbout()">Save</button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="mac-group-title">ACCOUNT</div>
-          <div class="mac-group">
-            <div class="mac-row">
-              <div class="mac-row-icon" style="background:#ff3b30;"><i class="fas fa-sign-out-alt"></i></div>
-              <div class="mac-row-text"><span class="mac-row-label" style="color:#ff3b30;">Sign Out</span></div>
-              <i class="fas fa-chevron-right mac-row-arrow"></i>
-            </div>
-          </div>
-        </div>
-
-        <!-- Appearance -->
-        <div class="mac-panel" id="mac-panel-appearance">
-          <div class="mac-panel-title">Appearance</div>
-
-          <div class="mac-group-title">DISPLAY MODE</div>
-          <div class="mac-group">
-            <div class="mac-row">
-              <div class="mac-row-icon" style="background:#6e6e73;"><i class="fas fa-circle-half-stroke"></i></div>
-              <div class="mac-row-text">
-                <span class="mac-row-label">Dark Mode</span>
-                <span class="mac-row-sub">Switch interface to dark theme</span>
-              </div>
-              <label class="mac-toggle">
-                <input type="checkbox" id="mac-dark-toggle" onchange="toggleDarkMode(this.checked)">
-                <span class="mac-toggle-track"></span>
-              </label>
-            </div>
-            <div class="mac-row">
-              <div class="mac-row-icon" style="background:#ff9500;"><i class="fas fa-adjust"></i></div>
-              <div class="mac-row-text">
-                <span class="mac-row-label">Accent Colour</span>
-                <span class="mac-row-sub">Highlight colour for buttons &amp; links</span>
-              </div>
-              <div style="display:flex;gap:6px;align-items:center;">
-                <div onclick="setAccentColor('#007aff',this)" style="width:18px;height:18px;border-radius:50%;background:#007aff;cursor:pointer;border:2px solid #007aff;outline:2px solid rgba(0,122,255,0.4);"></div>
-                <div onclick="setAccentColor('#ff9500',this)" style="width:18px;height:18px;border-radius:50%;background:#ff9500;cursor:pointer;"></div>
-                <div onclick="setAccentColor('#ff3b30',this)" style="width:18px;height:18px;border-radius:50%;background:#ff3b30;cursor:pointer;"></div>
-                <div onclick="setAccentColor('#34c759',this)" style="width:18px;height:18px;border-radius:50%;background:#34c759;cursor:pointer;"></div>
-                <div onclick="setAccentColor('#5e5ce6',this)" style="width:18px;height:18px;border-radius:50%;background:#5e5ce6;cursor:pointer;"></div>
-                <div onclick="setAccentColor('#ff6b35',this)" style="width:18px;height:18px;border-radius:50%;background:#ff6b35;cursor:pointer;"></div>
-              </div>
-            </div>
-            <div class="mac-row">
-              <div class="mac-row-icon" style="background:#5e5ce6;"><i class="fas fa-text-height"></i></div>
-              <div class="mac-row-text">
-                <span class="mac-row-label">Text Size</span>
-                <span class="mac-row-sub">Adjust font size across the app</span>
-              </div>
-              <select style="padding:5px 8px;border-radius:6px;border:0.5px solid rgba(0,0,0,0.2);font-size:13px;color:#1a1a1a;background:white;font-family:inherit;outline:none;" onchange="setTextSize(this.value)">
-                <option value="sm">Small</option>
-                <option value="md" selected>Medium</option>
-                <option value="lg">Large</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="mac-group-title">SIDEBAR</div>
-          <div class="mac-group">
-            <div class="mac-row">
-              <div class="mac-row-icon" style="background:#007aff;"><i class="fas fa-compress-alt"></i></div>
-              <div class="mac-row-text">
-                <span class="mac-row-label">Compact Sidebar</span>
-                <span class="mac-row-sub">Show icons only when collapsed</span>
-              </div>
-              <label class="mac-toggle">
-                <input type="checkbox">
-                <span class="mac-toggle-track"></span>
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <!-- Security -->
-        <div class="mac-panel" id="mac-panel-security">
-          <div class="mac-panel-title">Password &amp; Security</div>
-
-          <div class="mac-group-title">CHANGE PASSWORD</div>
-          <div class="mac-group">
-            <div class="mac-row">
-              <div class="mac-row-icon" style="background:#6e6e73;"><i class="fas fa-lock"></i></div>
-              <div class="mac-row-text"><span class="mac-row-label">Current Password</span></div>
-              <input type="password" id="currentPassword" class="mac-input" placeholder="Required">
-            </div>
-            <div class="mac-row">
-              <div class="mac-row-icon" style="background:#30d158;"><i class="fas fa-key"></i></div>
-              <div class="mac-row-text"><span class="mac-row-label">New Password</span></div>
-              <input type="password" id="newPassword" class="mac-input" placeholder="Min 8 characters">
-            </div>
-            <div class="mac-row">
-              <div class="mac-row-icon" style="background:#007aff;"><i class="fas fa-check-circle"></i></div>
-              <div class="mac-row-text"><span class="mac-row-label">Verify Password</span></div>
-              <input type="password" id="confirmPassword" class="mac-input" placeholder="Repeat new password">
-            </div>
-          </div>
-          <div style="display:flex;justify-content:flex-end;margin-bottom:20px;">
-            <button class="mac-btn mac-btn-blue" onclick="changePassword()"><i class="fas fa-shield-alt" style="margin-right:6px;"></i>Update Password</button>
-          </div>
-
-          <div class="mac-group-title">TWO-FACTOR AUTHENTICATION</div>
-          <div class="mac-group">
-            <div class="mac-row">
-              <div class="mac-row-icon" style="background:#ff9500;"><i class="fas fa-mobile-alt"></i></div>
-              <div class="mac-row-text">
-                <span class="mac-row-label">2-Factor Authentication</span>
-                <span class="mac-row-sub">Require OTP on every sign-in</span>
-              </div>
-              <label class="mac-toggle">
-                <input type="checkbox">
-                <span class="mac-toggle-track"></span>
-              </label>
-            </div>
-            <div class="mac-row">
-              <div class="mac-row-icon" style="background:#5e5ce6;"><i class="fas fa-qrcode"></i></div>
-              <div class="mac-row-text">
-                <span class="mac-row-label">Authenticator App</span>
-                <span class="mac-row-sub">Scan QR code to link app</span>
-              </div>
-              <button class="mac-btn mac-btn-gray">Set Up?</button>
-            </div>
-          </div>
-
-          <div class="mac-group-title">ACTIVE SESSIONS</div>
-          <div class="mac-group">
-            <div class="mac-row">
-              <div class="mac-row-icon" style="background:#007aff;"><i class="fas fa-desktop"></i></div>
-              <div class="mac-row-text">
-                <span class="mac-row-label">This Device</span>
-                <span class="mac-row-sub">Current session • Active now</span>
-              </div>
-              <span style="font-size:11px;background:#d1fae5;color:#065f46;padding:3px 8px;border-radius:20px;font-weight:600;">Active</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Language & Region -->
-        <div class="mac-panel" id="mac-panel-languages">
-          <div class="mac-panel-title">Language &amp; Region</div>
-
-          <div class="mac-group-title">PREFERRED LANGUAGE</div>
-          <div class="mac-group">
-            <div class="mac-lang-item selected" onclick="selectMacLanguage('english', this)">
-              <span class="mac-lang-flag">????</span>
-              <span class="mac-lang-name">English</span>
-              <i class="fas fa-check mac-lang-check"></i>
-            </div>
-            <div class="mac-lang-item" onclick="selectMacLanguage('hindi', this)">
-              <span class="mac-lang-flag">????</span>
-              <span class="mac-lang-name">Hindi</span>
-              <i class="fas fa-check mac-lang-check-empty"></i>
-            </div>
-            <div class="mac-lang-item" onclick="selectMacLanguage('spanish', this)">
-              <span class="mac-lang-flag">????</span>
-              <span class="mac-lang-name">Spanish</span>
-              <i class="fas fa-check mac-lang-check-empty"></i>
-            </div>
-            <div class="mac-lang-item" onclick="selectMacLanguage('french', this)">
-              <span class="mac-lang-flag">????</span>
-              <span class="mac-lang-name">French</span>
-              <i class="fas fa-check mac-lang-check-empty"></i>
-            </div>
-            <div class="mac-lang-item" onclick="selectMacLanguage('german', this)">
-              <span class="mac-lang-flag">????</span>
-              <span class="mac-lang-name">German</span>
-              <i class="fas fa-check mac-lang-check-empty"></i>
-            </div>
-            <div class="mac-lang-item" onclick="selectMacLanguage('japanese', this)">
-              <span class="mac-lang-flag">????</span>
-              <span class="mac-lang-name">Japanese</span>
-              <i class="fas fa-check mac-lang-check-empty"></i>
-            </div>
-          </div>
-
-          <div class="mac-group-title">REGION</div>
-          <div class="mac-group">
-            <div class="mac-row">
-              <div class="mac-row-icon" style="background:#ff9500;"><i class="fas fa-map-marker-alt"></i></div>
-              <div class="mac-row-text"><span class="mac-row-label">Country / Region</span></div>
-              <select style="padding:5px 8px;border-radius:6px;border:0.5px solid rgba(0,0,0,0.2);font-size:13px;color:#1a1a1a;background:white;font-family:inherit;outline:none;">
-                <option>India</option>
-                <option>United States</option>
-                <option>United Kingdom</option>
-                <option>Australia</option>
-              </select>
-            </div>
-            <div class="mac-row">
-              <div class="mac-row-icon" style="background:#30d158;"><i class="fas fa-clock"></i></div>
-              <div class="mac-row-text"><span class="mac-row-label">Time Zone</span></div>
-              <span class="mac-row-value">IST (UTC+5:30)</span>
-              <i class="fas fa-chevron-right mac-row-arrow"></i>
-            </div>
-          </div>
-        </div>
-
-        <!-- Notifications -->
-        <div class="mac-panel" id="mac-panel-notifications">
-          <div class="mac-panel-title">Notifications</div>
-
-          <div class="mac-group-title">ALERTS</div>
-          <div class="mac-group">
-            <div class="mac-row">
-              <div class="mac-row-icon" style="background:#ff3b30;"><i class="fas fa-bell"></i></div>
-              <div class="mac-row-text">
-                <span class="mac-row-label">Push Notifications</span>
-                <span class="mac-row-sub">Alerts for attendance, marks &amp; events</span>
-              </div>
-              <label class="mac-toggle">
-                <input type="checkbox" checked>
-                <span class="mac-toggle-track"></span>
-              </label>
-            </div>
-            <div class="mac-row">
-              <div class="mac-row-icon" style="background:#007aff;"><i class="fas fa-envelope"></i></div>
-              <div class="mac-row-text">
-                <span class="mac-row-label">Email Notifications</span>
-                <span class="mac-row-sub">Weekly digest and important updates</span>
-              </div>
-              <label class="mac-toggle">
-                <input type="checkbox" checked>
-                <span class="mac-toggle-track"></span>
-              </label>
-            </div>
-            <div class="mac-row">
-              <div class="mac-row-icon" style="background:#5e5ce6;"><i class="fas fa-volume-up"></i></div>
-              <div class="mac-row-text">
-                <span class="mac-row-label">Sound</span>
-                <span class="mac-row-sub">Play sound for notifications</span>
-              </div>
-              <label class="mac-toggle">
-                <input type="checkbox">
-                <span class="mac-toggle-track"></span>
-              </label>
-            </div>
-          </div>
-
-          <div class="mac-group-title">DO NOT DISTURB</div>
-          <div class="mac-group">
-            <div class="mac-row">
-              <div class="mac-row-icon" style="background:#ff9500;"><i class="fas fa-moon"></i></div>
-              <div class="mac-row-text">
-                <span class="mac-row-label">Focus Mode</span>
-                <span class="mac-row-sub">Mute all non-critical alerts</span>
-              </div>
-              <label class="mac-toggle">
-                <input type="checkbox">
-                <span class="mac-toggle-track"></span>
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <!-- Documents -->
-        <div class="mac-panel" id="mac-panel-documents">
-          <div class="mac-panel-title">Documents</div>
-
-          <input type="file" id="documentFileInput" style="display:none;" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" multiple onchange="handleDocumentUpload(event)">
-
-          <div class="mac-upload-zone" onclick="document.getElementById('documentFileInput').click()">
-            <div class="mac-upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
-            <div class="mac-upload-title">Add Documents</div>
-            <div class="mac-upload-sub">Click to upload ? PDF, JPG, PNG, DOC supported</div>
-          </div>
-
-          <div class="mac-doc-grid" id="documentsGrid"></div>
-        </div>
-
-        <!-- About -->
-        <div class="mac-panel" id="mac-panel-about">
-          <div class="mac-panel-title">About</div>
-
-          <div class="mac-group-title">SYSTEM</div>
-          <div class="mac-group">
-            <div class="mac-row">
-              <div class="mac-row-text"><span class="mac-row-label">Application</span></div>
-              <span class="mac-row-value">JSS Management System</span>
-            </div>
-            <div class="mac-row">
-              <div class="mac-row-text"><span class="mac-row-label">Version</span></div>
-              <span class="mac-row-value">2.0.0</span>
-            </div>
-            <div class="mac-row">
-              <div class="mac-row-text"><span class="mac-row-label">Institution</span></div>
-              <span class="mac-row-value">Govt. Polytechnic, Beelagi</span>
-            </div>
-            <div class="mac-row">
-              <div class="mac-row-text"><span class="mac-row-label">Build Date</span></div>
-              <span class="mac-row-value">Feb 2026</span>
-            </div>
-          </div>
-
-          <div class="mac-group-title">DATABASE</div>
-          <div class="mac-group">
-            <div class="mac-row">
-              <div class="mac-row-icon" style="background:#30d158;"><i class="fas fa-database"></i></div>
-              <div class="mac-row-text">
-                <span class="mac-row-label">database connection</span>
-                <span class="mac-row-sub">Real-time sync enabled</span>
-              </div>
-              <span style="font-size:11px;background:#d1fae5;color:#065f46;padding:3px 8px;border-radius:20px;font-weight:600;">Connected</span>
-            </div>
-          </div>
-        </div>
-
+      <!-- Phone Section -->
+      <div>
+        <p style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 8px 0;">Phone Number</p>
+        <p id="profilePhone" style="font-size: 15px; font-weight: 600; color: #cbd5e1; margin: 0;">Not provided</p>
       </div>
-      <!-- / Content Pane -->
+
+      <!-- Department Section -->
+      <div>
+        <p style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 8px 0;">Department</p>
+        <p id="profileDept" style="font-size: 15px; font-weight: 600; color: #cbd5e1; margin: 0;">Not assigned</p>
+      </div>
+
+      <!-- Designation Section -->
+      <div>
+        <p style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 8px 0;">Designation</p>
+        <p id="profileDesignation" style="font-size: 15px; font-weight: 600; color: #cbd5e1; margin: 0;">Not assigned</p>
+      </div>
+
+      <!-- Gender Section -->
+      <div>
+        <p style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 8px 0;">Gender</p>
+        <p id="profileGender" style="font-size: 15px; font-weight: 600; color: #cbd5e1; margin: 0;">Not specified</p>
+      </div>
+
+      <!-- Qualification Section -->
+      <div>
+        <p style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 8px 0;">Qualification</p>
+        <p id="profileQualification" style="font-size: 15px; font-weight: 600; color: #cbd5e1; margin: 0;">Not provided</p>
+      </div>
+
+      <!-- Joining Date Section -->
+      <div>
+        <p style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 8px 0;">Joining Date</p>
+        <p id="profileJoining" style="font-size: 15px; font-weight: 600; color: #cbd5e1; margin: 0;">Not provided</p>
+      </div>
 
     </div>
-    <!-- / Body -->
 
-    <!-- Legacy hidden sections (keep for JS compat) -->
-    <div style="display:none;">
-      <div id="aboutSection"><p id="aboutText">Write something about yourself...</p></div>
-      <div id="securitySection"></div>
-      <div id="languagesSection"></div>
+    <!-- Subjects Section -->
+    <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+      <p style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 12px 0;">Subjects Assigned</p>
+      <p id="profileSubjects" style="font-size: 15px; font-weight: 600; color: #cbd5e1; margin: 0;">No subjects assigned</p>
+    </div>
+
+    <!-- Close Button Footer -->
+    <div style="display: flex; gap: 12px; margin-top: 32px; padding-top: 24px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+      <button onclick="closeProfileModal()" style="flex: 1; padding: 12px 20px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.2); background: rgba(255, 255, 255, 0.05); color: white; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.3s;">
+        Close
+      </button>
     </div>
 
   </div>
