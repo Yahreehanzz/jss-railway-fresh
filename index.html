@@ -41122,20 +41122,22 @@ function restoreTeacherZonePhoto() {
     <main style="position: relative; z-index: 10; max-width: 80rem; margin: 0 auto; padding: 3rem 1.5rem; min-height: 100vh; display: flex; flex-direction: column; gap: 2.5rem;">
       
       <!-- Header Section -->
-      <header style="display: flex; flex-direction: column; gap: 0.5rem;">
-        <div style="display: flex; align-items: center; gap: 0.75rem; font-size: 12px; font-weight: 700; letter-spacing: 2px; color: #64748b; text-transform: uppercase;">
-          <i class="fas fa-building" style="color: #475569; font-size: 14px;"></i>
-          <span>Govt. Polytechnic, Beelagi</span>
+      <header style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1rem;">
+        <div style="display: flex; align-items: center; gap: 1rem; font-size: 12px; font-weight: 700; letter-spacing: 2px; color: #64748b; text-transform: uppercase;">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-building" style="color: #818cf8; font-size: 16px;"></i>
+            <span style="color: #94a3b8;">Govt. Polytechnic, Beelagi</span>
+          </div>
           <span style="color: #334155;">&bull;</span>
           <span style="color: #818cf8;">Staff Portal</span>
         </div>
-        <h1 style="font-size: 3.5rem; font-weight: 800; color: white; letter-spacing: -1px; margin-top: 0.5rem;">
+        <h1 style="font-size: 3rem; font-weight: 800; color: white; letter-spacing: -2px; margin: 0;">
           Staff <span style="background: linear-gradient(to right, #4ade80, #14b8a6, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Dashboard</span>
         </h1>
       </header>
 
       <!-- Metrics Grid -->
-      <section style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+      <section style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
         
         <!-- Metric Card 1 -->
         <div style="background: rgba(15, 22, 41, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); transition: transform 0.3s ease, box-shadow 0.3s ease; border-radius: 1rem; padding: 1.5rem; display: flex; align-items: center; gap: 1.5rem; cursor: pointer;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 20px 40px rgba(0, 0, 0, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 30px rgba(0, 0, 0, 0.1)'">
@@ -41172,9 +41174,9 @@ function restoreTeacherZonePhoto() {
         </div>
 
         <!-- List Container -->
-        <div style="padding: 1rem 1.5rem;" id="staffListContainer2">
+        <div style="padding: 1.5rem;" id="staffListContainer2">
           <!-- Staff items will be populated here by JavaScript -->
-          <div style="display: flex; flex-direction: column; gap: 0.5rem; padding: 0.5rem;">
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
           </div>
         </div>
 
@@ -41247,17 +41249,22 @@ function restoreTeacherZonePhoto() {
       // Populate staff list from existing teachers data
       function populateModernDashboard() {
         const container = document.getElementById('staffListContainer2');
-        if (!window.teachers || window.teachers.length === 0) return;
+        if (!teachers || teachers.length === 0) {
+          container.innerHTML = '<div style="padding: 2rem; text-align: center; color: #94a3b8;">No teachers added yet</div>';
+          return;
+        }
 
         container.innerHTML = '';
-        window.teachers.forEach(teacher => {
+        teachers.forEach(teacher => {
           const initial = teacher.name ? teacher.name.charAt(0).toUpperCase() : '?';
+          const isInDatabase = teacher.database_id ? true : false;
+          
           const staffItem = document.createElement('div');
           staffItem.style.cssText = `
             display: flex;
             flex-direction: column;
             gap: 1.5rem;
-            padding: 1rem;
+            padding: 1.5rem;
             border-radius: 0.75rem;
             background: rgba(26, 35, 58, 0.5);
             border: 1px solid transparent;
@@ -41265,67 +41272,82 @@ function restoreTeacherZonePhoto() {
           `;
           
           staffItem.innerHTML = `
-            <div style="display: flex; flex-direction: column; gap: 1.5rem; md-flex-direction: row; md-align-items: center; md-justify-content: space-between; md-gap: 1.5rem;">
-              <div style="display: flex; align-items: center; gap: 1.25rem;">
-                <div style="position: relative;">
-                  <div style="width: 56px; height: 56px; border-radius: 9999px; background: linear-gradient(to bottom right, #818cf8, #a78bfa); padding: 2px;">
-                    <div style="width: 100%; height: 100%; border-radius: 9999px; background: #070B14; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 20px;">
-                      ${initial}
+            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+              <div style="display: flex; align-items: flex-start; gap: 1.25rem; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 1.25rem; flex: 1;">
+                  <div style="position: relative;">
+                    <div style="width: 56px; height: 56px; border-radius: 9999px; background: linear-gradient(to bottom right, #818cf8, #a78bfa); padding: 2px;">
+                      <div style="width: 100%; height: 100%; border-radius: 9999px; background: #070B14; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 20px;">
+                        ${initial}
+                      </div>
                     </div>
+                    <div style="position: absolute; bottom: 0; right: 0; width: 16px; height: 16px; border-radius: 50%; background: #10b981; border: 2px solid #070B14;"></div>
                   </div>
-                  <div style="position: absolute; bottom: 0; right: 0; width: 16px; height: 16px; border-radius: 50%; background: #10b981; border: 2px solid #070B14;"></div>
+
+                  <div style="display: flex; flex-direction: column; gap: 0.5rem; flex: 1;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                      <h4 style="font-size: 18px; font-weight: 700; color: white; margin: 0;">${teacher.name}</h4>
+                      ${isInDatabase ? '<span style="display: flex; align-items: center; gap: 0.375rem; padding: 0.375rem 0.625rem; border-radius: 0.375rem; background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); font-size: 11px; font-weight: 700; color: #4ade80; text-transform: uppercase; letter-spacing: 0.5px;"><i class="fas fa-database" style="font-size: 12px;"></i> Saved</span>' : '<span style="display: flex; align-items: center; gap: 0.375rem; padding: 0.375rem 0.625rem; border-radius: 0.375rem; background: rgba(248, 113, 113, 0.1); border: 1px solid rgba(248, 113, 113, 0.3); font-size: 11px; font-weight: 700; color: #fca5a5; text-transform: uppercase; letter-spacing: 0.5px;"><i class="fas fa-exclamation-circle" style="font-size: 12px;"></i> Local</span>'}
+                    </div>
+                    <p style="font-size: 13px; font-weight: 500; color: #cbd5e1; margin: 0; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                      <span style="font-family: monospace; font-size: 12px; background: rgba(255, 255, 255, 0.05); padding: 0.375rem 0.5rem; border-radius: 0.25rem; border: 1px solid rgba(255, 255, 255, 0.1);">ID: ${teacher.id}</span>
+                      <span style="color: #475569;">&bull;</span>
+                      <span>${teacher.subjects ? teacher.subjects.join(', ') : 'No subjects assigned'}</span>
+                    </p>
+                  </div>
                 </div>
 
-                <div style="display: flex; flex-direction: column; gap: 0.25rem;">
-                  <div style="display: flex; align-items: center; gap: 0.75rem;">
-                    <h4 style="font-size: 18px; font-weight: 700; color: white; margin: 0;">${teacher.name}</h4>
-                    <span style="display: flex; align-items: center; gap: 0.375rem; padding: 0.375rem 0.5rem; border-radius: 0.375rem; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); font-size: 10px; font-weight: 700; color: #4ade80; text-transform: uppercase; letter-spacing: 1px;">
-                      <i class="fas fa-database" style="font-size: 12px;"></i>
-                      ${teacher.subjects ? teacher.subjects[0].substring(0, 10) : 'Unknown'}
-                    </span>
-                  </div>
-                  <p style="font-size: 14px; font-weight: 500; color: #94a3b8; margin: 0; display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
-                    <span style="font-family: monospace; font-size: 12px; background: rgba(255, 255, 255, 0.05); padding: 0.375rem 0.375rem; border-radius: 0.25rem;">ID: ${teacher.id}</span>
-                    <span style="color: #475569;">&bull;</span>
-                    <span>${teacher.subjects ? teacher.subjects.join(', ').substring(0, 40) : 'No subjects'}</span>
-                  </p>
-                </div>
-              </div>
-
-              <div style="display: flex; align-items: center; gap: 1rem; margin-left: 3.5rem;">
-                <span style="display: none; align-items: center; padding: 0.375rem 0.75rem; border-radius: 9999px; background: #111827; border: 1px solid #475569; font-size: 12px; font-weight: 600; color: #cbd5e1;">
-                  ${teacher.department || 'INFORMATION SCIENCE'}
-                </span>
-                
-                <button onclick="showToast('Loading profile for ${teacher.name}...', 'success')" style="position: relative; overflow: hidden; padding: 0.625rem 1.5rem; border-radius: 0.5rem; background: #4f46e5; color: white; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; border: none; cursor: pointer; transition: all 0.3s; box-shadow: 0 0 20px rgba(79, 70, 229, 0.3); display: flex; align-items: center; gap: 0.5rem;">
-                  <span>View Profile</span>
+                <button onclick="showToast('Viewing profile for ${teacher.name}...', 'info')" style="padding: 0.625rem 1.5rem; border-radius: 0.5rem; background: linear-gradient(135deg, #4f46e5, #6366f1); color: white; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; border: none; cursor: pointer; transition: all 0.3s; box-shadow: 0 0 20px rgba(79, 70, 229, 0.3); white-space: nowrap; display: flex; align-items: center; gap: 0.5rem;">
+                  <span>View</span>
                   <i class="fas fa-arrow-right" style="font-size: 12px;"></i>
                 </button>
               </div>
-
             </div>
           `;
 
           staffItem.onmouseenter = function() {
             this.style.background = 'rgba(26, 35, 58, 0.8)';
             this.style.borderColor = 'rgba(100, 116, 139, 0.3)';
+            this.style.transform = 'translateY(-2px)';
           };
           staffItem.onmouseleave = function() {
             this.style.background = 'rgba(26, 35, 58, 0.5)';
             this.style.borderColor = 'transparent';
+            this.style.transform = 'translateY(0)';
           };
 
           container.appendChild(staffItem);
         });
 
-        document.getElementById('staffCountBadge2').textContent = window.teachers.length;
-        document.getElementById('totalTeachersCount2').textContent = window.teachers.length;
-        document.getElementById('activeTeachersCount2').textContent = window.teachers.length;
+        document.getElementById('staffCountBadge2').textContent = teachers.length;
+        document.getElementById('totalTeachersCount2').textContent = teachers.length;
+        document.getElementById('activeTeachersCount2').textContent = teachers.length;
       }
 
-      // Initialize when data is ready
-      setTimeout(populateModernDashboard, 500);
-      window.addEventListener('teachersUpdated', populateModernDashboard);
+      // Initial setup and real-time updates
+      function setupModernDashboard() {
+        populateModernDashboard();
+      }
+
+      // Call when tab switches to dashboard
+      window.setupModernDashboard = setupModernDashboard;
+      
+      // Intercept renderTeacherDashboard to also update modern dashboard
+      const originalRender = window.renderTeacherDashboard;
+      if (originalRender) {
+        window.renderTeacherDashboard = function() {
+          originalRender.apply(this, arguments);
+          setTimeout(populateModernDashboard, 100);
+        };
+      }
+
+      // Also listen for teacher updates
+      window.addEventListener('teachersUpdated', () => {
+        setTimeout(populateModernDashboard, 100);
+      });
+
+      // Initial call
+      setTimeout(setupModernDashboard, 800);
     </script>
 
   </div>
@@ -62064,11 +62086,22 @@ function renderAttendance() {
                 hideLoader();
                 if (data.success) {
                     console.log('✅ Teacher saved to database! ID:', data.data.id);
+                    
+                    // Mark teacher as saved in database
+                    teacher.database_id = data.data.id;
+                    teacher.saved_to_db = true;
+                    localStorage.setItem("teachers", JSON.stringify(teachers));
+                    
                     showMessageBox('✅ Success', 'Teacher Saved to Database Successfully!');
                     document.getElementById("addTeacher").querySelectorAll('input:not([type="file"])').forEach(input => input.value = '');
                     document.getElementById("addTeacher").querySelectorAll('select').forEach(sel => sel.value = '');
                     try { document.getElementById("addTeacherPhoto").value = ''; } catch(e) {}
                     renderTeacherDashboard();
+                    
+                    // Trigger dashboard update
+                    setTimeout(() => {
+                      window.dispatchEvent(new Event('teachersUpdated'));
+                    }, 100);
                 } else {
                     console.error('❌ Database save failed:', data.error);
                     showMessageBox('❌ Error', 'Failed to save: ' + (data.error || 'Unknown error'));
