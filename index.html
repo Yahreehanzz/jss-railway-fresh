@@ -61616,11 +61616,22 @@ function renderAttendance() {
         function renderTeacherDashboard() {
             try {
                 console.log('[DEBUG] renderTeacherDashboard called, teachers count:', teachers?.length || 0);
+                console.log('[DEBUG] selectedBranch:', selectedBranch);
                 
                 // Ensure teachers are loaded
                 if (!teachers || teachers.length === 0) {
                     console.warn('[WARN] Teachers data not loaded, loading from localStorage...');
                     teachers = JSON.parse(localStorage.getItem("teachers") || "[]");
+                    console.log('[DEBUG] After localStorage load, teachers count:', teachers.length);
+                }
+                
+                if (!teachers || teachers.length === 0) {
+                    console.error('[ERROR] No teachers found even after localStorage load');
+                    const container = document.getElementById("staffListContainer");
+                    if (container) {
+                        container.innerHTML = `<div style="text-align:center;padding:24px;color:rgba(148,163,184,1);font-size:13px;">No staff data loaded. Please refresh or contact admin.</div>`;
+                    }
+                    return;
                 }
                 
                 const filteredByBranchTeachers = teachers.filter(t => t.branch === selectedBranch);
@@ -61731,29 +61742,41 @@ function renderAttendance() {
             try {
                 const container = document.getElementById("staffListContainer");
                 if (!container) {
-                    console.warn('[WARN] staffListContainer element not found');
+                    console.error('[ERROR] staffListContainer element not found');
                     return;
                 }
 
                 console.log('[DEBUG] renderDashboardStaffList called, teachers count:', teachers?.length || 0);
+                
+                // Ensure teachers are loaded
+                if (!teachers || teachers.length === 0) {
+                    console.warn('[WARN] Teachers not loaded, attempting to load from localStorage...');
+                    teachers = JSON.parse(localStorage.getItem("teachers") || "[]");
+                }
+                
                 container.innerHTML = "";
 
                 // Get teachers for current branch
-                const branchTeachers = teachers.filter(t => t.branch === selectedBranch);
-                console.log('[DEBUG] Teachers for branch:', branchTeachers.length);
+                const branchTeachers = teachers ? teachers.filter(t => t.branch === selectedBranch) : [];
+                console.log('[DEBUG] Teachers for branch:', branchTeachers.length, 'Branch:', selectedBranch);
 
                 // Update section header badge
                 const badge = document.getElementById('dashboardStaffCountBadge');
                 if (badge) badge.textContent = branchTeachers.length;
 
                 if (branchTeachers.length === 0) {
-                    container.innerHTML = `<div style="text-align:center;padding:24px;color:rgba(148,163,184,1);font-size:13px;">No staff members found in this branch.</div>`;
+                    container.innerHTML = `<div style="text-align:center;padding:24px;color:rgba(148,163,184,1);font-size:13px;">No staff members found in this branch. Please ensure teachers are added.</div>`;
                     return;
                 }
 
                 branchTeachers.forEach(t => {
                     try {
-                        const initial = t.name ? t.name.charAt(0).toUpperCase() : '?';
+                        if (!t || !t.name) {
+                            console.warn('[WARN] Invalid teacher object:', t);
+                            return;
+                        }
+
+                        const initial = t.name.charAt(0).toUpperCase();
                         const deptLabel = t.department || (t.subjects && t.subjects[0]) || 'Staff';
                         const subjectsList = (t.subjects && t.subjects.length > 0) ? t.subjects.slice(0, 2).join(', ') : 'N/A';
                         
@@ -61836,7 +61859,7 @@ function renderAttendance() {
                                 box-shadow: 0 2px 8px rgba(16,185,129,0.15);
                                 position: relative;
                                 overflow: hidden;
-                            " onclick="event.stopPropagation();showTeacherProfile('${t.id}')">
+                            " onclick="event.stopPropagation();showTeacherProfile('${(t.id || '').replace(/'/g, "\\'")}')">
                                 <span style="position:relative;z-index:2;display:flex;align-items:center;gap:6px;">
                                     <i class="fas fa-user" style="font-size:10px;"></i>
                                     PROFILE
@@ -61875,13 +61898,17 @@ function renderAttendance() {
 
                         container.appendChild(card);
                     } catch (itemError) {
-                        console.warn('[WARN] Error rendering dashboard staff item:', t, itemError);
+                        console.error('[ERROR] Error rendering dashboard staff item:', t, itemError);
                     }
                 });
 
-                console.log('[DEBUG] renderDashboardStaffList completed successfully');
+                console.log('[DEBUG] renderDashboardStaffList completed, rendered:', branchTeachers.length, 'teachers');
             } catch (error) {
                 console.error('[ERROR] renderDashboardStaffList error:', error);
+                const container = document.getElementById("staffListContainer");
+                if (container) {
+                    container.innerHTML = `<div style="text-align:center;padding:24px;color:rgba(200,50,50,1);font-size:13px;">Error loading staff list. Check console for details.</div>`;
+                }
             }
         }
 
