@@ -41187,6 +41187,106 @@ function restoreTeacherZonePhoto() {
     <!-- Toast Container -->
     <div id="toast-container" style="position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 50; display: flex; flex-direction: column; gap: 0.75rem;"></div>
 
+    <!-- Profile Modal -->
+    <div id="profileModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 1rem;">
+      <div style="background: linear-gradient(135deg, rgba(15, 22, 41, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%); border: 1px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(16px); border-radius: 1.5rem; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 2rem; position: relative;">
+        
+        <!-- Close Button -->
+        <button onclick="document.getElementById('profileModal').style.display='none'" style="position: absolute; top: 1rem; right: 1rem; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; font-size: 20px; transition: all 0.3s;">
+          <i class="fas fa-times"></i>
+        </button>
+
+        <!-- Header -->
+        <div style="display: flex; align-items: flex-start; gap: 1.5rem; margin-bottom: 2rem;">
+          <div style="position: relative;">
+            <div id="profileAvatar" style="width: 80px; height: 80px; border-radius: 9999px; background: linear-gradient(to bottom right, #818cf8, #a78bfa); padding: 2px; display: flex; align-items: center; justify-content: center;">
+              <div style="width: 100%; height: 100%; border-radius: 9999px; background: #070B14; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 32px;">D</div>
+            </div>
+            <div id="profileStatusDot" style="position: absolute; bottom: 0; right: 0; width: 20px; height: 20px; border-radius: 50%; background: #10b981; border: 3px solid #070B14;"></div>
+          </div>
+
+          <div style="flex: 1;">
+            <h2 id="profileName" style="font-size: 28px; font-weight: 800; color: white; margin: 0 0 0.5rem 0; letter-spacing: -0.5px;">Teacher Name</h2>
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+              <span id="profileBadge" style="display: flex; align-items: center; gap: 0.375rem; padding: 0.375rem 0.625rem; border-radius: 0.375rem; background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); font-size: 11px; font-weight: 700; color: #4ade80; text-transform: uppercase;">
+                <i class="fas fa-database" style="font-size: 12px;"></i> Saved
+              </span>
+            </div>
+            <p id="profileId" style="font-size: 13px; color: #94a3b8; margin: 0; font-family: monospace;">ID: 123456</p>
+          </div>
+        </div>
+
+        <!-- Info Grid -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+          
+          <!-- Email -->
+          <div style="background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.2); border-radius: 0.75rem; padding: 1rem;">
+            <div style="font-size: 11px; font-weight: 700; color: #818cf8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem;"><i class="fas fa-envelope" style="margin-right: 0.5rem;"></i>Email</div>
+            <p id="profileEmail" style="font-size: 14px; color: white; margin: 0; word-break: break-all;">admin@email.com</p>
+          </div>
+
+          <!-- Phone -->
+          <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 0.75rem; padding: 1rem;">
+            <div style="font-size: 11px; font-weight: 700; color: #2dd4bf; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem;"><i class="fas fa-phone" style="margin-right: 0.5rem;"></i>Phone</div>
+            <p id="profilePhone" style="font-size: 14px; color: white; margin: 0;">+91 98765 43210</p>
+          </div>
+
+          <!-- Department -->
+          <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 0.75rem; padding: 1rem;">
+            <div style="font-size: 11px; font-weight: 700; color: #fbbf24; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem;"><i class="fas fa-building" style="margin-right: 0.5rem;"></i>Department</div>
+            <p id="profileDept" style="font-size: 14px; color: white; margin: 0;">Information Science</p>
+          </div>
+
+          <!-- Designation -->
+          <div style="background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.2); border-radius: 0.75rem; padding: 1rem;">
+            <div style="font-size: 11px; font-weight: 700; color: #d8b4fe; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem;"><i class="fas fa-briefcase" style="margin-right: 0.5rem;"></i>Designation</div>
+            <p id="profileDesignation" style="font-size: 14px; color: white; margin: 0;">Technical Staff</p>
+          </div>
+
+        </div>
+
+        <!-- Additional Info -->
+        <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 0.75rem; padding: 1.5rem; margin-bottom: 1.5rem;">
+          
+          <!-- Gender -->
+          <div style="margin-bottom: 1rem;">
+            <div style="font-size: 11px; font-weight: 700; color: #cbd5e1; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem;"><i class="fas fa-venus-mars" style="margin-right: 0.5rem;"></i>Gender</div>
+            <p id="profileGender" style="font-size: 14px; color: #e2e8f0; margin: 0;">Female</p>
+          </div>
+
+          <!-- Subjects -->
+          <div style="margin-bottom: 1rem;">
+            <div style="font-size: 11px; font-weight: 700; color: #cbd5e1; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem;"><i class="fas fa-book" style="margin-right: 0.5rem;"></i>Subjects</div>
+            <p id="profileSubjects" style="font-size: 14px; color: #e2e8f0; margin: 0;">No subjects assigned</p>
+          </div>
+
+          <!-- Qualification -->
+          <div style="margin-bottom: 1rem;">
+            <div style="font-size: 11px; font-weight: 700; color: #cbd5e1; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem;"><i class="fas fa-graduation-cap" style="margin-right: 0.5rem;"></i>Qualification</div>
+            <p id="profileQualification" style="font-size: 14px; color: #e2e8f0; margin: 0;">B.Tech</p>
+          </div>
+
+          <!-- Date of Joining -->
+          <div>
+            <div style="font-size: 11px; font-weight: 700; color: #cbd5e1; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem;"><i class="fas fa-calendar" style="margin-right: 0.5rem;"></i>Date of Joining</div>
+            <p id="profileJoining" style="font-size: 14px; color: #e2e8f0; margin: 0;">2024-01-15</p>
+          </div>
+
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+          <button onclick="document.getElementById('profileModal').style.display='none'" style="padding: 0.75rem 1.5rem; border-radius: 0.5rem; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: white; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.3s;">
+            Close
+          </button>
+          <button onclick="showToast('Edit profile feature coming soon!', 'info')" style="padding: 0.75rem 1.5rem; border-radius: 0.5rem; background: linear-gradient(135deg, #4f46e5, #6366f1); border: none; color: white; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.3s; box-shadow: 0 0 20px rgba(79, 70, 229, 0.3);">
+            Edit Profile
+          </button>
+        </div>
+
+      </div>
+    </div>
+
     <!-- Styles -->
     <style>
       @keyframes pulse {
@@ -41246,6 +41346,46 @@ function restoreTeacherZonePhoto() {
         }, 3000);
       }
 
+      // Show teacher profile modal
+      function showTeacherProfile(teacher) {
+        const modal = document.getElementById('profileModal');
+        const initial = teacher.name ? teacher.name.charAt(0).toUpperCase() : '?';
+        const isInDatabase = teacher.database_id ? true : false;
+
+        // Update avatar
+        document.querySelector('#profileModal div[style*="border-radius: 9999px"]').innerHTML = 
+          `<div style="width: 100%; height: 100%; border-radius: 9999px; background: #070B14; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 32px;">${initial}</div>`;
+
+        // Update profile info
+        document.getElementById('profileName').textContent = teacher.name || 'Unknown';
+        document.getElementById('profileId').textContent = `ID: ${teacher.id || 'N/A'}`;
+        document.getElementById('profileEmail').textContent = teacher.email || 'Not provided';
+        document.getElementById('profilePhone').textContent = teacher.phone || 'Not provided';
+        document.getElementById('profileDept').textContent = teacher.department || 'Not assigned';
+        document.getElementById('profileDesignation').textContent = teacher.designation || 'Not assigned';
+        document.getElementById('profileGender').textContent = teacher.gender || 'Not specified';
+        document.getElementById('profileQualification').textContent = teacher.qualification || 'Not provided';
+        document.getElementById('profileJoining').textContent = teacher.joining || 'Not provided';
+        document.getElementById('profileSubjects').textContent = (teacher.subjects && teacher.subjects.length > 0) ? teacher.subjects.join(', ') : 'No subjects assigned';
+
+        // Update badge
+        const badgeEl = document.getElementById('profileBadge');
+        if (isInDatabase) {
+          badgeEl.innerHTML = '<i class="fas fa-database" style="font-size: 12px;"></i> SAVED';
+          badgeEl.style.background = 'rgba(16, 185, 129, 0.2)';
+          badgeEl.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+          badgeEl.style.color = '#4ade80';
+        } else {
+          badgeEl.innerHTML = '<i class="fas fa-exclamation-circle" style="font-size: 12px;"></i> LOCAL';
+          badgeEl.style.background = 'rgba(248, 113, 113, 0.1)';
+          badgeEl.style.borderColor = 'rgba(248, 113, 113, 0.3)';
+          badgeEl.style.color = '#fca5a5';
+        }
+
+        // Show modal
+        modal.style.display = 'flex';
+      }
+
       // Populate staff list from existing teachers data
       function populateModernDashboard() {
         const container = document.getElementById('staffListContainer2');
@@ -41297,7 +41437,7 @@ function restoreTeacherZonePhoto() {
                   </div>
                 </div>
 
-                <button onclick="showToast('Viewing profile for ${teacher.name}...', 'info')" style="padding: 0.625rem 1.5rem; border-radius: 0.5rem; background: linear-gradient(135deg, #4f46e5, #6366f1); color: white; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; border: none; cursor: pointer; transition: all 0.3s; box-shadow: 0 0 20px rgba(79, 70, 229, 0.3); white-space: nowrap; display: flex; align-items: center; gap: 0.5rem;">
+                <button onclick='showTeacherProfile(${JSON.stringify(teacher).replace(/'/g, "&apos;")})' style="padding: 0.625rem 1.5rem; border-radius: 0.5rem; background: linear-gradient(135deg, #4f46e5, #6366f1); color: white; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; border: none; cursor: pointer; transition: all 0.3s; box-shadow: 0 0 20px rgba(79, 70, 229, 0.3); white-space: nowrap; display: flex; align-items: center; gap: 0.5rem;">
                   <span>View</span>
                   <i class="fas fa-arrow-right" style="font-size: 12px;"></i>
                 </button>
@@ -41344,6 +41484,13 @@ function restoreTeacherZonePhoto() {
       // Also listen for teacher updates
       window.addEventListener('teachersUpdated', () => {
         setTimeout(populateModernDashboard, 100);
+      });
+
+      // Close modal on background click
+      document.getElementById('profileModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+          this.style.display = 'none';
+        }
       });
 
       // Initial call
