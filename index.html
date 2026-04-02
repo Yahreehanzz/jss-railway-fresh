@@ -38486,7 +38486,264 @@ Easily access and review students' academic performance here. This section provi
         </div>
     </div>
 
-<!-- Role Password Modal (for HOD/Admin) -->
+    <script>
+        // Setup Modal Variables & Functions
+        const SETUP_COUNTRY_CODES = {
+            'India': '+91',
+            'United States': '+1',
+            'Afghanistan': '+93',
+            'Albania': '+355',
+            'Algeria': '+213',
+            'Australia': '+61',
+            'Austria': '+43',
+            'Indonesia': '+62'
+        };
+
+        let setupCurrentStep = 0;
+        const setupTotalSteps = 6;
+        let setupSelectedCountry = 'India';
+        let setupOTPSent = false;
+        let setupOTPEmail = '';
+
+        function setupSelectItem(el) {
+            document.querySelectorAll('.setup-mac-list-item').forEach(item => item.classList.remove('selected'));
+            el.classList.add('selected');
+            setupSelectedCountry = el.textContent.trim();
+        }
+
+        function setupUpdateUI() {
+            const steps = document.querySelectorAll('.setup-step-item');
+            steps.forEach((step, idx) => {
+                step.classList.remove('active');
+                if (idx === setupCurrentStep) {
+                    step.classList.add('active');
+                }
+            });
+
+            const btnBack = document.getElementById('setup-btn-back');
+            const btnNext = document.getElementById('setup-btn-next');
+
+            if (setupCurrentStep > 0 && setupCurrentStep < 2) {
+                btnBack.style.opacity = '1';
+                btnBack.style.pointerEvents = 'auto';
+            } else {
+                btnBack.style.opacity = '0';
+                btnBack.style.pointerEvents = 'none';
+            }
+
+            if (setupCurrentStep === 4) {
+                setTimeout(() => {
+                    setupCurrentStep = 5;
+                    setupUpdateUI();
+                }, 2000);
+            }
+
+            // Show country code when on step 2
+            if (setupCurrentStep === 2) {
+                const countryCode = SETUP_COUNTRY_CODES[setupSelectedCountry] || SETUP_COUNTRY_CODES['India'];
+                document.getElementById('setup-country-code-2').value = countryCode;
+            }
+        }
+
+        function setupCheckPasswords() {
+            const pass = document.getElementById('setup-password').value;
+            const confirm = document.getElementById('setup-confirm-password').value;
+            const error = document.getElementById('setup-password-error');
+            const btn = document.getElementById('setup-btn-next');
+
+            if (confirm.length > 0 && pass !== confirm) {
+                error.style.display = 'block';
+                btn.disabled = true;
+                return false;
+            } else {
+                error.style.display = 'none';
+                btn.disabled = false;
+                return true;
+            }
+        }
+
+        function setupValidateStep() {
+            if (setupCurrentStep === 1) {
+                const name = document.getElementById('setup-fullname').value.trim();
+                const pass = document.getElementById('setup-password').value;
+                if (!name || !pass || !setupCheckPasswords()) return false;
+            }
+            if (setupCurrentStep === 2) {
+                if (!setupOTPSent) {
+                    document.getElementById('setup-phone-error').textContent = 'Please send verification code first';
+                    document.getElementById('setup-phone-error').style.display = 'block';
+                    return false;
+                }
+            }
+            if (setupCurrentStep === 3) {
+                const otp = document.getElementById('setup-otp').value;
+                if (otp.length < 6) return false;
+            }
+            return true;
+        }
+
+        async function setupSendOTP() {
+            const email = document.getElementById('setup-email').value.trim();
+            const phone = document.getElementById('setup-phone').value.trim();
+            const errorEl = document.getElementById('setup-phone-error');
+            const btn = document.getElementById('setup-send-otp-btn');
+            
+            errorEl.style.display = 'none';
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            if (!email || !emailRegex.test(email)) {
+                errorEl.textContent = 'Please enter a valid email address';
+                errorEl.style.display = 'block';
+                return;
+            }
+            
+            if (!phone || phone.length < 7) {
+                errorEl.textContent = 'Please enter a valid phone number';
+                errorEl.style.display = 'block';
+                return;
+            }
+            
+            try {
+                btn.disabled = true;
+                btn.textContent = 'Sending...';
+                
+                const response = await fetch(`${API_BASE}/send-otp`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, phone, countryCode: SETUP_COUNTRY_CODES[setupSelectedCountry] || '+91' })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    setupOTPSent = true;
+                    setupOTPEmail = email;
+                    btn.textContent = 'Code Sent ✓';
+                    btn.style.background = '#34c759';
+                    setTimeout(() => {
+                        setupCurrentStep = 3;
+                        setupUpdateUI();
+                    }, 500);
+                } else {
+                    errorEl.textContent = data.error || 'Failed to send OTP';
+                    errorEl.style.display = 'block';
+                    btn.disabled = false;
+                    btn.textContent = 'Send Code to Email';
+                }
+            } catch (e) {
+                console.error('Error:', e);
+                errorEl.textContent = 'Network error';
+                errorEl.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = 'Send Code to Email';
+            }
+        }
+
+        async function setupVerifyOTP() {
+            const otp = document.getElementById('setup-otp').value.trim();
+            const errorEl = document.getElementById('setup-otp-error');
+            
+            if (otp.length !== 6) {
+                errorEl.textContent = 'Please enter a 6-digit code';
+                errorEl.style.display = 'block';
+                return false;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/verify-otp`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: setupOTPEmail, otp })
+                });
+                
+                const data = await response.json();
+                if (data.success) return true;
+                
+                errorEl.textContent = data.error || 'Invalid OTP';
+                errorEl.style.display = 'block';
+                return false;
+            } catch (e) {
+                errorEl.textContent = 'Network error';
+                errorEl.style.display = 'block';
+                return false;
+            }
+        }
+
+        async function setupResendOTP() {
+            setupOTPSent = false;
+            setupCurrentStep = 2;
+            setupUpdateUI();
+            document.getElementById('setup-send-otp-btn').click();
+        }
+
+        function setupGoNext() {
+            if (!setupValidateStep()) return;
+            
+            if (setupCurrentStep === 3) {
+                setupVerifyOTP().then((verified) => {
+                    if (verified) {
+                        setupCurrentStep = 4;
+                        setupUpdateUI();
+                        setTimeout(() => completeTeacherSetup(), 2500);
+                    }
+                });
+            } else if (setupCurrentStep < setupTotalSteps) {
+                setupCurrentStep++;
+                setupUpdateUI();
+            }
+        }
+
+        function setupGoBack() {
+            if (setupCurrentStep > 0) {
+                setupCurrentStep--;
+                setupUpdateUI();
+            }
+        }
+
+        async function completeTeacherSetup() {
+            const setupData = {
+                fullName: document.getElementById('setup-fullname').value,
+                accountName: document.getElementById('setup-accountname').value,
+                email: document.getElementById('setup-email').value,
+                phone: document.getElementById('setup-phone').value,
+                setupCompleted: true,
+                setupDate: new Date().toISOString()
+            };
+
+            localStorage.setItem('teacherSetupData', JSON.stringify(setupData));
+
+            try {
+                const facultyTeacherId = sessionStorage.getItem('facultyTeacherId');
+                fetch(`${API_BASE}/save-teacher-setup`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ teacherId: facultyTeacherId, setupData })
+                }).catch(() => {});
+            } catch (e) {}
+
+            hideSetupOverlay();
+            setTimeout(() => show2FAModal(), 300);
+        }
+
+        // Initialize setup on modal open
+        function initializeSetup() {
+            setupCurrentStep = 0;
+            setupOTPSent = false;
+            setupOTPEmail = '';
+            setupSelectedCountry = 'India';
+            setupUpdateUI();
+            document.getElementById('setup-email').value = '';
+            document.getElementById('setup-phone').value = '';
+            document.getElementById('setup-otp').value = '';
+            document.getElementById('setup-fullname').value = '';
+            document.getElementById('setup-accountname').value = '';
+            document.getElementById('setup-password').value = '';
+            document.getElementById('setup-confirm-password').value = '';
+            document.getElementById('setup-phone-error').style.display = 'none';
+            document.getElementById('setup-otp-error').style.display = 'none';
+            document.getElementById('setup-password-error').style.display = 'none';
+        }
+    </script>
+
 <div class="hidden overlay-base" id="rolePasswordOverlay" style="z-index:999998;">
     <div class="role-password-modal" id="rolePasswordModal">
         <h2 id="rolePasswordTitle">Enter Password</h2>
@@ -51712,7 +51969,9 @@ function restoreTeacherZonePhoto() {
 
         function startTeacherSetup() {
             document.getElementById('roleSelectionOverlay').classList.add('hidden');
+            initializeSetup();
             const overlay = document.getElementById('teacherSetupOverlay');
+            overlay.classList.remove('hidden');
             overlay.style.display = 'flex';
             // Trigger animation
             setTimeout(() => {
@@ -51724,6 +51983,7 @@ function restoreTeacherZonePhoto() {
             const overlay = document.getElementById('teacherSetupOverlay');
             overlay.classList.remove('show-setup');
             setTimeout(() => {
+                overlay.classList.add('hidden');
                 overlay.style.display = 'none';
             }, 300);
         }
