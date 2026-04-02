@@ -41428,6 +41428,10 @@ function restoreTeacherZonePhoto() {
         }
       }
 
+      // Make functions globally accessible
+      window.showTeacherProfile = showTeacherProfile;
+      window.closeProfileModal = closeProfileModal;
+
       // Populate staff list from existing teachers data
       function populateModernDashboard() {
         const container = document.getElementById('staffListContainer2');
@@ -41502,7 +41506,7 @@ function restoreTeacherZonePhoto() {
                   </div>
                 </div>
 
-                <button data-teacher-id="${teacherId}" class="view-teacher-btn" style="padding: 0.625rem 1.5rem; border-radius: 0.5rem; background: linear-gradient(135deg, #4f46e5, #6366f1); color: white; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; border: none; cursor: pointer; transition: all 0.3s; box-shadow: 0 0 20px rgba(79, 70, 229, 0.3); white-space: nowrap; display: flex; align-items: center; gap: 0.5rem;">
+                <button onclick="window.showTeacherProfile('${teacherId}')" style="padding: 0.625rem 1.5rem; border-radius: 0.5rem; background: linear-gradient(135deg, #4f46e5, #6366f1); color: white; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; border: none; cursor: pointer; transition: all 0.3s; box-shadow: 0 0 20px rgba(79, 70, 229, 0.3); white-space: nowrap; display: flex; align-items: center; gap: 0.5rem;">
                   <span>View</span>
                   <i class="fas fa-arrow-right" style="font-size: 12px;"></i>
                 </button>
@@ -41522,17 +41526,6 @@ function restoreTeacherZonePhoto() {
           };
 
           container.appendChild(staffItem);
-        });
-
-        // Attach click handlers to all VIEW buttons
-        document.querySelectorAll('.view-teacher-btn').forEach(btn => {
-          btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            const teacherId = this.getAttribute('data-teacher-id');
-            console.log('[DEBUG] VIEW button clicked for teacher:', teacherId);
-            showTeacherProfile(teacherId);
-          });
         });
 
         document.getElementById('staffCountBadge2').textContent = displayTeachers.length;
