@@ -41398,29 +41398,39 @@ function restoreTeacherZonePhoto() {
       // Populate staff list from existing teachers data
       function populateModernDashboard() {
         const container = document.getElementById('staffListContainer2');
+        
+        // Ensure teachers array is loaded
         if (!teachers || teachers.length === 0) {
-          container.innerHTML = '<div style="padding: 2rem; text-align: center; color: #94a3b8;">No teachers added yet</div>';
+          console.log('[DEBUG] Teachers empty, loading from localStorage...');
+          teachers = JSON.parse(localStorage.getItem("teachers") || "[]");
+        }
+
+        console.log('[DEBUG] populateModernDashboard called with teachers:', teachers.length);
+
+        if (!teachers || teachers.length === 0) {
+          container.innerHTML = '<div style="padding: 2rem; text-align: center; color: #94a3b8;">No teachers saved to database yet. Add and save teachers to see them here.</div>';
           return;
         }
 
         // Clear the teachers map
         window.teachersMap = {};
 
-        // Only show SAVED teachers (filter out LOCAL ones)
-        const savedTeachers = teachers.filter(t => t.database_id);
+        // Show ALL teachers (both SAVED and being synced)
+        const displayTeachers = teachers.filter(t => t && t.name);
 
         container.innerHTML = '';
         
-        if (savedTeachers.length === 0) {
-          container.innerHTML = '<div style="padding: 2rem; text-align: center; color: #94a3b8;">No teachers saved to database yet. Add and save teachers to see them here.</div>';
+        if (displayTeachers.length === 0) {
+          container.innerHTML = '<div style="padding: 2rem; text-align: center; color: #94a3b8;">No teachers found.</div>';
           return;
         }
 
-        savedTeachers.forEach(teacher => {
+        displayTeachers.forEach(teacher => {
           const teacherId = teacher.database_id || teacher.id;
           window.teachersMap[teacherId] = teacher;
 
           const initial = teacher.name ? teacher.name.charAt(0).toUpperCase() : '?';
+          const isInDatabase = teacher.database_id ? true : false;
           
           const staffItem = document.createElement('div');
           staffItem.style.cssText = `
@@ -41450,12 +41460,12 @@ function restoreTeacherZonePhoto() {
                   <div style="display: flex; flex-direction: column; gap: 0.5rem; flex: 1;">
                     <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
                       <h4 style="font-size: 18px; font-weight: 700; color: white; margin: 0;">${teacher.name}</h4>
-                      <span style="display: flex; align-items: center; gap: 0.375rem; padding: 0.375rem 0.625rem; border-radius: 0.375rem; background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); font-size: 11px; font-weight: 700; color: #4ade80; text-transform: uppercase; letter-spacing: 0.5px;"><i class="fas fa-database" style="font-size: 12px;"></i> Saved</span>
+                      ${isInDatabase ? '<span style="display: flex; align-items: center; gap: 0.375rem; padding: 0.375rem 0.625rem; border-radius: 0.375rem; background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); font-size: 11px; font-weight: 700; color: #4ade80; text-transform: uppercase; letter-spacing: 0.5px;"><i class="fas fa-database" style="font-size: 12px;"></i> Saved</span>' : '<span style="display: flex; align-items: center; gap: 0.375rem; padding: 0.375rem 0.625rem; border-radius: 0.375rem; background: rgba(248, 113, 113, 0.1); border: 1px solid rgba(248, 113, 113, 0.3); font-size: 11px; font-weight: 700; color: #fca5a5; text-transform: uppercase; letter-spacing: 0.5px;"><i class="fas fa-hourglass-end" style="font-size: 12px;"></i> Saving...</span>'}
                     </div>
                     <p style="font-size: 13px; font-weight: 500; color: #cbd5e1; margin: 0; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
                       <span style="font-family: monospace; font-size: 12px; background: rgba(255, 255, 255, 0.05); padding: 0.375rem 0.5rem; border-radius: 0.25rem; border: 1px solid rgba(255, 255, 255, 0.1);">ID: ${teacher.id}</span>
                       <span style="color: #475569;">&bull;</span>
-                      <span>${teacher.subjects ? teacher.subjects.join(', ') : 'No subjects assigned'}</span>
+                      <span>${teacher.subjects && teacher.subjects.length > 0 ? teacher.subjects.join(', ') : 'No subjects assigned'}</span>
                     </p>
                   </div>
                 </div>
@@ -41482,13 +41492,21 @@ function restoreTeacherZonePhoto() {
           container.appendChild(staffItem);
         });
 
-        document.getElementById('staffCountBadge2').textContent = savedTeachers.length;
-        document.getElementById('totalTeachersCount2').textContent = savedTeachers.length;
-        document.getElementById('activeTeachersCount2').textContent = savedTeachers.length;
+        document.getElementById('staffCountBadge2').textContent = displayTeachers.length;
+        document.getElementById('totalTeachersCount2').textContent = displayTeachers.length;
+        document.getElementById('activeTeachersCount2').textContent = displayTeachers.length;
+        
+        console.log('[DEBUG] Dashboard populated with', displayTeachers.length, 'teachers');
       }
 
       // Initial setup and real-time updates
       function setupModernDashboard() {
+        console.log('[DEBUG] setupModernDashboard called');
+        // Ensure teachers are loaded from localStorage
+        if (!teachers || teachers.length === 0) {
+          teachers = JSON.parse(localStorage.getItem("teachers") || "[]");
+          console.log('[DEBUG] Teachers loaded from localStorage:', teachers.length);
+        }
         populateModernDashboard();
       }
 
@@ -41499,14 +41517,21 @@ function restoreTeacherZonePhoto() {
       const originalRender = window.renderTeacherDashboard;
       if (originalRender) {
         window.renderTeacherDashboard = function() {
+          console.log('[DEBUG] Original renderTeacherDashboard called');
           originalRender.apply(this, arguments);
-          setTimeout(populateModernDashboard, 100);
+          setTimeout(() => {
+            console.log('[DEBUG] Triggering populateModernDashboard from original render');
+            populateModernDashboard();
+          }, 100);
         };
       }
 
       // Also listen for teacher updates
       window.addEventListener('teachersUpdated', () => {
-        setTimeout(populateModernDashboard, 100);
+        console.log('[DEBUG] teachersUpdated event fired');
+        setTimeout(() => {
+          populateModernDashboard();
+        }, 100);
       });
 
       // Close modal on background click
@@ -41516,8 +41541,24 @@ function restoreTeacherZonePhoto() {
         }
       });
 
-      // Initial call
-      setTimeout(setupModernDashboard, 800);
+      // Initial call - ensure teachers load
+      console.log('[DEBUG] Initial setup timeout starting...');
+      setTimeout(() => {
+        console.log('[DEBUG] Initial setup timeout triggered');
+        setupModernDashboard();
+      }, 500);
+
+      // Also setup when tab changes
+      const originalSwitchTab = window.switchAdminTab || window.switchTeacherTab;
+      if (originalSwitchTab) {
+        window.switchTeacherTab = function(tabId) {
+          console.log('[DEBUG] Tab switched to:', tabId);
+          if (originalSwitchTab) originalSwitchTab.apply(this, arguments);
+          if (tabId === 'dashboard') {
+            setTimeout(setupModernDashboard, 300);
+          }
+        };
+      }
     </script>
 
   </div>
