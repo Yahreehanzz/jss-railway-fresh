@@ -41101,72 +41101,56 @@ function restoreTeacherZonePhoto() {
     </div>
 
   <!-- DASHBOARD panel -->
-  <div class="tc-panel" id="tcp-dashboard" style="background: #070B14; position: relative; min-height: 100vh;">
-    <!-- Ambient Background Elements -->
-    <div style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-size: 50px 50px; background-image: linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px); mask-image: radial-gradient(ellipse at top, black 20%, transparent 70%); z-index: -1; pointer-events: none;"></div>
-    <div style="position: fixed; top: -10%; left: -10%; width: 500px; height: 500px; background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%); z-index: -1; pointer-events: none;"></div>
-    <div style="position: fixed; top: 20%; right: -10%; width: 600px; height: 600px; background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%); z-index: -1; pointer-events: none;"></div>
-
-    <main style="max-width: 1280px; margin: 0 auto; padding: 48px 24px; min-height: 100vh; display: flex; flex-direction: column; gap: 40px; position: relative; z-index: 10;">
-      
-      <!-- Header Section -->
-      <header style="display: flex; flex-direction: column; gap: 8px;">
-        <div style="display: flex; align-items: center; gap: 12px; font-size: 12px; font-weight: 700; letter-spacing: 2px; color: #64748b; text-transform: uppercase;">
-          <i class="fas fa-building" style="font-size: 16px; color: #475569;"></i>
-          <span>Govt. Polytechnic, Beelagi</span>
-          <span style="color: #334155;">&bull;</span>
-          <span style="color: #818cf8;">Staff Portal</span>
-        </div>
-        <h1 style="font-size: 48px; font-weight: 800; color: white; letter-spacing: -1px; margin: 4px 0 0 0;">
-          Staff <span style="background: linear-gradient(to right, #4ade80, #22d3ee); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Dashboard</span>
-        </h1>
-      </header>
-
-      <!-- Metrics Grid -->
-      <section style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
-        
-        <!-- Metric Card 1 -->
-        <div style="background: rgba(15, 22, 41, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px; padding: 24px; display: flex; align-items: center; gap: 24px; transition: all 0.3s ease; cursor: pointer; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='rgba(255, 255, 255, 0.1)'; this.style.boxShadow='0 20px 40px rgba(0, 0, 0, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(255, 255, 255, 0.05)'; this.style.boxShadow='0 4px 30px rgba(0, 0, 0, 0.1)';">
-          <div style="width: 64px; height: 64px; border-radius: 12px; background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.2); display: flex; align-items: center; justify-content: center; color: #818cf8; transition: all 0.3s ease;">
-            <i class="fas fa-users" style="font-size: 32px;"></i>
+  <div class="tc-panel" id="tcp-dashboard">
+    <div class="tcd-layout">
+      <!-- HERO HEADER -->
+      <div class="tcd-hero">
+        <div class="tcd-grid-overlay"></div>
+        <div class="tcd-hero-top">
+          <div>
+            <div class="tcd-eyebrow">GOVT. POLYTECHNIC, BEELAGI &nbsp;?&nbsp; STAFF PORTAL</div>
+            <h1 class="tcd-h1">Staff <span>Dashboard</span></h1>
           </div>
-          <div style="display: flex; flex-direction: column;">
-            <h2 style="font-size: 32px; font-weight: 800; color: white; margin: 0 0 8px 0; letter-spacing: -0.5px;" id="totalTeachersCount2">0</h2>
-            <p style="font-size: 12px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.5px; margin: 0;">Total Staff &bull; Current Branch</p>
+          <div class="tcd-search-bar" style="display:none;">
+            <i class="fas fa-search"></i>
+            <input id="teacherSearch" onkeyup="renderTeacherList()" placeholder="Search by name, ID, subject?"/>
+            <select id="teacherFilterSubject" style="display:none;" onchange="renderTeacherList()"><option value="all">All Depts</option></select>
+            <button onclick="switchTeacherTab('add')" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;color:#fff;padding:9px 18px;border-radius:10px;font-size:11px;font-weight:700;letter-spacing:1.5px;cursor:pointer;white-space:nowrap;"><i class="fas fa-user-plus"></i> ADD</button>
           </div>
         </div>
-
-        <!-- Metric Card 2 -->
-        <div style="background: rgba(15, 22, 41, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px; padding: 24px; display: flex; align-items: center; gap: 24px; transition: all 0.3s ease; cursor: pointer; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);" onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='rgba(255, 255, 255, 0.1)'; this.style.boxShadow='0 20px 40px rgba(0, 0, 0, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='rgba(255, 255, 255, 0.05)'; this.style.boxShadow='0 4px 30px rgba(0, 0, 0, 0.1)';">
-          <div style="width: 64px; height: 64px; border-radius: 12px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); display: flex; align-items: center; justify-content: center; color: #4ade80; transition: all 0.3s ease;">
-            <i class="fas fa-chalkboard-user" style="font-size: 32px;"></i>
+        <!-- STAT CARDS -->
+        <!-- Hidden elements to preserve JS compatibility -->
+        <span id="csTeachersCount" style="display:none">0</span>
+        <span id="ecTeachersCount" style="display:none">0</span>
+        <span id="meTeachersCount" style="display:none">0</span>
+        <div style="display:flex;gap:16px;position:relative;z-index:1;">
+          <div class="tcd-stat" style="flex:1;">
+            <div class="tcd-stat-icon all"><i class="fas fa-users"></i></div>
+            <div class="tcd-stat-info">
+              <div class="tcd-stat-num" id="totalTeachersCount">0</div>
+              <div class="tcd-stat-label">Total Staff ? Current Branch</div>
+            </div>
           </div>
-          <div style="display: flex; flex-direction: column;">
-            <h2 style="font-size: 32px; font-weight: 800; color: white; margin: 0 0 8px 0; letter-spacing: -0.5px;" id="activeTeachersCount2">0</h2>
-            <p style="font-size: 12px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.5px; margin: 0;">Active Teachers</p>
+          <span id="tcBranchDeptCount" style="display:none">0</span>
+          <span id="tcBranchDeptLabel" style="display:none"></span>
+          <div class="tcd-stat" style="flex:1;">
+            <div class="tcd-stat-icon" style="background:rgba(20,184,166,0.2);color:#5eead4;box-shadow:0 0 20px rgba(20,184,166,0.2);"><i class="fas fa-chalkboard-teacher"></i></div>
+            <div class="tcd-stat-info">
+              <div class="tcd-stat-num" id="tcHODCount">0</div>
+              <div class="tcd-stat-label">Teachers</div>
+            </div>
           </div>
         </div>
-
-      </section>
-
-      <!-- Staff List Section -->
-      <section style="background: rgba(15, 22, 41, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);">
-        
-        <!-- Section Header -->
-        <div style="padding: 20px 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); background: rgba(255, 255, 255, 0.02); display: flex; align-items: center; gap: 12px;">
-          <i class="fas fa-id-card" style="font-size: 16px; color: #94a3b8;"></i>
-          <h3 style="font-size: 12px; font-weight: 700; color: #cbd5e1; letter-spacing: 2px; text-transform: uppercase; margin: 0;">All Staff</h3>
-          <span style="padding: 4px 10px; border-radius: 99px; background: rgba(99, 102, 241, 0.2); color: #a5b4fc; font-size: 12px; font-weight: 700; border: 1px solid rgba(99, 102, 241, 0.3);" id="staffCountBadge2">0</span>
+      </div>
+      <!-- BODY -->
+      <div class="tcd-body">
+        <!-- Staff list -->
+        <div class="tcd-glass-card" style="display:flex;flex-direction:column;">
+          <div class="tcd-card-title"><i class="fas fa-id-badge"></i> All Staff &nbsp;<span id="tcStaffCountBadge" style="background:rgba(99,102,241,0.3);color:#a5b4fc;border-radius:99px;padding:2px 10px;font-size:10px;letter-spacing:1px;">0</span></div>
+          <ul class="tcd-teacher-list" id="teacherList"></ul>
         </div>
-
-        <!-- List Container -->
-        <div style="padding: 16px 24px; display: flex; flex-direction: column; gap: 12px;" id="staffListContainer2">
-          <div style="text-align: center; padding: 32px; color: #94a3b8;">No teachers saved to database yet. Add and save teachers to see them here.</div>
-        </div>
-
-      </section>
-
-    </main>
+      </div>
+    </div>
   </div>
 
   <!-- ADD TEACHER panel -->
@@ -61612,196 +61596,52 @@ function renderAttendance() {
 
         function renderTeacherDashboard() {
             try {
-                console.log('[DEBUG] renderTeacherDashboard called');
+                console.log('[DEBUG] renderTeacherDashboard called, teachers count:', teachers?.length || 0);
                 
                 // Ensure teachers are loaded
                 if (!teachers || teachers.length === 0) {
+                    console.warn('[WARN] Teachers data not loaded, loading from localStorage...');
                     teachers = JSON.parse(localStorage.getItem("teachers") || "[]");
                 }
+                
+                const filteredByBranchTeachers = teachers.filter(t => t.branch === selectedBranch);
+                console.log('[DEBUG] Filtered teachers by branch:', filteredByBranchTeachers.length);
 
-                // Only show SAVED teachers (with database_id)
-                const displayTeachers = teachers.filter(t => t && t.name && t.database_id);
-                console.log('[DEBUG] Display teachers (SAVED only):', displayTeachers.length);
+                const total = filteredByBranchTeachers.length;
+                const isCS = t => (t.department && (t.department.toLowerCase().includes('computer') || t.department.toLowerCase().includes('cs'))) || (t.subjects && t.subjects.includes('Computer Science'));
+                const isEC = t => (t.department && (t.department.toLowerCase().includes('electron') || t.department.toLowerCase().includes('ec'))) || (t.subjects && t.subjects.includes('Electronics'));
+                const isME = t => (t.department && (t.department.toLowerCase().includes('mech') || t.department.toLowerCase().includes('me'))) || (t.subjects && t.subjects.includes('Mechanical'));
+                const csTeachers = filteredByBranchTeachers.filter(isCS).length;
+                const ecTeachers = filteredByBranchTeachers.filter(isEC).length;
+                const meTeachers = filteredByBranchTeachers.filter(isME).length;
+                const hodCount   = filteredByBranchTeachers.length;
 
-                const container = document.getElementById('staffListContainer2');
-                if (!container) {
-                    console.warn('[WARN] staffListContainer2 not found');
-                    return;
-                }
+                const totalEl = document.getElementById("totalTeachersCount");
+                const csEl = document.getElementById("csTeachersCount");
+                const ecEl = document.getElementById("ecTeachersCount");
+                const meEl = document.getElementById("meTeachersCount");
+                
+                if (totalEl) totalEl.textContent = total;
+                if (csEl) csEl.textContent = csTeachers;
+                if (ecEl) ecEl.textContent = ecTeachers;
+                if (meEl) meEl.textContent = meTeachers;
 
-                // Update count badges
-                document.getElementById('staffCountBadge2').textContent = displayTeachers.length;
-                document.getElementById('totalTeachersCount2').textContent = displayTeachers.length;
-                document.getElementById('activeTeachersCount2').textContent = displayTeachers.length;
+                // Branch-specific dept card
+                const bdc = document.getElementById('tcBranchDeptCount'); 
+                if (bdc) bdc.textContent = total;
+                const bdl = document.getElementById('tcBranchDeptLabel'); 
+                if (bdl) bdl.textContent = 'Staff';
+                const hc  = document.getElementById('tcHODCount');        
+                if (hc)  hc.textContent  = hodCount;
 
-                if (displayTeachers.length === 0) {
-                    container.innerHTML = '<div style="padding: 32px; text-align: center; color: #94a3b8;">No saved teachers yet. Add a teacher and save to database to see them here.</div>';
-                    return;
-                }
-
-                container.innerHTML = '';
-                window.teachersMap = {};
-
-                displayTeachers.forEach(teacher => {
-                    if (!teacher.name) return;
-
-                    // Populate map for profile modal lookups
-                    window.teachersMap[teacher.database_id] = teacher;
-
-                    const initial = teacher.name.charAt(0).toUpperCase();
-                    
-                    const staffItem = document.createElement('div');
-                    staffItem.style.cssText = `
-                        display: flex;
-                        flex-direction: column;
-                        gap: 24px;
-                        padding: 16px;
-                        border-radius: 12px;
-                        background: rgba(26, 35, 58, 0.5);
-                        border: 1px solid transparent;
-                        transition: all 0.3s;
-                    `;
-                    
-                    staffItem.innerHTML = `
-                        <div style="display: flex; flex-direction: column; gap: 24px;">
-                            <div style="display: flex; align-items: flex-start; gap: 20px; justify-content: space-between;">
-                                <div style="display: flex; align-items: center; gap: 20px; flex: 1;">
-                                    <div style="position: relative;">
-                                        <div style="width: 56px; height: 56px; border-radius: 9999px; background: linear-gradient(to bottom right, #818cf8, #a78bfa); padding: 2px;">
-                                            <div style="width: 100%; height: 100%; border-radius: 9999px; background: #070B14; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 20px;">
-                                                ${initial}
-                                            </div>
-                                        </div>
-                                        <div style="position: absolute; bottom: 0; right: 0; width: 16px; height: 16px; border-radius: 50%; background: #10b981; border: 2px solid #070B14;"></div>
-                                    </div>
-
-                                    <div style="display: flex; flex-direction: column; gap: 8px; flex: 1;">
-                                        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                                            <h4 style="font-size: 18px; font-weight: 700; color: white; margin: 0;">${teacher.name}</h4>
-                                            <span style="display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 6px; background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); font-size: 11px; font-weight: 700; color: #4ade80; text-transform: uppercase; letter-spacing: 0.5px;"><i class="fas fa-database" style="font-size: 12px;"></i> Saved</span>
-                                        </div>
-                                        <p style="font-size: 13px; font-weight: 500; color: #cbd5e1; margin: 0; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                                            <span style="font-family: monospace; font-size: 12px; background: rgba(255, 255, 255, 0.05); padding: 6px 8px; border-radius: 4px; border: 1px solid rgba(255, 255, 255, 0.1);">ID: ${teacher.id}</span>
-                                            <span style="color: #475569;">&bull;</span>
-                                            <span>${teacher.subjects && teacher.subjects.length > 0 ? teacher.subjects.join(', ') : 'No subjects assigned'}</span>
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <button data-teacher='${JSON.stringify(teacher).replace(/'/g, "&apos;")}' onclick="openTeacherModal(this)" style="padding: 10px 24px; border-radius: 8px; background: linear-gradient(135deg, #4f46e5, #6366f1); color: white; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; border: none; cursor: pointer; transition: all 0.3s; box-shadow: 0 0 20px rgba(79, 70, 229, 0.3); white-space: nowrap; display: flex; align-items: center; gap: 8px;">
-                                    <span>View</span>
-                                    <i class="fas fa-arrow-right" style="font-size: 12px;"></i>
-                                </button>
-                            </div>
-                        </div>
-                    `;
-
-                    staffItem.onmouseenter = function() {
-                        this.style.background = 'rgba(26, 35, 58, 0.8)';
-                        this.style.borderColor = 'rgba(100, 116, 139, 0.3)';
-                        this.style.transform = 'translateY(-2px)';
-                    };
-                    staffItem.onmouseleave = function() {
-                        this.style.background = 'rgba(26, 35, 58, 0.5)';
-                        this.style.borderColor = 'transparent';
-                        this.style.transform = 'translateY(0)';
-                    };
-
-                    container.appendChild(staffItem);
-                });
-
-                console.log('[DEBUG] Dashboard rendered with', displayTeachers.length, 'teachers');
+                console.log('[DEBUG] Rendering teacher list...');
+                renderTeacherList();
+                updateTeacherDeptProgressBars();
+                console.log('[DEBUG] renderTeacherDashboard completed successfully');
             } catch (error) {
-                console.error('[ERROR] renderTeacherDashboard:', error);
+                console.error('[ERROR] renderTeacherDashboard error:', error);
             }
         }
-
-        // Open teacher profile modal from button click
-        function openTeacherModal(btnElement) {
-            try {
-                console.log('[DEBUG] openTeacherModal called');
-                
-                const teacherJson = btnElement.getAttribute('data-teacher');
-                if (!teacherJson) {
-                    console.error('[ERROR] No teacher data found on button');
-                    showToast('Teacher data not found', 'info');
-                    return;
-                }
-
-                const teacher = JSON.parse(teacherJson);
-                console.log('[DEBUG] Teacher loaded:', teacher.name);
-
-                const modal = document.getElementById('profileModal');
-                if (!modal) {
-                    console.error('[ERROR] Modal not found');
-                    return;
-                }
-
-                // Update avatar
-                const initial = teacher.name ? teacher.name.charAt(0).toUpperCase() : '?';
-                const avatarDiv = modal.querySelector('#profileAvatar');
-                if (avatarDiv) {
-                    avatarDiv.innerHTML = `<div style="width: 100%; height: 100%; border-radius: 9999px; background: #070B14; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 32px;">${initial}</div>`;
-                }
-
-                // Update all fields
-                const updateElement = (id, text) => {
-                    const el = document.getElementById(id);
-                    if (el) el.textContent = text;
-                };
-
-                updateElement('profileName', teacher.name || 'Unknown');
-                updateElement('profileId', `ID: ${teacher.id || 'N/A'}`);
-                updateElement('profileEmail', teacher.email || 'Not provided');
-                updateElement('profilePhone', teacher.phone || 'Not provided');
-                updateElement('profileDept', teacher.department || 'Not assigned');
-                updateElement('profileDesignation', teacher.designation || 'Not assigned');
-                updateElement('profileGender', teacher.gender || 'Not specified');
-                updateElement('profileQualification', teacher.qualification || 'Not provided');
-                updateElement('profileJoining', teacher.joining || 'Not provided');
-                updateElement('profileSubjects', (teacher.subjects && teacher.subjects.length > 0) ? teacher.subjects.join(', ') : 'No subjects assigned');
-
-                // Update badge
-                const badgeEl = document.getElementById('profileBadge');
-                if (badgeEl) {
-                    if (teacher.database_id) {
-                        badgeEl.innerHTML = '<i class="fas fa-database" style="font-size: 12px;"></i> SAVED';
-                        badgeEl.style.background = 'rgba(16, 185, 129, 0.2)';
-                        badgeEl.style.borderColor = 'rgba(16, 185, 129, 0.4)';
-                        badgeEl.style.color = '#4ade80';
-                    } else {
-                        badgeEl.innerHTML = '<i class="fas fa-exclamation-circle" style="font-size: 12px;"></i> LOCAL';
-                        badgeEl.style.background = 'rgba(248, 113, 113, 0.1)';
-                        badgeEl.style.borderColor = 'rgba(248, 113, 113, 0.3)';
-                        badgeEl.style.color = '#fca5a5';
-                    }
-                }
-
-                // Show modal using setProperty to override !important
-                console.log('[DEBUG] Opening modal...');
-                modal.style.setProperty('display', 'flex', 'important');
-                modal.style.setProperty('align-items', 'center', 'important');
-                modal.style.setProperty('justify-content', 'center', 'important');
-                console.log('[DEBUG] Modal is now visible');
-                
-            } catch(error) {
-                console.error('[ERROR] Error in openTeacherModal:', error);
-                showToast('Error opening profile: ' + error.message, 'info');
-            }
-        }
-
-        // Close profile modal
-        function closeProfileModal() {
-            const modal = document.getElementById('profileModal');
-            if (modal) {
-                console.log('[DEBUG] Closing modal');
-                modal.style.setProperty('display', 'none', 'important');
-            }
-        }
-
-        // Make functions globally accessible
-        window.openTeacherModal = openTeacherModal;
-        window.closeProfileModal = closeProfileModal;
 
         function renderTeacherList() {
             try {
@@ -82440,94 +82280,474 @@ Govt. Polytechnic, Beelagi`;
 <!-- =============================================
      macOS System Settings Style Profile Modal
      ============================================= -->
-<!-- Teacher Profile Modal -->
-<div id="profileModal" style="display: none !important; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
-  <div style="background: linear-gradient(135deg, rgba(20, 25, 40, 0.98) 0%, rgba(30, 40, 60, 0.98) 100%); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); border-radius: 20px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6); max-width: 700px; width: 100%; max-height: 85vh; overflow-y: auto; padding: 40px; position: relative;">
-    
-    <!-- Close Button -->
-    <button onclick="closeProfileModal()" style="position: absolute; top: 20px; right: 20px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; font-size: 18px; transition: all 0.3s; hover: {background: rgba(255, 255, 255, 0.2);}">
-      <i class="fas fa-times"></i>
-    </button>
+<div class="profile-modal-overlay" id="profileModal">
+  <div class="profile-modal">
 
-    <!-- Profile Header -->
-    <div style="display: flex; align-items: flex-start; gap: 24px; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
-      
-      <!-- Avatar -->
-      <div id="profileAvatar" style="width: 100px; height: 100px; border-radius: 50%; background: linear-gradient(to bottom right, #818cf8, #a78bfa); padding: 3px; flex-shrink: 0;">
-        <div style="width: 100%; height: 100%; border-radius: 50%; background: #070B14; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 40px;">?</div>
+    <!-- Title Bar -->
+    <div class="profile-modal-titlebar">
+      <div class="mac-dot close" onclick="closeProfileModal()" title="Close">
+        <span class="mac-dot-icon"><i class="fas fa-times"></i></span>
       </div>
+      <div class="mac-dot minimize" title="Minimize">
+        <span class="mac-dot-icon"><i class="fas fa-minus"></i></span>
+      </div>
+      <div class="mac-dot expand" title="Expand">
+        <span class="mac-dot-icon"><i class="fas fa-expand"></i></span>
+      </div>
+      <span class="mac-title-text">System Settings</span>
+    </div>
 
-      <!-- Header Info -->
-      <div style="flex: 1;">
-        <h2 id="profileName" style="font-size: 28px; font-weight: 800; color: white; margin: 0 0 8px 0; letter-spacing: -0.5px;">Teacher Name</h2>
-        <p id="profileId" style="font-size: 14px; color: #94a3b8; margin: 0 0 12px 0;">ID: N/A</p>
-        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-          <span id="profileBadge" style="display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 20px; background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); font-size: 12px; font-weight: 700; color: #4ade80; text-transform: uppercase; letter-spacing: 0.5px;">
-            <i class="fas fa-database" style="font-size: 12px;"></i> SAVED
-          </span>
+    <!-- Body -->
+    <div class="profile-mac-body">
+
+      <!-- -- Sidebar -- -->
+      <div class="profile-mac-sidebar">
+
+        <!-- Avatar + Name -->
+        <div class="mac-sidebar-profile">
+          <div class="mac-avatar-wrapper">
+            <img src="https://i.pravatar.cc/150?img=12" alt="Avatar" class="mac-avatar" id="modal-user-avatar"/>
+            <div class="mac-avatar-badge" onclick="document.getElementById('avatarImageInput').click()" title="Change photo">
+              <i class="fas fa-camera"></i>
+            </div>
+            <input type="file" id="avatarImageInput" accept="image/*" style="display:none;" onchange="updateAvatarImage(event)">
+          </div>
+          <div class="mac-sidebar-name" id="modal-user-name">Govt. Polytechnic, Beelagi</div>
+          <div class="mac-sidebar-role" id="modal-user-role">Administrator</div>
+          <button class="mac-sidebar-btn" onclick="openEditProfileModal()">Edit Profile?</button>
         </div>
+
+        <!-- Search -->
+        <div class="mac-sidebar-search">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" placeholder="Search settings" oninput="filterMacSettings(this.value)">
+        </div>
+
+        <!-- Nav -->
+        <div class="mac-nav-section">
+          <div class="mac-nav-section-label">Profile</div>
+
+          <button class="mac-nav-item active" onclick="switchMacPanel('general')" data-panel="general">
+            <div class="mac-nav-icon-wrap" style="background:#5e5ce6;">
+              <i class="fas fa-user" style="font-size:12px;"></i>
+            </div>
+            <span class="mac-nav-label">General</span>
+            <i class="fas fa-chevron-right mac-nav-chevron"></i>
+          </button>
+
+          <button class="mac-nav-item" onclick="switchMacPanel('appearance')" data-panel="appearance">
+            <div class="mac-nav-icon-wrap" style="background:#ff9500;">
+              <i class="fas fa-palette" style="font-size:12px;"></i>
+            </div>
+            <span class="mac-nav-label">Appearance</span>
+            <i class="fas fa-chevron-right mac-nav-chevron"></i>
+          </button>
+
+          <button class="mac-nav-item" onclick="switchMacPanel('security')" data-panel="security">
+            <div class="mac-nav-icon-wrap" style="background:#30d158;">
+              <i class="fas fa-lock" style="font-size:12px;"></i>
+            </div>
+            <span class="mac-nav-label">Password &amp; Security</span>
+            <i class="fas fa-chevron-right mac-nav-chevron"></i>
+          </button>
+
+          <button class="mac-nav-item" onclick="switchMacPanel('languages')" data-panel="languages">
+            <div class="mac-nav-icon-wrap" style="background:#007aff;">
+              <i class="fas fa-globe" style="font-size:12px;"></i>
+            </div>
+            <span class="mac-nav-label">Language &amp; Region</span>
+            <i class="fas fa-chevron-right mac-nav-chevron"></i>
+          </button>
+
+          <button class="mac-nav-item" onclick="switchMacPanel('notifications')" data-panel="notifications">
+            <div class="mac-nav-icon-wrap" style="background:#ff3b30;">
+              <i class="fas fa-bell" style="font-size:12px;"></i>
+            </div>
+            <span class="mac-nav-label">Notifications</span>
+            <i class="fas fa-chevron-right mac-nav-chevron"></i>
+          </button>
+
+          <button class="mac-nav-item" onclick="switchMacPanel('documents')" data-panel="documents">
+            <div class="mac-nav-icon-wrap" style="background:#ff6b35;">
+              <i class="fas fa-folder" style="font-size:12px;"></i>
+            </div>
+            <span class="mac-nav-label">Documents</span>
+            <i class="fas fa-chevron-right mac-nav-chevron"></i>
+          </button>
+
+          <button class="mac-nav-item" onclick="switchMacPanel('about')" data-panel="about">
+            <div class="mac-nav-icon-wrap" style="background:#6e6e73;">
+              <i class="fas fa-info-circle" style="font-size:12px;"></i>
+            </div>
+            <span class="mac-nav-label">About</span>
+            <i class="fas fa-chevron-right mac-nav-chevron"></i>
+          </button>
+        </div>
+
       </div>
+      <!-- / Sidebar -->
+
+      <!-- -- Content Pane -- -->
+      <div class="profile-mac-content">
+
+        <!-- General -->
+        <div class="mac-panel active" id="mac-panel-general">
+          <div class="mac-panel-title">General</div>
+
+          <div class="mac-group-title">IDENTITY</div>
+          <div class="mac-group">
+            <div class="mac-row">
+              <div class="mac-row-icon" style="background:#5e5ce6;"><i class="fas fa-user"></i></div>
+              <div class="mac-row-text">
+                <span class="mac-row-label">College Name</span>
+                <span class="mac-row-sub" id="mac-college-name">Govt. Polytechnic, Beelagi</span>
+              </div>
+              <span class="mac-row-value" style="font-size:11px;color:#aaa;">Read-only</span>
+            </div>
+            <div class="mac-row">
+              <div class="mac-row-icon" style="background:#007aff;"><i class="fas fa-code-branch"></i></div>
+              <div class="mac-row-text">
+                <span class="mac-row-label">Branch / Department</span>
+                <span class="mac-row-sub" id="mac-branch-name">—</span>
+              </div>
+              <span class="mac-row-value" style="font-size:11px;color:#aaa;">Read-only</span>
+            </div>
+            <div class="mac-row">
+              <div class="mac-row-icon" style="background:#ff9500;"><i class="fas fa-id-badge"></i></div>
+              <div class="mac-row-text">
+                <span class="mac-row-label">Role</span>
+              </div>
+              <span class="mac-row-value">Teacher</span>
+              <i class="fas fa-chevron-right mac-row-arrow"></i>
+            </div>
+          </div>
+
+          <div class="mac-group-title">BIO</div>
+          <div class="mac-group">
+            <div class="mac-row" style="align-items: flex-start; padding: 14px 16px;">
+              <div style="flex:1;">
+                <textarea class="mac-textarea" id="macAboutTextarea" placeholder="Write a short bio?">Write something about yourself...</textarea>
+                <div style="display:flex;gap:8px;margin-top:8px;justify-content:flex-end;">
+                  <button class="mac-btn mac-btn-gray" onclick="cancelEditAbout()">Cancel</button>
+                  <button class="mac-btn mac-btn-blue" onclick="saveMacAbout()">Save</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mac-group-title">ACCOUNT</div>
+          <div class="mac-group">
+            <div class="mac-row">
+              <div class="mac-row-icon" style="background:#ff3b30;"><i class="fas fa-sign-out-alt"></i></div>
+              <div class="mac-row-text"><span class="mac-row-label" style="color:#ff3b30;">Sign Out</span></div>
+              <i class="fas fa-chevron-right mac-row-arrow"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Appearance -->
+        <div class="mac-panel" id="mac-panel-appearance">
+          <div class="mac-panel-title">Appearance</div>
+
+          <div class="mac-group-title">DISPLAY MODE</div>
+          <div class="mac-group">
+            <div class="mac-row">
+              <div class="mac-row-icon" style="background:#6e6e73;"><i class="fas fa-circle-half-stroke"></i></div>
+              <div class="mac-row-text">
+                <span class="mac-row-label">Dark Mode</span>
+                <span class="mac-row-sub">Switch interface to dark theme</span>
+              </div>
+              <label class="mac-toggle">
+                <input type="checkbox" id="mac-dark-toggle" onchange="toggleDarkMode(this.checked)">
+                <span class="mac-toggle-track"></span>
+              </label>
+            </div>
+            <div class="mac-row">
+              <div class="mac-row-icon" style="background:#ff9500;"><i class="fas fa-adjust"></i></div>
+              <div class="mac-row-text">
+                <span class="mac-row-label">Accent Colour</span>
+                <span class="mac-row-sub">Highlight colour for buttons &amp; links</span>
+              </div>
+              <div style="display:flex;gap:6px;align-items:center;">
+                <div onclick="setAccentColor('#007aff',this)" style="width:18px;height:18px;border-radius:50%;background:#007aff;cursor:pointer;border:2px solid #007aff;outline:2px solid rgba(0,122,255,0.4);"></div>
+                <div onclick="setAccentColor('#ff9500',this)" style="width:18px;height:18px;border-radius:50%;background:#ff9500;cursor:pointer;"></div>
+                <div onclick="setAccentColor('#ff3b30',this)" style="width:18px;height:18px;border-radius:50%;background:#ff3b30;cursor:pointer;"></div>
+                <div onclick="setAccentColor('#34c759',this)" style="width:18px;height:18px;border-radius:50%;background:#34c759;cursor:pointer;"></div>
+                <div onclick="setAccentColor('#5e5ce6',this)" style="width:18px;height:18px;border-radius:50%;background:#5e5ce6;cursor:pointer;"></div>
+                <div onclick="setAccentColor('#ff6b35',this)" style="width:18px;height:18px;border-radius:50%;background:#ff6b35;cursor:pointer;"></div>
+              </div>
+            </div>
+            <div class="mac-row">
+              <div class="mac-row-icon" style="background:#5e5ce6;"><i class="fas fa-text-height"></i></div>
+              <div class="mac-row-text">
+                <span class="mac-row-label">Text Size</span>
+                <span class="mac-row-sub">Adjust font size across the app</span>
+              </div>
+              <select style="padding:5px 8px;border-radius:6px;border:0.5px solid rgba(0,0,0,0.2);font-size:13px;color:#1a1a1a;background:white;font-family:inherit;outline:none;" onchange="setTextSize(this.value)">
+                <option value="sm">Small</option>
+                <option value="md" selected>Medium</option>
+                <option value="lg">Large</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mac-group-title">SIDEBAR</div>
+          <div class="mac-group">
+            <div class="mac-row">
+              <div class="mac-row-icon" style="background:#007aff;"><i class="fas fa-compress-alt"></i></div>
+              <div class="mac-row-text">
+                <span class="mac-row-label">Compact Sidebar</span>
+                <span class="mac-row-sub">Show icons only when collapsed</span>
+              </div>
+              <label class="mac-toggle">
+                <input type="checkbox">
+                <span class="mac-toggle-track"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Security -->
+        <div class="mac-panel" id="mac-panel-security">
+          <div class="mac-panel-title">Password &amp; Security</div>
+
+          <div class="mac-group-title">CHANGE PASSWORD</div>
+          <div class="mac-group">
+            <div class="mac-row">
+              <div class="mac-row-icon" style="background:#6e6e73;"><i class="fas fa-lock"></i></div>
+              <div class="mac-row-text"><span class="mac-row-label">Current Password</span></div>
+              <input type="password" id="currentPassword" class="mac-input" placeholder="Required">
+            </div>
+            <div class="mac-row">
+              <div class="mac-row-icon" style="background:#30d158;"><i class="fas fa-key"></i></div>
+              <div class="mac-row-text"><span class="mac-row-label">New Password</span></div>
+              <input type="password" id="newPassword" class="mac-input" placeholder="Min 8 characters">
+            </div>
+            <div class="mac-row">
+              <div class="mac-row-icon" style="background:#007aff;"><i class="fas fa-check-circle"></i></div>
+              <div class="mac-row-text"><span class="mac-row-label">Verify Password</span></div>
+              <input type="password" id="confirmPassword" class="mac-input" placeholder="Repeat new password">
+            </div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;margin-bottom:20px;">
+            <button class="mac-btn mac-btn-blue" onclick="changePassword()"><i class="fas fa-shield-alt" style="margin-right:6px;"></i>Update Password</button>
+          </div>
+
+          <div class="mac-group-title">TWO-FACTOR AUTHENTICATION</div>
+          <div class="mac-group">
+            <div class="mac-row">
+              <div class="mac-row-icon" style="background:#ff9500;"><i class="fas fa-mobile-alt"></i></div>
+              <div class="mac-row-text">
+                <span class="mac-row-label">2-Factor Authentication</span>
+                <span class="mac-row-sub">Require OTP on every sign-in</span>
+              </div>
+              <label class="mac-toggle">
+                <input type="checkbox">
+                <span class="mac-toggle-track"></span>
+              </label>
+            </div>
+            <div class="mac-row">
+              <div class="mac-row-icon" style="background:#5e5ce6;"><i class="fas fa-qrcode"></i></div>
+              <div class="mac-row-text">
+                <span class="mac-row-label">Authenticator App</span>
+                <span class="mac-row-sub">Scan QR code to link app</span>
+              </div>
+              <button class="mac-btn mac-btn-gray">Set Up?</button>
+            </div>
+          </div>
+
+          <div class="mac-group-title">ACTIVE SESSIONS</div>
+          <div class="mac-group">
+            <div class="mac-row">
+              <div class="mac-row-icon" style="background:#007aff;"><i class="fas fa-desktop"></i></div>
+              <div class="mac-row-text">
+                <span class="mac-row-label">This Device</span>
+                <span class="mac-row-sub">Current session • Active now</span>
+              </div>
+              <span style="font-size:11px;background:#d1fae5;color:#065f46;padding:3px 8px;border-radius:20px;font-weight:600;">Active</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Language & Region -->
+        <div class="mac-panel" id="mac-panel-languages">
+          <div class="mac-panel-title">Language &amp; Region</div>
+
+          <div class="mac-group-title">PREFERRED LANGUAGE</div>
+          <div class="mac-group">
+            <div class="mac-lang-item selected" onclick="selectMacLanguage('english', this)">
+              <span class="mac-lang-flag">????</span>
+              <span class="mac-lang-name">English</span>
+              <i class="fas fa-check mac-lang-check"></i>
+            </div>
+            <div class="mac-lang-item" onclick="selectMacLanguage('hindi', this)">
+              <span class="mac-lang-flag">????</span>
+              <span class="mac-lang-name">Hindi</span>
+              <i class="fas fa-check mac-lang-check-empty"></i>
+            </div>
+            <div class="mac-lang-item" onclick="selectMacLanguage('spanish', this)">
+              <span class="mac-lang-flag">????</span>
+              <span class="mac-lang-name">Spanish</span>
+              <i class="fas fa-check mac-lang-check-empty"></i>
+            </div>
+            <div class="mac-lang-item" onclick="selectMacLanguage('french', this)">
+              <span class="mac-lang-flag">????</span>
+              <span class="mac-lang-name">French</span>
+              <i class="fas fa-check mac-lang-check-empty"></i>
+            </div>
+            <div class="mac-lang-item" onclick="selectMacLanguage('german', this)">
+              <span class="mac-lang-flag">????</span>
+              <span class="mac-lang-name">German</span>
+              <i class="fas fa-check mac-lang-check-empty"></i>
+            </div>
+            <div class="mac-lang-item" onclick="selectMacLanguage('japanese', this)">
+              <span class="mac-lang-flag">????</span>
+              <span class="mac-lang-name">Japanese</span>
+              <i class="fas fa-check mac-lang-check-empty"></i>
+            </div>
+          </div>
+
+          <div class="mac-group-title">REGION</div>
+          <div class="mac-group">
+            <div class="mac-row">
+              <div class="mac-row-icon" style="background:#ff9500;"><i class="fas fa-map-marker-alt"></i></div>
+              <div class="mac-row-text"><span class="mac-row-label">Country / Region</span></div>
+              <select style="padding:5px 8px;border-radius:6px;border:0.5px solid rgba(0,0,0,0.2);font-size:13px;color:#1a1a1a;background:white;font-family:inherit;outline:none;">
+                <option>India</option>
+                <option>United States</option>
+                <option>United Kingdom</option>
+                <option>Australia</option>
+              </select>
+            </div>
+            <div class="mac-row">
+              <div class="mac-row-icon" style="background:#30d158;"><i class="fas fa-clock"></i></div>
+              <div class="mac-row-text"><span class="mac-row-label">Time Zone</span></div>
+              <span class="mac-row-value">IST (UTC+5:30)</span>
+              <i class="fas fa-chevron-right mac-row-arrow"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notifications -->
+        <div class="mac-panel" id="mac-panel-notifications">
+          <div class="mac-panel-title">Notifications</div>
+
+          <div class="mac-group-title">ALERTS</div>
+          <div class="mac-group">
+            <div class="mac-row">
+              <div class="mac-row-icon" style="background:#ff3b30;"><i class="fas fa-bell"></i></div>
+              <div class="mac-row-text">
+                <span class="mac-row-label">Push Notifications</span>
+                <span class="mac-row-sub">Alerts for attendance, marks &amp; events</span>
+              </div>
+              <label class="mac-toggle">
+                <input type="checkbox" checked>
+                <span class="mac-toggle-track"></span>
+              </label>
+            </div>
+            <div class="mac-row">
+              <div class="mac-row-icon" style="background:#007aff;"><i class="fas fa-envelope"></i></div>
+              <div class="mac-row-text">
+                <span class="mac-row-label">Email Notifications</span>
+                <span class="mac-row-sub">Weekly digest and important updates</span>
+              </div>
+              <label class="mac-toggle">
+                <input type="checkbox" checked>
+                <span class="mac-toggle-track"></span>
+              </label>
+            </div>
+            <div class="mac-row">
+              <div class="mac-row-icon" style="background:#5e5ce6;"><i class="fas fa-volume-up"></i></div>
+              <div class="mac-row-text">
+                <span class="mac-row-label">Sound</span>
+                <span class="mac-row-sub">Play sound for notifications</span>
+              </div>
+              <label class="mac-toggle">
+                <input type="checkbox">
+                <span class="mac-toggle-track"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="mac-group-title">DO NOT DISTURB</div>
+          <div class="mac-group">
+            <div class="mac-row">
+              <div class="mac-row-icon" style="background:#ff9500;"><i class="fas fa-moon"></i></div>
+              <div class="mac-row-text">
+                <span class="mac-row-label">Focus Mode</span>
+                <span class="mac-row-sub">Mute all non-critical alerts</span>
+              </div>
+              <label class="mac-toggle">
+                <input type="checkbox">
+                <span class="mac-toggle-track"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Documents -->
+        <div class="mac-panel" id="mac-panel-documents">
+          <div class="mac-panel-title">Documents</div>
+
+          <input type="file" id="documentFileInput" style="display:none;" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" multiple onchange="handleDocumentUpload(event)">
+
+          <div class="mac-upload-zone" onclick="document.getElementById('documentFileInput').click()">
+            <div class="mac-upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+            <div class="mac-upload-title">Add Documents</div>
+            <div class="mac-upload-sub">Click to upload ? PDF, JPG, PNG, DOC supported</div>
+          </div>
+
+          <div class="mac-doc-grid" id="documentsGrid"></div>
+        </div>
+
+        <!-- About -->
+        <div class="mac-panel" id="mac-panel-about">
+          <div class="mac-panel-title">About</div>
+
+          <div class="mac-group-title">SYSTEM</div>
+          <div class="mac-group">
+            <div class="mac-row">
+              <div class="mac-row-text"><span class="mac-row-label">Application</span></div>
+              <span class="mac-row-value">JSS Management System</span>
+            </div>
+            <div class="mac-row">
+              <div class="mac-row-text"><span class="mac-row-label">Version</span></div>
+              <span class="mac-row-value">2.0.0</span>
+            </div>
+            <div class="mac-row">
+              <div class="mac-row-text"><span class="mac-row-label">Institution</span></div>
+              <span class="mac-row-value">Govt. Polytechnic, Beelagi</span>
+            </div>
+            <div class="mac-row">
+              <div class="mac-row-text"><span class="mac-row-label">Build Date</span></div>
+              <span class="mac-row-value">Feb 2026</span>
+            </div>
+          </div>
+
+          <div class="mac-group-title">DATABASE</div>
+          <div class="mac-group">
+            <div class="mac-row">
+              <div class="mac-row-icon" style="background:#30d158;"><i class="fas fa-database"></i></div>
+              <div class="mac-row-text">
+                <span class="mac-row-label">database connection</span>
+                <span class="mac-row-sub">Real-time sync enabled</span>
+              </div>
+              <span style="font-size:11px;background:#d1fae5;color:#065f46;padding:3px 8px;border-radius:20px;font-weight:600;">Connected</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <!-- / Content Pane -->
 
     </div>
+    <!-- / Body -->
 
-    <!-- Profile Details Grid -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
-      
-      <!-- Email Section -->
-      <div>
-        <p style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 8px 0;">Email Address</p>
-        <p id="profileEmail" style="font-size: 15px; font-weight: 600; color: #cbd5e1; margin: 0;">Not provided</p>
-      </div>
-
-      <!-- Phone Section -->
-      <div>
-        <p style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 8px 0;">Phone Number</p>
-        <p id="profilePhone" style="font-size: 15px; font-weight: 600; color: #cbd5e1; margin: 0;">Not provided</p>
-      </div>
-
-      <!-- Department Section -->
-      <div>
-        <p style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 8px 0;">Department</p>
-        <p id="profileDept" style="font-size: 15px; font-weight: 600; color: #cbd5e1; margin: 0;">Not assigned</p>
-      </div>
-
-      <!-- Designation Section -->
-      <div>
-        <p style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 8px 0;">Designation</p>
-        <p id="profileDesignation" style="font-size: 15px; font-weight: 600; color: #cbd5e1; margin: 0;">Not assigned</p>
-      </div>
-
-      <!-- Gender Section -->
-      <div>
-        <p style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 8px 0;">Gender</p>
-        <p id="profileGender" style="font-size: 15px; font-weight: 600; color: #cbd5e1; margin: 0;">Not specified</p>
-      </div>
-
-      <!-- Qualification Section -->
-      <div>
-        <p style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 8px 0;">Qualification</p>
-        <p id="profileQualification" style="font-size: 15px; font-weight: 600; color: #cbd5e1; margin: 0;">Not provided</p>
-      </div>
-
-      <!-- Joining Date Section -->
-      <div>
-        <p style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 8px 0;">Joining Date</p>
-        <p id="profileJoining" style="font-size: 15px; font-weight: 600; color: #cbd5e1; margin: 0;">Not provided</p>
-      </div>
-
-    </div>
-
-    <!-- Subjects Section -->
-    <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
-      <p style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 12px 0;">Subjects Assigned</p>
-      <p id="profileSubjects" style="font-size: 15px; font-weight: 600; color: #cbd5e1; margin: 0;">No subjects assigned</p>
-    </div>
-
-    <!-- Close Button Footer -->
-    <div style="display: flex; gap: 12px; margin-top: 32px; padding-top: 24px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
-      <button onclick="closeProfileModal()" style="flex: 1; padding: 12px 20px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.2); background: rgba(255, 255, 255, 0.05); color: white; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.3s;">
-        Close
-      </button>
+    <!-- Legacy hidden sections (keep for JS compat) -->
+    <div style="display:none;">
+      <div id="aboutSection"><p id="aboutText">Write something about yourself...</p></div>
+      <div id="securitySection"></div>
+      <div id="languagesSection"></div>
     </div>
 
   </div>
