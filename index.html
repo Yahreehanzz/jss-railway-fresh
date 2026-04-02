@@ -38120,7 +38120,7 @@ Easily access and review students' academic performance here. This section provi
     </div>
 </div>
 
-<!-- Professional Teacher Setup Modal -->
+<!-- Professional Teacher Setup Modal - Split Layout -->
 <div class="hidden overlay-base" id="teacherSetupOverlay" style="z-index:999997;">
     <div class="teacher-setup-modal" id="setupModal">
         <style>
@@ -38140,16 +38140,18 @@ Easily access and review students' academic performance here. This section provi
                 to { opacity: 1; }
             }
 
-            /* Modal Window */
+            /* Modal Window - Split Layout */
             .teacher-setup-modal {
                 width: 95%;
-                max-width: 520px;
+                max-width: 950px;
+                height: auto;
+                max-height: 85vh;
                 background: white;
                 border-radius: 20px;
                 box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
                 overflow: hidden;
                 display: flex;
-                flex-direction: column;
+                flex-direction: row;
                 animation: modalSlideIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
             }
 
@@ -38164,98 +38166,173 @@ Easily access and review students' academic performance here. This section provi
                 }
             }
 
-            /* Modal Header */
-            .setup-modal-header {
+            /* Left Panel - Branding & Logo */
+            .setup-modal-branding {
+                width: 35%;
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                padding: 40px 30px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: space-between;
                 color: white;
-                padding: 24px;
+            }
+
+            .setup-brand-logo {
+                width: 100%;
                 text-align: center;
+                padding: 20px 0;
+            }
+
+            .setup-brand-logo svg {
+                width: 80px;
+                height: 80px;
+                margin-bottom: 20px;
+                filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2));
+            }
+
+            .setup-brand-title {
+                font-size: 24px;
+                font-weight: 700;
+                margin-bottom: 8px;
+                letter-spacing: -0.5px;
+            }
+
+            .setup-brand-subtitle {
+                font-size: 13px;
+                opacity: 0.9;
+                line-height: 1.5;
+                text-align: center;
+                margin-bottom: 30px;
+            }
+
+            .setup-brand-features {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+                margin-top: auto;
+            }
+
+            .setup-brand-feature {
+                display: flex;
+                align-items: flex-start;
+                gap: 12px;
+                font-size: 13px;
+            }
+
+            .setup-brand-feature-icon {
+                width: 24px;
+                height: 24px;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.2);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+                margin-top: 2px;
+            }
+
+            .setup-brand-feature-icon svg {
+                width: 14px;
+                height: 14px;
+            }
+
+            /* Right Panel - Form */
+            .setup-modal-right {
+                width: 65%;
+                padding: 40px;
+                overflow-y: auto;
+                display: flex;
+                flex-direction: column;
+            }
+
+            /* Modal Header - Right Side */
+            .setup-modal-header {
+                background: transparent;
+                color: #1d1d1f;
+                padding: 0 0 24px 0;
+                text-align: left;
+                border-bottom: 1px solid #f2f2f7;
+                margin-bottom: 28px;
             }
 
             .setup-modal-header h2 {
-                margin: 0 0 4px 0;
-                font-size: 24px;
-                font-weight: 600;
+                margin: 0 0 8px 0;
+                font-size: 28px;
+                font-weight: 700;
                 letter-spacing: -0.5px;
+                color: #1d1d1f;
             }
 
             .setup-modal-header p {
                 margin: 0;
                 font-size: 14px;
-                opacity: 0.9;
+                color: #86868b;
             }
 
             /* Modal Content */
             .setup-modal-content {
                 flex: 1;
-                padding: 32px 24px;
                 display: flex;
                 flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                min-height: 350px;
-                position: relative;
-                font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                gap: 0;
+                min-height: 200px;
+                overflow-y: auto;
             }
 
             .setup-step-item {
-                position: absolute;
-                display: flex;
+                display: none;
+                animation: stepFadeIn 0.5s ease-out;
                 flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                opacity: 0;
-                visibility: hidden;
-                transform: translateX(40px) scale(0.95);
-                transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
-                width: 100%;
-                max-width: 450px;
+                gap: 16px;
             }
 
             .setup-step-item.active {
-                opacity: 1;
-                visibility: visible;
-                transform: translateX(0) scale(1);
+                display: flex;
             }
 
-            .setup-step-item.previous {
-                transform: translateX(-40px) scale(0.95);
-                opacity: 0;
-                visibility: hidden;
-            }
-
-            .setup-hero-icon {
-                width: 64px;
-                height: 64px;
-                color: #667eea;
-                margin-bottom: 16px;
-                filter: drop-shadow(0 4px 12px rgba(102, 126, 234, 0.2));
+            @keyframes stepFadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
             }
 
             .setup-title-text {
-                font-size: 22px;
+                font-size: 20px;
                 font-weight: 600;
                 color: #1d1d1f;
-                margin: 0 0 8px 0;
-                text-align: center;
+                margin: 0;
+                letter-spacing: -0.3px;
             }
 
             .setup-subtitle-text {
-                font-size: 14px;
+                font-size: 13px;
                 color: #86868b;
-                margin: 0 0 20px 0;
-                text-align: center;
+                margin: 0;
+                line-height: 1.5;
+            }
+
+            .setup-hero-icon {
+                width: 48px;
+                height: 48px;
+                color: #667eea;
+                margin-bottom: 12px;
+                filter: drop-shadow(0 2px 8px rgba(102, 126, 234, 0.15));
             }
 
             /* Inputs */
             .setup-mac-input {
                 width: 100%;
-                max-width: 380px;
-                padding: 12px 16px;
-                margin-bottom: 12px;
+                padding: 11px 14px;
                 border: 1px solid #e5e5ea;
                 border-radius: 10px;
-                font-size: 15px;
+                font-size: 14px;
                 font-family: inherit;
                 transition: all 0.2s;
                 background: #f9f9fb;
@@ -38275,14 +38352,12 @@ Easily access and review students' academic performance here. This section provi
             /* List Box */
             .setup-mac-list-box {
                 width: 100%;
-                max-width: 380px;
-                height: 240px;
+                max-height: 180px;
                 background: white;
                 border: 1px solid #e5e5ea;
                 border-radius: 10px;
                 overflow-y: auto;
                 padding: 6px;
-                margin-bottom: 12px;
             }
 
             .setup-mac-list-box:focus-within {
@@ -38292,7 +38367,7 @@ Easily access and review students' academic performance here. This section provi
 
             .setup-mac-list-item {
                 padding: 8px 12px;
-                font-size: 14px;
+                font-size: 13px;
                 cursor: pointer;
                 color: #1d1d1f;
                 border-radius: 6px;
@@ -38312,11 +38387,12 @@ Easily access and review students' academic performance here. This section provi
 
             /* Buttons */
             .setup-modal-footer {
-                padding: 16px 24px;
+                padding: 20px 0 0 0;
                 border-top: 1px solid #f2f2f7;
                 display: flex;
                 gap: 12px;
                 justify-content: flex-end;
+                margin-top: auto;
             }
 
             .setup-mac-btn {
@@ -38359,9 +38435,9 @@ Easily access and review students' academic performance here. This section provi
             #setup-phone-error, 
             #setup-otp-error {
                 color: #ff3b30;
-                font-size: 13px;
-                margin-top: 8px;
-                text-align: center;
+                font-size: 12px;
+                margin-top: 6px;
+                display: none;
             }
 
             /* Spinner */
@@ -38378,21 +38454,100 @@ Easily access and review students' academic performance here. This section provi
                 to { transform: rotate(360deg); }
             }
 
-            /* Step progress indicator */
-            .setup-step-counter {
-                font-size: 12px;
-                color: #a1a1a6;
-                margin-top: 16px;
-                text-align: center;
+            /* Responsive */
+            @media (max-width: 768px) {
+                .teacher-setup-modal {
+                    flex-direction: column;
+                    max-width: 95%;
+                    max-height: 95vh;
+                }
+
+                .setup-modal-branding {
+                    width: 100%;
+                    padding: 24px;
+                    min-height: auto;
+                    flex-direction: row;
+                    justify-content: flex-start;
+                    align-items: center;
+                    gap: 20px;
+                }
+
+                .setup-brand-logo {
+                    padding: 0;
+                    flex-shrink: 0;
+                }
+
+                .setup-brand-logo svg {
+                    width: 60px;
+                    height: 60px;
+                    margin-bottom: 0;
+                }
+
+                .setup-brand-title {
+                    font-size: 18px;
+                    margin-bottom: 0;
+                }
+
+                .setup-brand-features {
+                    display: none;
+                }
+
+                .setup-modal-right {
+                    width: 100%;
+                    padding: 24px;
+                }
             }
         </style>
 
-        <div class="setup-modal-header">
-            <h2>Setup Your Account</h2>
-            <p id="setup-step-title">Complete your profile</p>
+        <!-- Left Panel -->
+        <div class="setup-modal-branding">
+            <div class="setup-brand-logo">
+                <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="3" opacity="0.5"/>
+                    <circle cx="50" cy="50" r="35" stroke="currentColor" stroke-width="2"/>
+                    <path d="M50 20Q75 35 75 50Q75 70 50 80Q25 70 25 50Q25 35 50 20" fill="currentColor" opacity="0.3"/>
+                    <path d="M35 50L45 60L65 40" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <div class="setup-brand-title">Professional Setup</div>
+                <div class="setup-brand-subtitle">Complete your profile in just 5 steps</div>
+            </div>
+
+            <div class="setup-brand-features">
+                <div class="setup-brand-feature">
+                    <div class="setup-brand-feature-icon">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div>Secure verification</div>
+                </div>
+                <div class="setup-brand-feature">
+                    <div class="setup-brand-feature-icon">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div>Email & phone verified</div>
+                </div>
+                <div class="setup-brand-feature">
+                    <div class="setup-brand-feature-icon">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div>Full dashboard access</div>
+                </div>
+            </div>
         </div>
 
-        <div class="setup-modal-content">
+        <!-- Right Panel -->
+        <div class="setup-modal-right">
+            <div class="setup-modal-header">
+                <h2 id="setup-form-title">Select Your Region</h2>
+                <p id="setup-form-subtitle">Choose your country for phone verification</p>
+            </div>
+
+            <div class="setup-modal-content">
             <!-- Step 0: Country Selection -->
             <div class="setup-step-item active" id="setup-step-0">
                 <svg class="setup-hero-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -38484,6 +38639,7 @@ Easily access and review students' academic performance here. This section provi
             <button id="setup-btn-back" class="setup-mac-btn setup-mac-btn-secondary" onclick="setupGoBack()" style="opacity:0;pointer-events:none;">Back</button>
             <button id="setup-btn-next" class="setup-mac-btn setup-mac-btn-primary" onclick="setupGoNext()">Continue</button>
         </div>
+        </div>
     </div>
 
     <script>
@@ -38513,6 +38669,26 @@ Easily access and review students' academic performance here. This section provi
 
         function setupUpdateUI() {
             const steps = document.querySelectorAll('.setup-step-item');
+            const btnBack = document.getElementById('setup-btn-back');
+            const btnNext = document.getElementById('setup-btn-next');
+            const formTitle = document.getElementById('setup-form-title');
+            const formSubtitle = document.getElementById('setup-form-subtitle');
+
+            // Update titles based on step
+            const titles = [
+                { title: 'Select Your Region', subtitle: 'Choose your country for phone verification' },
+                { title: 'Create Account', subtitle: 'Set up your login details' },
+                { title: 'Verify Phone', subtitle: 'Enter email and phone number' },
+                { title: 'Verify Code', subtitle: 'Enter the 6-digit code sent to your email' },
+                { title: 'Setting Up...', subtitle: 'Finalizing your account' },
+                { title: 'Setup Complete!', subtitle: 'Your account is ready. Loading dashboard...' }
+            ];
+
+            if (titles[setupCurrentStep]) {
+                formTitle.textContent = titles[setupCurrentStep].title;
+                formSubtitle.textContent = titles[setupCurrentStep].subtitle;
+            }
+
             steps.forEach((step, idx) => {
                 step.classList.remove('active');
                 if (idx === setupCurrentStep) {
@@ -38520,22 +38696,12 @@ Easily access and review students' academic performance here. This section provi
                 }
             });
 
-            const btnBack = document.getElementById('setup-btn-back');
-            const btnNext = document.getElementById('setup-btn-next');
-
-            if (setupCurrentStep > 0 && setupCurrentStep < 2) {
+            if (setupCurrentStep > 0 && setupCurrentStep < 3) {
                 btnBack.style.opacity = '1';
                 btnBack.style.pointerEvents = 'auto';
             } else {
                 btnBack.style.opacity = '0';
                 btnBack.style.pointerEvents = 'none';
-            }
-
-            if (setupCurrentStep === 4) {
-                setTimeout(() => {
-                    setupCurrentStep = 5;
-                    setupUpdateUI();
-                }, 2000);
             }
 
             // Show country code when on step 2
