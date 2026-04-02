@@ -61753,72 +61753,127 @@ function renderAttendance() {
 
                 branchTeachers.forEach(t => {
                     try {
-                        const dept = (t.department || t.subjects?.[0] || 'other').toLowerCase();
-                        let deptClass = 'other', deptLabel = t.department || (t.subjects && t.subjects[0]) || 'Staff';
-
                         const initial = t.name ? t.name.charAt(0).toUpperCase() : '?';
+                        const deptLabel = t.department || (t.subjects && t.subjects[0]) || 'Staff';
+                        const subjectsList = (t.subjects && t.subjects.length > 0) ? t.subjects.slice(0, 2).join(', ') : 'N/A';
+                        
+                        // Create gradient avatar backgrounds
+                        const colors = ['6366f1', '8b5cf6', 'ec4899', 'f59e0b', '10b981'];
+                        const colorIndex = (t.id || 'default').charCodeAt(0) % colors.length;
+                        const bgGradient = colors[colorIndex];
+
                         const avatarHtml = t.photo 
                             ? `<img src="${t.photo}" alt="${t.name}" style="width:100%;height:100%;object-fit:cover;"/>`
-                            : `<span style="font-weight:700;font-size:18px;color:rgba(165,180,252,1);">${initial}</span>`;
+                            : `<span style="font-weight:700;font-size:20px;background:linear-gradient(135deg,#${bgGradient},#${colors[(colorIndex+1)%colors.length]});-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">${initial}</span>`;
 
-                        // Create staff item with glassmorphism styling
-                        const item = document.createElement("div");
-                        item.style.cssText = `
-                            background: rgba(255,255,255,0.05);
-                            backdrop-filter: blur(10px);
-                            -webkit-backdrop-filter: blur(10px);
-                            border: 1px solid rgba(255,255,255,0.1);
-                            border-radius: 16px;
-                            padding: 16px;
+                        // Create card
+                        const card = document.createElement("div");
+                        card.style.cssText = `
+                            background: rgba(20,28,48,0.8);
+                            backdrop-filter: blur(20px);
+                            -webkit-backdrop-filter: blur(20px);
+                            border: 1px solid rgba(99,102,241,0.2);
+                            border-radius: 20px;
+                            padding: 18px;
                             display: flex;
                             align-items: center;
-                            gap: 14px;
-                            transition: all 0.3s ease;
+                            gap: 16px;
+                            transition: all 0.35s cubic-bezier(0.4,0.0,0.2,1);
                             cursor: pointer;
+                            position: relative;
+                            overflow: hidden;
+                            box-shadow: 0 4px 20px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.1);
                         `;
 
-                        item.innerHTML = `
-                            <div style="width:48px;height:48px;border-radius:12px;background:rgba(99,102,241,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;border:1px solid rgba(99,102,241,0.3);">
-                                ${avatarHtml}
-                            </div>
-                            <div style="flex:1;display:flex;flex-direction:column;gap:4px;min-width:0;">
-                                <div style="font-weight:600;color:rgba(226,232,240,1);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                                    ${t.name || 'Unknown'}
+                        card.innerHTML = `
+                            <!-- Avatar Section -->
+                            <div style="position:relative;flex-shrink:0;">
+                                <div style="width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,rgba(99,102,241,0.15),rgba(16,185,129,0.1));display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(99,102,241,0.3);overflow:hidden;">
+                                    ${avatarHtml}
                                 </div>
-                                <div style="font-size:11px;color:rgba(148,163,184,1);">
-                                    ${t.id || 'N/A'} &nbsp;•&nbsp; ${(t.subjects && t.subjects.length > 0) ? t.subjects[0] : 'N/A'}
+                                <div style="position:absolute;bottom:0;right:0;width:14px;height:14px;background:rgba(16,185,129,0.9);border-radius:50%;border:2px solid rgba(20,28,48,0.8);box-shadow:0 0 8px rgba(16,185,129,0.6);"></div>
+                            </div>
+                            
+                            <!-- Info Section -->
+                            <div style="flex:1;display:flex;flex-direction:column;gap:6px;min-width:0;">
+                                <div style="display:flex;align-items:baseline;gap:10px;">
+                                    <h4 style="margin:0;font-size:14px;font-weight:700;color:rgba(226,232,240,1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                                        ${t.name || 'Unknown'}
+                                    </h4>
+                                    <span style="padding:3px 8px;background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);border-radius:6px;font-size:10px;font-weight:600;color:rgba(129,140,248,0.9);white-space:nowrap;">
+                                        ${t.id || 'N/A'}
+                                    </span>
+                                </div>
+                                <div style="display:flex;gap:12px;align-items:center;">
+                                    <span style="font-size:11px;color:rgba(148,163,184,0.9);display:flex;align-items:center;gap:5px;">
+                                        <i class="fas fa-book" style="font-size:10px;color:rgba(16,185,129,0.7);"></i>
+                                        ${subjectsList.length > 25 ? subjectsList.substring(0, 25) + '...' : subjectsList}
+                                    </span>
+                                </div>
+                                <div style="display:flex;gap:8px;align-items:center;">
+                                    <span style="padding:4px 10px;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.25);border-radius:8px;font-size:10px;font-weight:600;color:rgba(110,231,183,0.95);text-transform:capitalize;">
+                                        📚 ${deptLabel}
+                                    </span>
+                                    <span style="font-size:9px;color:rgba(148,163,184,0.7);">•</span>
+                                    <span style="font-size:10px;color:rgba(148,163,184,0.8);">Active Now</span>
                                 </div>
                             </div>
+                            
+                            <!-- Action Button -->
                             <button style="
-                                background: rgba(16,185,129,0.1);
-                                border: 1px solid rgba(16,185,129,0.3);
-                                color: rgba(110,231,183,1);
-                                padding: 8px 16px;
-                                border-radius: 8px;
+                                background: linear-gradient(135deg,rgba(16,185,129,0.15),rgba(6,182,212,0.1));
+                                border: 1.5px solid rgba(16,185,129,0.4);
+                                color: rgba(110,231,183,0.95);
+                                padding: 9px 18px;
+                                border-radius: 10px;
                                 font-size: 11px;
-                                font-weight: 600;
+                                font-weight: 700;
                                 cursor: pointer;
-                                transition: all 0.2s ease;
+                                transition: all 0.25s ease;
                                 white-space: nowrap;
                                 flex-shrink: 0;
+                                letter-spacing: 0.5px;
+                                box-shadow: 0 2px 8px rgba(16,185,129,0.15);
+                                position: relative;
+                                overflow: hidden;
                             " onclick="event.stopPropagation();showTeacherProfile('${t.id}')">
-                                VIEW PROFILE
+                                <span style="position:relative;z-index:2;display:flex;align-items:center;gap:6px;">
+                                    <i class="fas fa-user" style="font-size:10px;"></i>
+                                    PROFILE
+                                </span>
                             </button>
                         `;
 
-                        // Hover effect
-                        item.addEventListener('mouseenter', function() {
-                            this.style.background = 'rgba(255,255,255,0.08)';
+                        // Professional hover effect
+                        card.addEventListener('mouseenter', function() {
+                            this.style.background = 'rgba(25,35,55,0.9)';
                             this.style.borderColor = 'rgba(99,102,241,0.4)';
-                            this.style.transform = 'translateX(4px)';
+                            this.style.boxShadow = '0 12px 32px rgba(99,102,241,0.2), inset 0 1px 1px rgba(255,255,255,0.15)';
+                            this.style.transform = 'translateY(-2px) scale(1.01)';
+                            
+                            const btn = this.querySelector('button');
+                            if (btn) {
+                                btn.style.background = 'linear-gradient(135deg,rgba(16,185,129,0.25),rgba(6,182,212,0.2))';
+                                btn.style.borderColor = 'rgba(16,185,129,0.6)';
+                                btn.style.boxShadow = '0 4px 12px rgba(16,185,129,0.25)';
+                            }
                         });
-                        item.addEventListener('mouseleave', function() {
-                            this.style.background = 'rgba(255,255,255,0.05)';
-                            this.style.borderColor = 'rgba(255,255,255,0.1)';
-                            this.style.transform = 'translateX(0)';
+                        
+                        card.addEventListener('mouseleave', function() {
+                            this.style.background = 'rgba(20,28,48,0.8)';
+                            this.style.borderColor = 'rgba(99,102,241,0.2)';
+                            this.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.1)';
+                            this.style.transform = 'translateY(0) scale(1)';
+                            
+                            const btn = this.querySelector('button');
+                            if (btn) {
+                                btn.style.background = 'linear-gradient(135deg,rgba(16,185,129,0.15),rgba(6,182,212,0.1))';
+                                btn.style.borderColor = 'rgba(16,185,129,0.4)';
+                                btn.style.boxShadow = '0 2px 8px rgba(16,185,129,0.15)';
+                            }
                         });
 
-                        container.appendChild(item);
+                        container.appendChild(card);
                     } catch (itemError) {
                         console.warn('[WARN] Error rendering dashboard staff item:', t, itemError);
                     }
