@@ -658,36 +658,6 @@ body.teacher-dark .tc-card {
     text-transform: uppercase;
     cursor: pointer;
     transition: background 0.15s, color 0.15s;
-}
-/* Database Badge */
-.db-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 3px 10px;
-    background: linear-gradient(135deg, #0f766e 0%, #134e4a 100%);
-    color: #5eead4;
-    border: 1px solid rgba(94, 234, 212, 0.2);
-    border-radius: 20px;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    box-shadow: 0 2px 4px rgba(15, 118, 110, 0.2);
-}
-.db-badge::before {
-    content: '●';
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #5eead4;
-    animation: pulse 2s infinite;
-}
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-}
     flex-shrink: 0;
 }
 .tcd-tcard-view:hover { background: #6366f1; color: #fff; border-color: #6366f1; }
@@ -15264,104 +15234,64 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         #attendanceMarkingList {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: 20px;
-            padding: 15px 0;
-            width: 100%;
+            padding: 15px;
+            overflow-y: auto;
+            max-height: 600px;
         }
-        
-        /* Responsive grid breakpoints */
-        @media (max-width: 480px) {
-            #attendanceMarkingList {
-                grid-template-columns: repeat(1, 1fr);
-                gap: 15px;
-            }
-        }
-        
-        @media (min-width: 481px) and (max-width: 768px) {
-            #attendanceMarkingList {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 18px;
-            }
-        }
-        
-        @media (min-width: 769px) and (max-width: 1024px) {
-            #attendanceMarkingList {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 18px;
-            }
-        }
-        
-        @media (min-width: 1025px) and (max-width: 1440px) {
-            #attendanceMarkingList {
-                grid-template-columns: repeat(4, 1fr);
-                gap: 20px;
-            }
-        }
-        
-        @media (min-width: 1441px) {
-            #attendanceMarkingList {
-                grid-template-columns: repeat(5, 1fr);
-                gap: 20px;
-            }
-        }
-        
         .attendance-mark-card {
             background: var(--card-bg);
-            border-radius: 12px;
+            border-radius: 14px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             padding: 18px;
             text-align: center;
             display: flex;
             flex-direction: column;
             align-items: center;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            border: 1px solid transparent;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0,0,0,0.05);
         }
-        
         .attendance-mark-card:hover {
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-            transform: translateY(-4px);
-            border-color: var(--primary-light);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+            transform: translateY(-3px);
         }
-        
         .attendance-mark-card img {
-            width: 85px;
-            height: 85px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
             object-fit: cover;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             border: 3px solid var(--primary-light);
-            transition: transform 0.3s ease;
         }
-        
-        .attendance-mark-card:hover img {
-            transform: scale(1.05);
-        }
-        
         .attendance-mark-card h4 {
-            font-size: 0.95rem;
-            font-weight: 600;
-            margin: 0 0 6px;
+            font-size: 1rem;
+            margin: 0 0 5px;
             color: var(--text);
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            width: 100%;
         }
-        
         .attendance-mark-card small {
             font-size: 0.8rem;
             color: var(--text);
-            opacity: 0.6;
-            margin-bottom: 12px;
+            opacity: 0.7;
         }
-        
         .attendance-action-buttons {
             display: flex;
             justify-content: center;
-            margin-top: auto;
+            margin-top: 15px;
             width: 100%;
+        }
+        
+        /* Responsive grid for attendance cards */
+        @media (max-width: 1200px) {
+            #attendanceMarkingList {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 768px) {
+            #attendanceMarkingList {
+                grid-template-columns: 1fr;
+                max-height: 500px;
+            }
         }
 
         /* Dynamic Island Toggle Button */
@@ -15386,7 +15316,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         .dynamic-island-toggle.present {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: linear-gradient(135deg, #003366 0%, #004d80 100%);
             box-shadow: 0 8px 24px rgba(16, 185, 129, 0.45);
         }
 
@@ -38120,796 +38050,7 @@ Easily access and review students' academic performance here. This section provi
     </div>
 </div>
 
-<!-- Professional Teacher Setup Modal - Split Layout -->
-<div class="hidden overlay-base" id="teacherSetupOverlay" style="z-index:999997;">
-    <div class="teacher-setup-modal" id="setupModal">
-        <style>
-            /* Modal Overlay */
-            #teacherSetupOverlay {
-                background: rgba(0, 0, 0, 0.4);
-                backdrop-filter: blur(4px);
-                -webkit-backdrop-filter: blur(4px);
-            }
-
-            #teacherSetupOverlay.show-setup {
-                animation: overlayFadeIn 0.4s ease-out forwards;
-            }
-
-            @keyframes overlayFadeIn {
-                from { opacity: 0; }
-                to { opacity: 1; }
-            }
-
-            /* Modal Window - Split Layout */
-            .teacher-setup-modal {
-                width: 95%;
-                max-width: 950px;
-                height: auto;
-                max-height: 85vh;
-                background: white;
-                border-radius: 20px;
-                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-                overflow: hidden;
-                display: flex;
-                flex-direction: row;
-                animation: modalSlideIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-            }
-
-            @keyframes modalSlideIn {
-                from {
-                    opacity: 0;
-                    transform: translateY(30px) scale(0.95);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0) scale(1);
-                }
-            }
-
-            /* Left Panel - Branding & Logo */
-            .setup-modal-branding {
-                width: 35%;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                padding: 40px 30px;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: space-between;
-                color: white;
-            }
-
-            .setup-brand-logo {
-                width: 100%;
-                text-align: center;
-                padding: 20px 0;
-            }
-
-            .setup-brand-logo svg {
-                width: 80px;
-                height: 80px;
-                margin-bottom: 20px;
-                filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2));
-            }
-
-            .setup-brand-title {
-                font-size: 24px;
-                font-weight: 700;
-                margin-bottom: 8px;
-                letter-spacing: -0.5px;
-            }
-
-            .setup-brand-subtitle {
-                font-size: 13px;
-                opacity: 0.9;
-                line-height: 1.5;
-                text-align: center;
-                margin-bottom: 30px;
-            }
-
-            .setup-brand-features {
-                width: 100%;
-                display: flex;
-                flex-direction: column;
-                gap: 16px;
-                margin-top: auto;
-            }
-
-            .setup-brand-feature {
-                display: flex;
-                align-items: flex-start;
-                gap: 12px;
-                font-size: 13px;
-            }
-
-            .setup-brand-feature-icon {
-                width: 24px;
-                height: 24px;
-                border-radius: 50%;
-                background: rgba(255, 255, 255, 0.2);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                flex-shrink: 0;
-                margin-top: 2px;
-            }
-
-            .setup-brand-feature-icon svg {
-                width: 14px;
-                height: 14px;
-            }
-
-            /* Right Panel - Form */
-            .setup-modal-right {
-                width: 65%;
-                padding: 40px;
-                overflow-y: auto;
-                display: flex;
-                flex-direction: column;
-            }
-
-            /* Modal Header - Right Side */
-            .setup-modal-header {
-                background: transparent;
-                color: #1d1d1f;
-                padding: 0 0 24px 0;
-                text-align: left;
-                border-bottom: 1px solid #f2f2f7;
-                margin-bottom: 28px;
-            }
-
-            .setup-modal-header h2 {
-                margin: 0 0 8px 0;
-                font-size: 28px;
-                font-weight: 700;
-                letter-spacing: -0.5px;
-                color: #1d1d1f;
-            }
-
-            .setup-modal-header p {
-                margin: 0;
-                font-size: 14px;
-                color: #86868b;
-            }
-
-            /* Modal Content */
-            .setup-modal-content {
-                flex: 1;
-                display: flex;
-                flex-direction: column;
-                gap: 0;
-                min-height: 200px;
-                overflow-y: auto;
-            }
-
-            .setup-step-item {
-                display: none;
-                animation: stepFadeIn 0.5s ease-out;
-                flex-direction: column;
-                gap: 16px;
-            }
-
-            .setup-step-item.active {
-                display: flex;
-            }
-
-            @keyframes stepFadeIn {
-                from {
-                    opacity: 0;
-                    transform: translateY(10px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-
-            .setup-title-text {
-                font-size: 20px;
-                font-weight: 600;
-                color: #1d1d1f;
-                margin: 0;
-                letter-spacing: -0.3px;
-            }
-
-            .setup-subtitle-text {
-                font-size: 13px;
-                color: #86868b;
-                margin: 0;
-                line-height: 1.5;
-            }
-
-            .setup-hero-icon {
-                width: 48px;
-                height: 48px;
-                color: #667eea;
-                margin-bottom: 12px;
-                filter: drop-shadow(0 2px 8px rgba(102, 126, 234, 0.15));
-            }
-
-            /* Inputs */
-            .setup-mac-input {
-                width: 100%;
-                padding: 11px 14px;
-                border: 1px solid #e5e5ea;
-                border-radius: 10px;
-                font-size: 14px;
-                font-family: inherit;
-                transition: all 0.2s;
-                background: #f9f9fb;
-            }
-
-            .setup-mac-input:focus {
-                outline: none;
-                border-color: #667eea;
-                background: white;
-                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-            }
-
-            .setup-mac-input::placeholder {
-                color: #a1a1a6;
-            }
-
-            /* List Box */
-            .setup-mac-list-box {
-                width: 100%;
-                max-height: 180px;
-                background: white;
-                border: 1px solid #e5e5ea;
-                border-radius: 10px;
-                overflow-y: auto;
-                padding: 6px;
-            }
-
-            .setup-mac-list-box:focus-within {
-                border-color: #667eea;
-                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-            }
-
-            .setup-mac-list-item {
-                padding: 8px 12px;
-                font-size: 13px;
-                cursor: pointer;
-                color: #1d1d1f;
-                border-radius: 6px;
-                margin-bottom: 2px;
-                transition: all 0.15s;
-            }
-
-            .setup-mac-list-item:hover:not(.selected) {
-                background-color: #f5f5f7;
-            }
-
-            .setup-mac-list-item.selected {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
-                font-weight: 500;
-            }
-
-            /* Buttons */
-            .setup-modal-footer {
-                padding: 20px 0 0 0;
-                border-top: 1px solid #f2f2f7;
-                display: flex;
-                gap: 12px;
-                justify-content: flex-end;
-                margin-top: auto;
-            }
-
-            .setup-mac-btn {
-                padding: 10px 24px;
-                border: none;
-                border-radius: 8px;
-                font-size: 14px;
-                font-weight: 500;
-                cursor: pointer;
-                transition: all 0.2s;
-                font-family: inherit;
-            }
-
-            .setup-mac-btn-primary {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
-            }
-
-            .setup-mac-btn-primary:hover:not(:disabled) {
-                transform: translateY(-1px);
-                box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
-            }
-
-            .setup-mac-btn-primary:disabled {
-                opacity: 0.5;
-                cursor: not-allowed;
-            }
-
-            .setup-mac-btn-secondary {
-                background: #f5f5f7;
-                color: #1d1d1f;
-            }
-
-            .setup-mac-btn-secondary:hover:not(:disabled) {
-                background: #e8e8ed;
-            }
-
-            /* Error Messages */
-            .setup-password-error, 
-            #setup-phone-error, 
-            #setup-otp-error {
-                color: #ff3b30;
-                font-size: 12px;
-                margin-top: 6px;
-                display: none;
-            }
-
-            /* Spinner */
-            .setup-mac-spinner {
-                width: 40px;
-                height: 40px;
-                border: 3px solid #f0f0f0;
-                border-top: 3px solid #667eea;
-                border-radius: 50%;
-                animation: spin 1s linear infinite;
-            }
-
-            @keyframes spin {
-                to { transform: rotate(360deg); }
-            }
-
-            /* Responsive */
-            @media (max-width: 768px) {
-                .teacher-setup-modal {
-                    flex-direction: column;
-                    max-width: 95%;
-                    max-height: 95vh;
-                }
-
-                .setup-modal-branding {
-                    width: 100%;
-                    padding: 24px;
-                    min-height: auto;
-                    flex-direction: row;
-                    justify-content: flex-start;
-                    align-items: center;
-                    gap: 20px;
-                }
-
-                .setup-brand-logo {
-                    padding: 0;
-                    flex-shrink: 0;
-                }
-
-                .setup-brand-logo svg {
-                    width: 60px;
-                    height: 60px;
-                    margin-bottom: 0;
-                }
-
-                .setup-brand-title {
-                    font-size: 18px;
-                    margin-bottom: 0;
-                }
-
-                .setup-brand-features {
-                    display: none;
-                }
-
-                .setup-modal-right {
-                    width: 100%;
-                    padding: 24px;
-                }
-            }
-        </style>
-
-        <!-- Left Panel -->
-        <div class="setup-modal-branding">
-            <div class="setup-brand-logo">
-                <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="3" opacity="0.5"/>
-                    <circle cx="50" cy="50" r="35" stroke="currentColor" stroke-width="2"/>
-                    <path d="M50 20Q75 35 75 50Q75 70 50 80Q25 70 25 50Q25 35 50 20" fill="currentColor" opacity="0.3"/>
-                    <path d="M35 50L45 60L65 40" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                <div class="setup-brand-title">Professional Setup</div>
-                <div class="setup-brand-subtitle">Complete your profile in just 5 steps</div>
-            </div>
-
-            <div class="setup-brand-features">
-                <div class="setup-brand-feature">
-                    <div class="setup-brand-feature-icon">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                        </svg>
-                    </div>
-                    <div>Secure verification</div>
-                </div>
-                <div class="setup-brand-feature">
-                    <div class="setup-brand-feature-icon">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                        </svg>
-                    </div>
-                    <div>Email & phone verified</div>
-                </div>
-                <div class="setup-brand-feature">
-                    <div class="setup-brand-feature-icon">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                        </svg>
-                    </div>
-                    <div>Full dashboard access</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Right Panel -->
-        <div class="setup-modal-right">
-            <div class="setup-modal-header">
-                <h2 id="setup-form-title">Select Your Region</h2>
-                <p id="setup-form-subtitle">Choose your country for phone verification</p>
-            </div>
-
-            <div class="setup-modal-content">
-            <!-- Step 0: Country Selection -->
-            <div class="setup-step-item active" id="setup-step-0">
-                <svg class="setup-hero-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="4"/>
-                    <path d="M50 6C50 6 25 30 25 50C25 70 50 94 50 94" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
-                    <path d="M50 6C50 6 75 30 75 50C75 70 50 94 50 94" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
-                    <path d="M6 50H94" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
-                </svg>
-                <h3 class="setup-title-text">Select Your Region</h3>
-                <p class="setup-subtitle-text">Choose your country for phone verification</p>
-                <div class="setup-mac-list-box" id="country-list" tabindex="0">
-                    <div class="setup-mac-list-item selected" onclick="setupSelectItem(this)">India</div>
-                    <div class="setup-mac-list-item" onclick="setupSelectItem(this)">United States</div>
-                    <div class="setup-mac-list-item" onclick="setupSelectItem(this)">Afghanistan</div>
-                    <div class="setup-mac-list-item" onclick="setupSelectItem(this)">Albania</div>
-                    <div class="setup-mac-list-item" onclick="setupSelectItem(this)">Algeria</div>
-                    <div class="setup-mac-list-item" onclick="setupSelectItem(this)">Australia</div>
-                    <div class="setup-mac-list-item" onclick="setupSelectItem(this)">Austria</div>
-                    <div class="setup-mac-list-item" onclick="setupSelectItem(this)">Indonesia</div>
-                </div>
-            </div>
-
-            <!-- Step 1: Account Creation -->
-            <div class="setup-step-item" id="setup-step-1">
-                <svg class="setup-hero-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                </svg>
-                <h3 class="setup-title-text">Create Account</h3>
-                <p class="setup-subtitle-text">Set up your login details</p>
-                <input type="text" id="setup-fullname" class="setup-mac-input" placeholder="Full Name" autocomplete="off">
-                <input type="text" id="setup-accountname" class="setup-mac-input" placeholder="Account Name" autocomplete="off">
-                <input type="password" id="setup-password" class="setup-mac-input" placeholder="Password">
-                <input type="password" id="setup-confirm-password" class="setup-mac-input" placeholder="Confirm Password" onkeyup="setupCheckPasswords()">
-                <p class="setup-password-error" id="setup-password-error">Passwords do not match</p>
-            </div>
-
-            <!-- Step 2: Email & Phone -->
-            <div class="setup-step-item" id="setup-step-2">
-                <svg class="setup-hero-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                </svg>
-                <h3 class="setup-title-text">Verify Phone</h3>
-                <p class="setup-subtitle-text">Enter email and phone number</p>
-                <input type="email" id="setup-email" class="setup-mac-input" placeholder="email@example.com" autocomplete="off">
-                <div style="display:flex;gap:8px;width:100%;max-width:380px;">
-                    <input type="text" id="setup-country-code-2" class="setup-mac-input" placeholder="+91" style="width:70px;flex-shrink:0;" readonly>
-                    <input type="tel" id="setup-phone" class="setup-mac-input" placeholder="9876543210" maxlength="15">
-                </div>
-                <p id="setup-phone-error" style="color:#ff3b30;font-size:13px;margin-top:8px;display:none;"></p>
-                <button onclick="setupSendOTP()" style="margin-top:12px;padding:10px 24px;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);color:white;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.2s;" id="setup-send-otp-btn">Send Code to Email</button>
-            </div>
-
-            <!-- Step 3: OTP Verification -->
-            <div class="setup-step-item" id="setup-step-3">
-                <svg class="setup-hero-icon" style="color:#10b981;filter:drop-shadow(0 4px 12px rgba(16,185,129,0.2));" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-                </svg>
-                <h3 class="setup-title-text">Verify Code</h3>
-                <p class="setup-subtitle-text">Enter the 6-digit code sent to your email</p>
-                <input type="text" id="setup-otp" maxlength="6" class="setup-mac-input" placeholder="000000" style="text-align:center;font-size:18px;letter-spacing:0.3em;font-family:monospace;" oninput="this.value=this.value.replace(/[^0-9]/g,'');">
-                <p id="setup-otp-error" style="color:#ff3b30;font-size:13px;margin-top:8px;display:none;"></p>
-                <button onclick="setupResendOTP()" style="font-size:13px;color:#667eea;background:transparent;border:none;cursor:pointer;text-decoration:underline;padding:8px 0;margin-top:8px;">Resend Code</button>
-            </div>
-
-            <!-- Step 4: Loading -->
-            <div class="setup-step-item" id="setup-step-4">
-                <div class="setup-mac-spinner" style="margin-bottom:32px;"></div>
-                <h3 class="setup-title-text">Setting Up...</h3>
-                <p class="setup-subtitle-text">Finalizing your account</p>
-            </div>
-
-            <!-- Step 5: Complete -->
-            <div class="setup-step-item" id="setup-step-5">
-                <div style="width:80px;height:80px;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:16px;box-shadow:0 16px 48px rgba(102, 126, 234, 0.3);">
-                    <svg style="width:40px;height:40px;color:white;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                </div>
-                <h3 class="setup-title-text">Setup Complete!</h3>
-                <p class="setup-subtitle-text">Your account is ready. Loading dashboard...</p>
-            </div>
-
-            <div class="setup-step-counter" id="setup-counter" style="display:none;margin-top:auto;">
-                <span id="current-step">1</span> of <span id="total-steps">5</span>
-            </div>
-        </div>
-
-        <div class="setup-modal-footer" id="setup-nav-bar">
-            <button id="setup-btn-back" class="setup-mac-btn setup-mac-btn-secondary" onclick="setupGoBack()" style="opacity:0;pointer-events:none;">Back</button>
-            <button id="setup-btn-next" class="setup-mac-btn setup-mac-btn-primary" onclick="setupGoNext()">Continue</button>
-        </div>
-        </div>
-    </div>
-
-    <script>
-        // Setup Modal Variables & Functions
-        const SETUP_COUNTRY_CODES = {
-            'India': '+91',
-            'United States': '+1',
-            'Afghanistan': '+93',
-            'Albania': '+355',
-            'Algeria': '+213',
-            'Australia': '+61',
-            'Austria': '+43',
-            'Indonesia': '+62'
-        };
-
-        let setupCurrentStep = 0;
-        const setupTotalSteps = 6;
-        let setupSelectedCountry = 'India';
-        let setupOTPSent = false;
-        let setupOTPEmail = '';
-
-        function setupSelectItem(el) {
-            document.querySelectorAll('.setup-mac-list-item').forEach(item => item.classList.remove('selected'));
-            el.classList.add('selected');
-            setupSelectedCountry = el.textContent.trim();
-        }
-
-        function setupUpdateUI() {
-            const steps = document.querySelectorAll('.setup-step-item');
-            const btnBack = document.getElementById('setup-btn-back');
-            const btnNext = document.getElementById('setup-btn-next');
-            const formTitle = document.getElementById('setup-form-title');
-            const formSubtitle = document.getElementById('setup-form-subtitle');
-
-            // Update titles based on step
-            const titles = [
-                { title: 'Select Your Region', subtitle: 'Choose your country for phone verification' },
-                { title: 'Create Account', subtitle: 'Set up your login details' },
-                { title: 'Verify Phone', subtitle: 'Enter email and phone number' },
-                { title: 'Verify Code', subtitle: 'Enter the 6-digit code sent to your email' },
-                { title: 'Setting Up...', subtitle: 'Finalizing your account' },
-                { title: 'Setup Complete!', subtitle: 'Your account is ready. Loading dashboard...' }
-            ];
-
-            if (titles[setupCurrentStep]) {
-                formTitle.textContent = titles[setupCurrentStep].title;
-                formSubtitle.textContent = titles[setupCurrentStep].subtitle;
-            }
-
-            steps.forEach((step, idx) => {
-                step.classList.remove('active');
-                if (idx === setupCurrentStep) {
-                    step.classList.add('active');
-                }
-            });
-
-            if (setupCurrentStep > 0 && setupCurrentStep < 3) {
-                btnBack.style.opacity = '1';
-                btnBack.style.pointerEvents = 'auto';
-            } else {
-                btnBack.style.opacity = '0';
-                btnBack.style.pointerEvents = 'none';
-            }
-
-            // Show country code when on step 2
-            if (setupCurrentStep === 2) {
-                const countryCode = SETUP_COUNTRY_CODES[setupSelectedCountry] || SETUP_COUNTRY_CODES['India'];
-                document.getElementById('setup-country-code-2').value = countryCode;
-            }
-        }
-
-        function setupCheckPasswords() {
-            const pass = document.getElementById('setup-password').value;
-            const confirm = document.getElementById('setup-confirm-password').value;
-            const error = document.getElementById('setup-password-error');
-            const btn = document.getElementById('setup-btn-next');
-
-            if (confirm.length > 0 && pass !== confirm) {
-                error.style.display = 'block';
-                btn.disabled = true;
-                return false;
-            } else {
-                error.style.display = 'none';
-                btn.disabled = false;
-                return true;
-            }
-        }
-
-        function setupValidateStep() {
-            if (setupCurrentStep === 1) {
-                const name = document.getElementById('setup-fullname').value.trim();
-                const pass = document.getElementById('setup-password').value;
-                if (!name || !pass || !setupCheckPasswords()) return false;
-            }
-            if (setupCurrentStep === 2) {
-                if (!setupOTPSent) {
-                    document.getElementById('setup-phone-error').textContent = 'Please send verification code first';
-                    document.getElementById('setup-phone-error').style.display = 'block';
-                    return false;
-                }
-            }
-            if (setupCurrentStep === 3) {
-                const otp = document.getElementById('setup-otp').value;
-                if (otp.length < 6) return false;
-            }
-            return true;
-        }
-
-        async function setupSendOTP() {
-            const email = document.getElementById('setup-email').value.trim();
-            const phone = document.getElementById('setup-phone').value.trim();
-            const errorEl = document.getElementById('setup-phone-error');
-            const btn = document.getElementById('setup-send-otp-btn');
-            
-            errorEl.style.display = 'none';
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            
-            if (!email || !emailRegex.test(email)) {
-                errorEl.textContent = 'Please enter a valid email address';
-                errorEl.style.display = 'block';
-                return;
-            }
-            
-            if (!phone || phone.length < 7) {
-                errorEl.textContent = 'Please enter a valid phone number';
-                errorEl.style.display = 'block';
-                return;
-            }
-            
-            try {
-                btn.disabled = true;
-                btn.textContent = 'Sending...';
-                
-                const response = await fetch(`${API_BASE}/send-otp`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, phone, countryCode: SETUP_COUNTRY_CODES[setupSelectedCountry] || '+91' })
-                });
-                
-                const data = await response.json();
-                if (data.success) {
-                    setupOTPSent = true;
-                    setupOTPEmail = email;
-                    btn.textContent = 'Code Sent ✓';
-                    btn.style.background = '#34c759';
-                    setTimeout(() => {
-                        setupCurrentStep = 3;
-                        setupUpdateUI();
-                    }, 500);
-                } else {
-                    errorEl.textContent = data.error || 'Failed to send OTP';
-                    errorEl.style.display = 'block';
-                    btn.disabled = false;
-                    btn.textContent = 'Send Code to Email';
-                }
-            } catch (e) {
-                console.error('Error:', e);
-                errorEl.textContent = 'Network error';
-                errorEl.style.display = 'block';
-                btn.disabled = false;
-                btn.textContent = 'Send Code to Email';
-            }
-        }
-
-        async function setupVerifyOTP() {
-            const otp = document.getElementById('setup-otp').value.trim();
-            const errorEl = document.getElementById('setup-otp-error');
-            
-            if (otp.length !== 6) {
-                errorEl.textContent = 'Please enter a 6-digit code';
-                errorEl.style.display = 'block';
-                return false;
-            }
-            
-            try {
-                const response = await fetch(`${API_BASE}/verify-otp`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: setupOTPEmail, otp })
-                });
-                
-                const data = await response.json();
-                if (data.success) return true;
-                
-                errorEl.textContent = data.error || 'Invalid OTP';
-                errorEl.style.display = 'block';
-                return false;
-            } catch (e) {
-                errorEl.textContent = 'Network error';
-                errorEl.style.display = 'block';
-                return false;
-            }
-        }
-
-        async function setupResendOTP() {
-            setupOTPSent = false;
-            setupCurrentStep = 2;
-            setupUpdateUI();
-            document.getElementById('setup-send-otp-btn').click();
-        }
-
-        function setupGoNext() {
-            if (!setupValidateStep()) return;
-            
-            if (setupCurrentStep === 3) {
-                setupVerifyOTP().then((verified) => {
-                    if (verified) {
-                        setupCurrentStep = 4;
-                        setupUpdateUI();
-                        setTimeout(() => completeTeacherSetup(), 2500);
-                    }
-                });
-            } else if (setupCurrentStep < setupTotalSteps) {
-                setupCurrentStep++;
-                setupUpdateUI();
-            }
-        }
-
-        function setupGoBack() {
-            if (setupCurrentStep > 0) {
-                setupCurrentStep--;
-                setupUpdateUI();
-            }
-        }
-
-        async function completeTeacherSetup() {
-            const setupData = {
-                fullName: document.getElementById('setup-fullname').value,
-                accountName: document.getElementById('setup-accountname').value,
-                email: document.getElementById('setup-email').value,
-                phone: document.getElementById('setup-phone').value,
-                setupCompleted: true,
-                setupDate: new Date().toISOString()
-            };
-
-            localStorage.setItem('teacherSetupData', JSON.stringify(setupData));
-
-            try {
-                const facultyTeacherId = sessionStorage.getItem('facultyTeacherId');
-                fetch(`${API_BASE}/save-teacher-setup`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ teacherId: facultyTeacherId, setupData })
-                }).catch(() => {});
-            } catch (e) {}
-
-            hideSetupOverlay();
-            setTimeout(() => show2FAModal(), 300);
-        }
-
-        // Initialize setup on modal open
-        function initializeSetup() {
-            setupCurrentStep = 0;
-            setupOTPSent = false;
-            setupOTPEmail = '';
-            setupSelectedCountry = 'India';
-            setupUpdateUI();
-            document.getElementById('setup-email').value = '';
-            document.getElementById('setup-phone').value = '';
-            document.getElementById('setup-otp').value = '';
-            document.getElementById('setup-fullname').value = '';
-            document.getElementById('setup-accountname').value = '';
-            document.getElementById('setup-password').value = '';
-            document.getElementById('setup-confirm-password').value = '';
-            document.getElementById('setup-phone-error').style.display = 'none';
-            document.getElementById('setup-otp-error').style.display = 'none';
-            document.getElementById('setup-password-error').style.display = 'none';
-        }
-    </script>
-
+<!-- Role Password Modal (for HOD/Admin) -->
 <div class="hidden overlay-base" id="rolePasswordOverlay" style="z-index:999998;">
     <div class="role-password-modal" id="rolePasswordModal">
         <h2 id="rolePasswordTitle">Enter Password</h2>
@@ -41959,100 +41100,57 @@ function restoreTeacherZonePhoto() {
         </div>
     </div>
 
-  <!-- DASHBOARD panel - PREMIUM UI -->
-  <div class="tc-panel" id="tcp-dashboard" style="background:#070B14;position:relative;overflow:hidden;">
-    <!-- Ambient Background Elements -->
-    <div style="position:fixed;top:0;left:0;width:100vw;height:100vh;background-size:50px 50px;background-image:linear-gradient(to right,rgba(255,255,255,0.02) 1px,transparent 1px),linear-gradient(to bottom,rgba(255,255,255,0.02) 1px,transparent 1px);mask-image:radial-gradient(ellipse at top,black 20%,transparent 70%);z-index:-1;pointer-events:none;"></div>
-    <div style="position:fixed;top:-10%;left:-10%;width:500px;height:500px;background:radial-gradient(circle,rgba(99,102,241,0.15) 0%,transparent 70%);z-index:-1;pointer-events:none;"></div>
-    <div style="position:fixed;top:20%;right:-10%;width:600px;height:600px;background:radial-gradient(circle,rgba(16,185,129,0.1) 0%,transparent 70%);z-index:-1;pointer-events:none;"></div>
-
-    <!-- Floating Notification Bar -->
-    <div style="position:fixed;right:0;top:50%;transform:translateY(-50%);background:rgba(15,22,41,0.8);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.08);border-right:none;padding:1rem 0.75rem;border-radius:16px 0 0 16px;display:flex;flex-direction:column;align-items:center;gap:0.5rem;cursor:pointer;transition:all 0.3s ease;box-shadow:-4px 0 20px rgba(0,0,0,0.3);z-index:50;" onclick="toggleNotifications()">
-      <div style="position:relative;">
-        <i class="fas fa-bell" style="font-size:1.5rem;color:#818cf8;"></i>
-        <span style="position:absolute;top:8px;right:8px;width:8px;height:8px;background-color:#ef4444;border-radius:50%;box-shadow:0 0 10px #ef4444;animation:pulse-red 2s infinite;"></span>
+  <!-- DASHBOARD panel -->
+  <div class="tc-panel" id="tcp-dashboard">
+    <div class="tcd-layout">
+      <!-- HERO HEADER -->
+      <div class="tcd-hero">
+        <div class="tcd-grid-overlay"></div>
+        <div class="tcd-hero-top">
+          <div>
+            <div class="tcd-eyebrow">GOVT. POLYTECHNIC, BEELAGI &nbsp;?&nbsp; STAFF PORTAL</div>
+            <h1 class="tcd-h1">Staff <span>Dashboard</span></h1>
+          </div>
+          <div class="tcd-search-bar" style="display:none;">
+            <i class="fas fa-search"></i>
+            <input id="teacherSearch" onkeyup="renderTeacherList()" placeholder="Search by name, ID, subject?"/>
+            <select id="teacherFilterSubject" style="display:none;" onchange="renderTeacherList()"><option value="all">All Depts</option></select>
+            <button onclick="switchTeacherTab('add')" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;color:#fff;padding:9px 18px;border-radius:10px;font-size:11px;font-weight:700;letter-spacing:1.5px;cursor:pointer;white-space:nowrap;"><i class="fas fa-user-plus"></i> ADD</button>
+          </div>
+        </div>
+        <!-- STAT CARDS -->
+        <!-- Hidden elements to preserve JS compatibility -->
+        <span id="csTeachersCount" style="display:none">0</span>
+        <span id="ecTeachersCount" style="display:none">0</span>
+        <span id="meTeachersCount" style="display:none">0</span>
+        <div style="display:flex;gap:16px;position:relative;z-index:1;">
+          <div class="tcd-stat" style="flex:1;">
+            <div class="tcd-stat-icon all"><i class="fas fa-users"></i></div>
+            <div class="tcd-stat-info">
+              <div class="tcd-stat-num" id="totalTeachersCount">0</div>
+              <div class="tcd-stat-label">Total Staff ? Current Branch</div>
+            </div>
+          </div>
+          <span id="tcBranchDeptCount" style="display:none">0</span>
+          <span id="tcBranchDeptLabel" style="display:none"></span>
+          <div class="tcd-stat" style="flex:1;">
+            <div class="tcd-stat-icon" style="background:rgba(20,184,166,0.2);color:#5eead4;box-shadow:0 0 20px rgba(20,184,166,0.2);"><i class="fas fa-chalkboard-teacher"></i></div>
+            <div class="tcd-stat-info">
+              <div class="tcd-stat-num" id="tcHODCount">0</div>
+              <div class="tcd-stat-label">Teachers</div>
+            </div>
+          </div>
+        </div>
       </div>
-      <span style="font-size:10px;font-weight:bold;letter-spacing:1px;color:#94a3b8;writing-mode:vertical-rl;transform:rotate(180deg);">NOTIF</span>
+      <!-- BODY -->
+      <div class="tcd-body">
+        <!-- Staff list -->
+        <div class="tcd-glass-card" style="display:flex;flex-direction:column;">
+          <div class="tcd-card-title"><i class="fas fa-id-badge"></i> All Staff &nbsp;<span id="tcStaffCountBadge" style="background:rgba(99,102,241,0.3);color:#a5b4fc;border-radius:99px;padding:2px 10px;font-size:10px;letter-spacing:1px;">0</span></div>
+          <ul class="tcd-teacher-list" id="teacherList"></ul>
+        </div>
+      </div>
     </div>
-
-    <!-- Main Content -->
-    <main style="max-width:100%;margin:0;padding:48px 24px;min-height:100vh;display:flex;flex-direction:column;gap:40px;position:relative;z-index:10;">
-    
-      <!-- Header Section -->
-      <header style="display:flex;flex-direction:column;gap:8px;">
-        <div style="display:flex;align-items:center;gap:12px;font-size:12px;font-weight:bold;letter-spacing:1px;color:#64748b;text-transform:uppercase;">
-          <i class="fas fa-building" style="font-size:14px;color:#475569;"></i>
-          <span>Govt. Polytechnic, Beelagi</span>
-          <span style="color:#334155;">&bull;</span>
-          <span style="color:#818cf8;">Staff Portal</span>
-        </div>
-        <h1 style="font-size:48px;font-weight:900;color:#fff;letter-spacing:-1px;margin:8px 0 0 0;">
-          Staff <span style="background:linear-gradient(to right,#34d399,#22d3ee,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Dashboard</span>
-        </h1>
-      </header>
-
-      <!-- Metrics Grid -->
-      <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;position:relative;z-index:10;">
-        
-        <!-- Metric Card 1 -->
-        <div style="background:rgba(15,22,41,0.6);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.05);box-shadow:0 4px 30px rgba(0,0,0,0.1);border-radius:16px;padding:24px;display:flex;align-items:center;gap:24px;transition:all 0.3s ease;cursor:pointer;" onmouseover="this.style.transform='translateY(-4px)';this.style.borderColor='rgba(255,255,255,0.1)';this.style.boxShadow='0 20px 40px rgba(0,0,0,0.4)'" onmouseout="this.style.transform='';this.style.borderColor='rgba(255,255,255,0.05)';this.style.boxShadow='0 4px 30px rgba(0,0,0,0.1)'">
-          <div style="width:64px;height:64px;border-radius:12px;background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.2);display:flex;align-items:center;justify-content:center;color:#818cf8;font-size:32px;transition:all 0.3s ease;" onmouseover="this.style.background='rgba(99,102,241,0.2)';this.style.transform='scale(1.1)'" onmouseout="this.style.background='rgba(99,102,241,0.1)';this.style.transform='scale(1)'">
-            <i class="fas fa-users"></i>
-          </div>
-          <div style="display:flex;flex-direction:column;">
-            <h2 style="font-size:32px;font-weight:900;color:#fff;margin:0;letter-spacing:-0.5px;" id="totalTeachersCount">0</h2>
-            <p style="font-size:12px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin:4px 0 0 0;">Total Staff &bull; Current Branch</p>
-          </div>
-        </div>
-
-        <!-- Metric Card 2 -->
-        <div style="background:rgba(15,22,41,0.6);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.05);box-shadow:0 4px 30px rgba(0,0,0,0.1);border-radius:16px;padding:24px;display:flex;align-items:center;gap:24px;transition:all 0.3s ease;cursor:pointer;" onmouseover="this.style.transform='translateY(-4px)';this.style.borderColor='rgba(255,255,255,0.1)';this.style.boxShadow='0 20px 40px rgba(0,0,0,0.4)'" onmouseout="this.style.transform='';this.style.borderColor='rgba(255,255,255,0.05)';this.style.boxShadow='0 4px 30px rgba(0,0,0,0.1)'">
-          <div style="width:64px;height:64px;border-radius:12px;background:rgba(20,184,166,0.1);border:1px solid rgba(20,184,166,0.2);display:flex;align-items:center;justify-content:center;color:#5eead4;font-size:32px;transition:all 0.3s ease;" onmouseover="this.style.background='rgba(20,184,166,0.2)';this.style.transform='scale(1.1)'" onmouseout="this.style.background='rgba(20,184,166,0.1)';this.style.transform='scale(1)'">
-            <i class="fas fa-chalkboard-teacher"></i>
-          </div>
-          <div style="display:flex;flex-direction:column;">
-            <h2 style="font-size:32px;font-weight:900;color:#fff;margin:0;letter-spacing:-0.5px;" id="tcHODCount">0</h2>
-            <p style="font-size:12px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin:4px 0 0 0;">Active Teachers</p>
-          </div>
-        </div>
-
-      </section>
-
-      <!-- Staff List Section -->
-      <section style="background:rgba(15,22,41,0.6);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.05);box-shadow:0 4px 30px rgba(0,0,0,0.1);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;position:relative;z-index:10;">
-        
-        <!-- Section Header -->
-        <div style="padding:20px 24px;border-bottom:1px solid rgba(255,255,255,0.05);background:rgba(255,255,255,0.02);display:flex;align-items:center;gap:12px;">
-          <i class="fas fa-id-card" style="font-size:16px;color:#94a3b8;"></i>
-          <h3 style="font-size:12px;font-weight:bold;color:#cbd5e1;letter-spacing:1px;text-transform:uppercase;margin:0;">All Staff</h3>
-          <span style="margin-left:auto;padding:4px 10px;border-radius:999px;background:rgba(99,102,241,0.2);color:#818cf8;font-size:12px;font-weight:bold;border:1px solid rgba(99,102,241,0.2);" id="tcStaffCountBadge">0</span>
-        </div>
-
-        <!-- List Container -->
-        <div style="padding:16px 24px;">
-          <ul class="tcd-teacher-list" id="teacherList" style="list-style:none;padding:0;margin:0;"></ul>
-        </div>
-      </section>
-
-      <!-- Hidden elements to preserve JS compatibility -->
-      <span id="csTeachersCount" style="display:none">0</span>
-      <span id="ecTeachersCount" style="display:none">0</span>
-      <span id="meTeachersCount" style="display:none">0</span>
-      <span id="tcBranchDeptCount" style="display:none">0</span>
-      <span id="tcBranchDeptLabel" style="display:none"></span>
-
-    </main>
-
-    <!-- Toast Notification Area -->
-    <div id="toast-container" style="position:fixed;bottom:24px;right:24px;z-index:50;display:flex;flex-direction:column;gap:12px;"></div>
-
-    <style>
-      @keyframes pulse-red {
-        0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.7); }
-        70% { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
-        100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
-      }
-    </style>
   </div>
 
   <!-- ADD TEACHER panel -->
@@ -42217,80 +41315,46 @@ function restoreTeacherZonePhoto() {
     </div>
   </div>
 
-  <!-- VIEW TEACHERS panel - PREMIUM UI -->
-  <div class="tc-panel" id="tcp-view" style="background:#070B14;position:relative;overflow:hidden;">
-    <!-- Ambient Background Elements -->
-    <div style="position:fixed;top:0;left:0;width:100vw;height:100vh;background-size:50px 50px;background-image:linear-gradient(to right,rgba(255,255,255,0.02) 1px,transparent 1px),linear-gradient(to bottom,rgba(255,255,255,0.02) 1px,transparent 1px);mask-image:radial-gradient(ellipse at top,black 20%,transparent 70%);z-index:-1;pointer-events:none;"></div>
-    <div style="position:fixed;top:-10%;left:-10%;width:500px;height:500px;background:radial-gradient(circle,rgba(99,102,241,0.15) 0%,transparent 70%);z-index:-1;pointer-events:none;"></div>
-    <div style="position:fixed;top:20%;right:-10%;width:600px;height:600px;background:radial-gradient(circle,rgba(16,185,129,0.1) 0%,transparent 70%);z-index:-1;pointer-events:none;"></div>
-
-    <!-- Floating Notification Bar -->
-    <div style="position:fixed;right:0;top:50%;transform:translateY(-50%);background:rgba(15,22,41,0.8);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.08);border-right:none;padding:1rem 0.75rem;border-radius:16px 0 0 16px;display:flex;flex-direction:column;align-items:center;gap:0.5rem;cursor:pointer;transition:all 0.3s ease;box-shadow:-4px 0 20px rgba(0,0,0,0.3);z-index:50;" onclick="toggleNotifications()">
-      <div style="position:relative;">
-        <i class="fas fa-bell" style="font-size:1.5rem;color:#818cf8;"></i>
-        <span style="position:absolute;top:8px;right:8px;width:8px;height:8px;background-color:#ef4444;border-radius:50%;box-shadow:0 0 10px #ef4444;animation:pulse-red 2s infinite;"></span>
-      </div>
-      <span style="font-size:10px;font-weight:bold;letter-spacing:1px;color:#94a3b8;writing-mode:vertical-rl;transform:rotate(180deg);">NOTIF</span>
-    </div>
-
-    <!-- Main Content -->
-    <main style="max-width:100%;margin:0;padding:48px 24px;min-height:100vh;display:flex;flex-direction:column;gap:40px;position:relative;z-index:10;">
-    
-      <!-- Header Section -->
-      <header style="display:flex;flex-direction:column;gap:8px;">
-        <div style="display:flex;align-items:center;gap:12px;font-size:12px;font-weight:bold;letter-spacing:1px;color:#64748b;text-transform:uppercase;">
-          <i class="fas fa-building" style="font-size:14px;color:#475569;"></i>
-          <span>Govt. Polytechnic, Beelagi</span>
-          <span style="color:#334155;">&bull;</span>
-          <span style="color:#818cf8;">Staff Portal</span>
-        </div>
-        <h1 style="font-size:48px;font-weight:900;color:#fff;letter-spacing:-1px;margin:8px 0 0 0;">
-          Staff <span style="background:linear-gradient(to right,#34d399,#22d3ee,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Directory</span>
-        </h1>
-      </header>
-
-      <!-- Staff List Section -->
-      <section style="background:rgba(15,22,41,0.6);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.05);box-shadow:0 4px 30px rgba(0,0,0,0.1);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;position:relative;z-index:10;">
-        
-        <!-- Section Header -->
-        <div style="padding:20px 24px;border-bottom:1px solid rgba(255,255,255,0.05);background:rgba(255,255,255,0.02);display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-          <i class="fas fa-id-card" style="font-size:16px;color:#94a3b8;"></i>
-          <h3 style="font-size:12px;font-weight:bold;color:#cbd5e1;letter-spacing:1px;text-transform:uppercase;margin:0;">All Staff</h3>
-          <span style="padding:4px 10px;border-radius:999px;background:rgba(99,102,241,0.2);color:#818cf8;font-size:12px;font-weight:bold;border:1px solid rgba(99,102,241,0.2);" id="viewTeachersCount">0</span>
-          
-          <!-- Search Filter -->
-          <div style="margin-left:auto;display:flex;gap:12px;flex-wrap:wrap;">
-            <input id="searchTeacherTable" type="text" placeholder="Search by name or ID..." onkeyup="filterTeacherTable()" style="flex:1;min-width:200px;padding:8px 12px;background:rgba(15,22,41,0.6);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;font-size:13px;" />
-            <select id="filterTeacherSubjectTable" onchange="filterTeacherTable()" style="padding:8px 12px;background:rgba(15,22,41,0.6);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#cbd5e1;font-size:13px;">
-              <option value="all">All Subjects</option>
-              <option value="Computer Science">Computer Science</option>
-              <option value="Electronics">Electronics</option>
-              <option value="Mechanical">Mechanical</option>
-              <option value="Mathematics">Mathematics</option>
-              <option value="Physics">Physics</option>
-              <option value="Chemistry">Chemistry</option>
-            </select>
+  <!-- VIEW TEACHERS panel -->
+  <div class="tc-panel" id="tcp-view">
+    <div class="tc-inner">
+      <div class="tc-page-title">All Teachers</div>
+      <div class="tc-page-sub">Directory &nbsp;?&nbsp; Sortable &nbsp;?&nbsp; Searchable</div>
+      <div class="tc-card">
+        <div class="tc-heading"><div class="tc-heading-title"><i class="fas fa-filter"></i> Filter Staff</div></div>
+        <div class="search-filter-controls">
+          <div class="dash-search-wrap" id="teacherTableSearchWrap">
+            <button class="dash-search-pill" onclick="togglePillSearch('teacherTableSearchWrap')" aria-label="Search">
+              <i class="fas fa-search"></i><span class="dash-pill-label">Search</span>
+            </button>
+            <div class="dash-search-expanded">
+              <i class="dash-ei fas fa-search"></i>
+              <input id="searchTeacherTable" type="text" placeholder="Search by name or ID?" onkeyup="filterTeacherTable()" autocomplete="off"/>
+            </div>
           </div>
+          <select id="filterTeacherSubjectTable" onchange="filterTeacherTable()">
+            <option value="all">All Subjects</option>
+            <option value="Computer Science">Computer Science</option>
+            <option value="Electronics">Electronics</option>
+            <option value="Mechanical">Mechanical</option>
+            <option value="Mathematics">Mathematics</option>
+            <option value="Physics">Physics</option>
+            <option value="Chemistry">Chemistry</option>
+          </select>
         </div>
-
-        <!-- List Container -->
-        <div style="padding:16px 24px;">
-          <div id="teacherTableBody" style="display:flex;flex-direction:column;gap:12px;"></div>
+        <div class="table-container">
+          <table class="teacher-table">
+            <thead><tr>
+              <th onclick="sortTableTeachers(0)">Name</th>
+              <th onclick="sortTableTeachers(1)">ID</th>
+              <th onclick="sortTableTeachers(2)">Subjects</th>
+              <th onclick="sortTableTeachers(3)">Actions</th>
+            </tr></thead>
+            <tbody id="teacherTableBody"></tbody>
+          </table>
         </div>
-      </section>
-
-    </main>
-
-    <!-- Toast Notification Area -->
-    <div id="toast-container" style="position:fixed;bottom:24px;right:24px;z-index:50;display:flex;flex-direction:column;gap:12px;"></div>
-
-    <style>
-      @keyframes pulse-red {
-        0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.7); }
-        70% { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
-        100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
-      }
-    </style>
+      </div>
+    </div>
   </div>
 
   <!-- FEE MANAGEMENT panel -->
@@ -45096,7 +44160,7 @@ function restoreTeacherZonePhoto() {
                 <span>Subjects</span>
             </button>
             <button class="prof-tab-pill" onclick="switchAdminTab('user')" id="nav-admin-user">
-                <span class="prof-tab-icon"> </span>
+                <span class="prof-tab-icon">�</span>
                 <span>Access Control</span>
             </button>
         </nav>
@@ -46525,25 +45589,15 @@ function restoreTeacherZonePhoto() {
                 if (avatarImgD?.success && avatarImgD.data)  { localStorage.setItem('userAvatarImage', avatarImgD.data); const _av=document.getElementById('modal-user-avatar'); if(_av) _av.src=avatarImgD.data; }
                 if (coverImgD?.success  && coverImgD.data)   { localStorage.setItem('userCoverImage', coverImgD.data); }
                 if (notifRulesD?.success&& notifRulesD.data) { try { localStorage.setItem('notificationRules', JSON.stringify(notifRulesD.data)); } catch(_){} }
-                // Teachers: Load only from Railway database API
-                try {
-                    const tr = await fetch(`${API_BASE}/teachers`);
-                    const tj = await tr.json();
-                    if (tj.success && tj.data.length > 0) { 
-                        teachers = tj.data.map(t => ({
-                            db_id: t.id,
-                            id: t.employee_id || t.id,
-                            name: t.name,
-                            email: t.email,
-                            phone: t.phone,
-                            subjects: t.subject ? t.subject.split(',').map(s => s.trim()) : [],
-                            department: t.department,
-                            photo: t.photo_url || defaultTeacherAvatar,
-                            branch: t.branch || selectedBranch || 'Default'
-                        }));
-                    }
-                } catch(_) {
-                    console.warn('Failed to load teachers from database');
+                // Teachers: prefer teachers_data setting, fallback to /api/teachers
+                if (teachD?.success && teachD.data && Array.isArray(teachD.data) && teachD.data.length > 0) {
+                    teachers = teachD.data; localStorage.setItem('teachers', JSON.stringify(teachers));
+                } else if (!teachers.length) {
+                    try {
+                        const tr = await fetch(`${API_BASE}/teachers`);
+                        const tj = await tr.json();
+                        if (tj.success && tj.data.length > 0) { teachers = tj.data; localStorage.setItem('teachers', JSON.stringify(teachers)); }
+                    } catch(_) {}
                 }
 
             } catch(e) {
@@ -46567,7 +45621,7 @@ function restoreTeacherZonePhoto() {
                 }
             });
             
-            teachers = [];  // Teachers are now loaded from database only
+            teachers = JSON.parse(localStorage.getItem("teachers") || "[]");
             attendance = JSON.parse(localStorage.getItem("attendance") || "{}");
             fees = JSON.parse(localStorage.getItem("fees") || "{}");
             manualAttendance = JSON.parse(localStorage.getItem("manualAttendance") || "{}");
@@ -52133,27 +51187,6 @@ function restoreTeacherZonePhoto() {
             document.getElementById('facultyUserPasswordInput').value = '';
         }
 
-        function startTeacherSetup() {
-            document.getElementById('roleSelectionOverlay').classList.add('hidden');
-            initializeSetup();
-            const overlay = document.getElementById('teacherSetupOverlay');
-            overlay.classList.remove('hidden');
-            overlay.style.display = 'flex';
-            // Trigger animation
-            setTimeout(() => {
-                overlay.classList.add('show-setup');
-            }, 10);
-        }
-
-        function hideSetupOverlay() {
-            const overlay = document.getElementById('teacherSetupOverlay');
-            overlay.classList.remove('show-setup');
-            setTimeout(() => {
-                overlay.classList.add('hidden');
-                overlay.style.display = 'none';
-            }, 300);
-        }
-
         function verifyFacultyUserPassword() {
             try {
                 const password = document.getElementById('facultyUserPasswordInput').value;
@@ -52192,20 +51225,11 @@ function restoreTeacherZonePhoto() {
                 sessionStorage.setItem('facultyTeacherId', selectedFacultyTeacherId);
                 sessionStorage.setItem('facultyUserIndex', selectedFacultyUserIndex);
                 
-                // Check if this is first-time login (no setup data yet)
-                const setupData = localStorage.getItem('teacherSetupData');
-                const hasCompletedSetup = setupData ? JSON.parse(setupData).setupCompleted : false;
-                
-                // Hide modal
+                // Hide modal and show 2FA
                 document.getElementById('roleSelectionOverlay').classList.add('hidden');
                 
                 setTimeout(() => {
-                    // Show setup for first-time users, otherwise show 2FA
-                    if (!hasCompletedSetup) {
-                        startTeacherSetup();
-                    } else {
-                        show2FAModal();
-                    }
+                    show2FAModal();
                 }, 300);
             } catch (e) {
                 console.error('Error verifying password:', e);
@@ -62574,12 +61598,13 @@ function renderAttendance() {
             try {
                 console.log('[DEBUG] renderTeacherDashboard called, teachers count:', teachers?.length || 0);
                 
-                // Teachers should be loaded from database API during initialization
+                // Ensure teachers are loaded
                 if (!teachers || teachers.length === 0) {
-                    console.warn('[WARN] No teachers loaded. Teachers are now loaded from database only.');
+                    console.warn('[WARN] Teachers data not loaded, loading from localStorage...');
+                    teachers = JSON.parse(localStorage.getItem("teachers") || "[]");
                 }
                 
-                const filteredByBranchTeachers = teachers.filter(t => !selectedBranch || t.branch === selectedBranch || t.branch === 'Default');
+                const filteredByBranchTeachers = teachers.filter(t => t.branch === selectedBranch);
                 console.log('[DEBUG] Filtered teachers by branch:', filteredByBranchTeachers.length);
 
                 const total = filteredByBranchTeachers.length;
@@ -62635,7 +61660,7 @@ function renderAttendance() {
                 const filterSubject = (filterEl || {value:'all'}).value;
 
                 const filteredTeachers = teachers.filter(t => {
-                    const matchesBranch = !selectedBranch || t.branch === selectedBranch || t.branch === 'Default';
+                    const matchesBranch = t.branch === selectedBranch;
                     const matchesSearch = (t.name || '').toLowerCase().includes(searchTerm) || (t.id || '').toLowerCase().includes(searchTerm);
                     const matchesSubject = filterSubject === 'all' || (t.subjects && t.subjects.includes(filterSubject));
                     return matchesBranch && matchesSearch && matchesSubject;
@@ -62663,80 +61688,19 @@ function renderAttendance() {
                         const initial = t.name ? t.name.charAt(0).toUpperCase() : '?';
                         const avatarHtml = t.photo && t.photo !== defaultTeacherAvatar
                             ? `<img src="${t.photo}" alt="${t.name}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`
-                            : `<span style="color:#fff;font-weight:bold;font-size:20px;">${initial}</span>`;
+                            : `<span>${initial}</span>`;
 
                         const li = document.createElement("li");
-                        li.style.cssText = `
-                            list-style:none;
-                            display:flex;
-                            flex-direction:column;
-                            md:flex-row;
-                            md:align-items:center;
-                            justify-content:space-between;
-                            gap:24px;
-                            padding:16px;
-                            border-radius:12px;
-                            background:rgba(30,41,59,0.5);
-                            border:1px solid transparent;
-                            transition:all 0.3s ease;
-                            margin-bottom:12px;
-                        `;
-                        
-                        li.onmouseover = function() {
-                            this.style.borderColor = 'rgba(51,65,85,0.5)';
-                            this.style.backgroundColor = 'rgba(26,35,58,0.3)';
-                        };
-                        
-                        li.onmouseout = function() {
-                            this.style.borderColor = 'transparent';
-                            this.style.backgroundColor = 'rgba(30,41,59,0.5)';
-                        };
-
+                        li.className = "tcd-teacher-card";
                         li.innerHTML = `
-                            <!-- Left: Identity & Details -->
-                            <div style="display:flex;align-items:center;gap:20px;flex:1;">
-                                <!-- Avatar -->
-                                <div style="position:relative;">
-                                    <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#9333ea);padding:2px;">
-                                        <div style="width:100%;height:100%;border-radius:50%;background:#0f1629;display:flex;align-items:center;justify-content:center;">
-                                            ${avatarHtml}
-                                        </div>
-                                    </div>
-                                    <div style="position:absolute;bottom:0;right:0;width:16px;height:16px;border-radius:50%;background:#10b981;border:2px solid #0f1629;"></div>
-                                </div>
-
-                                <!-- Info -->
-                                <div style="display:flex;flex-direction:column;gap:4px;flex:1;">
-                                    <div style="display:flex;align-items:center;gap:12px;">
-                                        <h4 style="font-size:16px;font-weight:bold;color:#fff;margin:0;transition:all 0.3s ease;" onmouseover="this.style.color='#818cf8'" onmouseout="this.style.color='#fff'">${t.name || 'Unknown'}</h4>
-                                        <span style="display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:6px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);font-size:9px;font-weight:bold;color:#5eead4;text-transform:uppercase;letter-spacing:0.5px;">
-                                            <i class="fas fa-database" style="font-size:10px;"></i>
-                                            Database
-                                        </span>
-                                    </div>
-                                    <p style="font-size:13px;font-weight:500;color:#94a3b8;margin:0;display:flex;align-items:center;flex-wrap:wrap;gap:8px;">
-                                        <span style="font-family:monospace;font-size:11px;background:rgba(255,255,255,0.05);padding:4px 6px;border-radius:4px;color:#cbd5e1;">ID: ${t.id || 'N/A'}</span>
-                                        <span style="color:#475569;">&bull;</span>
-                                        <span>${(t.subjects || []).join(', ') || 'No subjects'}</span>
-                                        <span style="color:#475569;" ${!(t.department || t.designation) ? 'style="display:none;"' : ''}>&bull;</span>
-                                        <span style="color:#cbd5e1/70;">${t.designation || t.department || ''}</span>
-                                    </p>
-                                </div>
+                            <div class="tcd-tcard-avatar">${avatarHtml}</div>
+                            <div class="tcd-tcard-info">
+                                <div class="tcd-tcard-name">${t.name || 'Unknown'}</div>
+                                <div class="tcd-tcard-sub">${t.id || 'N/A'} &nbsp;?&nbsp; ${(t.subjects || []).join(', ') || 'No subjects'}</div>
                             </div>
-
-                            <!-- Right: Tags & Actions -->
-                            <div style="display:flex;align-items:center;gap:16px;padding-left:56px;md:padding-left:0;">
-                                <span style="display:none;align-items:center;padding:6px 12px;border-radius:999px;background:#0f1629;border:1px solid #334155;font-size:12px;font-weight:600;color:#cbd5e1;box-shadow:inset 0 1px 3px rgba(0,0,0,0.3);@media (min-width:1024px) { display:flex; }">
-                                    ${deptLabel}
-                                </span>
-                                
-                                <button onclick="event.stopPropagation();showTeacherProfile(teachers.find(x=>x.id===${t.id}))" style="position:relative;overflow:hidden;padding:10px 16px;border-radius:8px;background:#4f46e5;border:none;color:#fff;font-size:11px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;transition:all 0.3s ease;cursor:pointer;box-shadow:0 0 20px rgba(79,70,229,0.3);display:flex;align-items:center;gap:8px;">
-                                    <span>View Profile</span>
-                                    <i class="fas fa-arrow-right" style="font-size:10px;"></i>
-                                </button>
-                            </div>
+                            <span class="tcd-tcard-dept ${deptClass}">${deptLabel}</span>
+                            <button class="tcd-tcard-view" onclick="event.stopPropagation();showTeacherProfile(teachers.find(x=>x.id==='${(t.id || '').replace(/'/g, "\\'")}'))">VIEW PROFILE</button>
                         `;
-                        
                         list.appendChild(li);
                     } catch (itemError) {
                         console.warn('[WARN] Error rendering teacher item:', t, itemError);
@@ -62886,76 +61850,51 @@ function renderAttendance() {
         }
 
         function finalizeAddTeacher(teacher) {
-            showLoader('Saving to database...');
+            teachers.push(teacher);
+            localStorage.setItem("teachers", JSON.stringify(teachers));
+            syncSettingToRailway('teachers_data', teachers);
             
-            const payload = {
-                name: teacher.name || '',
-                email: teacher.email || '',
-                phone: teacher.phone || '',
-                subject: teacher.subjects ? (Array.isArray(teacher.subjects) ? teacher.subjects.join(', ') : teacher.subjects) : '',
-                department: teacher.department || '',
-                employee_id: teacher.id || '',
-                photo_url: null,
-                designation: teacher.designation || '',
-                gender: teacher.gender || '',
-                date_of_joining: teacher.joining || '',
-                qualification: teacher.qualification || '',
+            // ✅ SAVE TO DATABASE VIA API
+            const genderValue = (document.getElementById("addTeacherGender") || {value:''}).value;
+            const teacherData = {
+                name: teacher.name,
+                employee_id: teacher.id,  // Maps to employee_id in database
+                email: teacher.email || null,
+                phone: teacher.phone || null,
+                subject: teacher.subjects ? teacher.subjects.join(', ') : null,
+                department: teacher.department || null,
+                designation: teacher.designation || null,
+                gender: genderValue || null,
+                date_of_joining: teacher.joining || null,
+                qualification: teacher.qualification || null,
                 experience: null
             };
             
-            console.log('📤 Sending teacher to API:', payload);
-            console.log('🔗 API URL:', `${API_BASE}/teachers`);
+            console.log('💾 Saving teacher to database:', teacherData);
             
-            fetch(`${API_BASE}/teachers`, {
+            fetch(`${window.API_BASE}/teachers`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify(payload)
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(teacherData)
             })
-            .then(r => {
-                console.log('📥 Response received');
-                console.log('   Status:', r.status, r.statusText);
-                console.log('   Headers:', {
-                    'content-type': r.headers.get("content-type"),
-                    'content-length': r.headers.get("content-length")
-                });
-                
-                const contentType = r.headers.get("content-type");
-                
-                if (!contentType || !contentType.includes("application/json")) {
-                    console.warn('⚠️  Content-Type is not JSON:', contentType);
-                    return r.text().then(text => {
-                        console.error('❌ Non-JSON Response Body:', text.substring(0, 500));
-                        throw new Error(`Server returned ${r.status} with ${contentType || 'no'} content-type. Response: ${text.substring(0, 100)}`);
-                    });
-                }
-                return r.json();
-            })
-            .then(res => {
-                console.log('✅✅ Parsed JSON Response:', res);
-                if (res.success && res.data && res.data.id) {
-                    teacher.db_id = res.data.id;
-                    teachers.push(teacher);
-                    hideLoader();
-                    showMessageBox('Success', `✅ Teacher "${teacher.name}" saved to database!`, 'success');
-                    document.getElementById("addTeacher").querySelectorAll('input:not([type="file"])').forEach(input => input.value = '');
-                    document.getElementById("addTeacherPhoto").value = '';
-                    document.getElementById("addTeacherPreviewPhoto").classList.add('hidden');
-                    setTimeout(() => renderTeacherDashboard(), 500);
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('✅ Teacher saved to database! ID:', data.data.id);
                 } else {
-                    hideLoader();
-                    console.error('Response was JSON but success=false:', res);
-                    showMessageBox('Error', res.error || 'Failed to save teacher to database', 'error');
+                    console.error('❌ Database save failed:', data.error);
                 }
             })
             .catch(err => {
-                hideLoader();
-                console.error('🚨🚨 Fetch Error:', err.message);
-                console.error('Full error:', err);
-                showMessageBox('Error', 'Save failed: ' + err.message, 'error');
+                console.error('❌ API call failed:', err);
             });
+            
+            hideLoader();
+            showMessageBox('Success', "Teacher Added!");
+            document.getElementById("addTeacher").querySelectorAll('input:not([type="file"])').forEach(input => input.value = '');
+            document.getElementById("addTeacherPhoto").value = '';
+            document.getElementById("addTeacherPreviewPhoto").classList.add('hidden');
+            renderTeacherDashboard();
         }
 
         let sortDirectionTeachers = {};
@@ -62972,96 +61911,33 @@ function renderAttendance() {
                 return matchesBranch && matchesSearch && matchesSubject;
             });
 
-            // Update count badge
-            const countBadge = document.getElementById('viewTeachersCount');
-            if (countBadge) countBadge.textContent = filteredTeachers.length;
-
             if (filteredTeachers.length === 0) {
-                body.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px;">No teachers found in this branch.</div>';
+                body.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 40px; color: #999;">No teachers found in this branch.</td></tr>';
             } else {
                 filteredTeachers.forEach(t => {
-                    const dept = (t.department || t.subjects?.[0] || 'other').toLowerCase();
-                    let deptLabel = t.department || (t.subjects && t.subjects[0]) || 'Staff';
-                    if (dept.includes('computer') || dept.includes('cs')) deptLabel = 'Computer Science';
-                    else if (dept.includes('electron') || dept.includes('ec')) deptLabel = 'Electronics';
-                    else if (dept.includes('mech') || dept.includes('me')) deptLabel = 'Mechanical Engineering';
-
+                    const row = body.insertRow();
+                    row.style.cssText = 'border-bottom: 1px solid #e5e7eb; transition: all 0.2s ease;';
+                    row.onmouseover = () => row.style.background = '#f8f9fa';
+                    row.onmouseout = () => row.style.background = '';
+                    
                     const initial = t.name ? t.name.charAt(0).toUpperCase() : '?';
-                    const avatarHtml = t.photo && t.photo !== defaultTeacherAvatar
-                        ? `<img src="${t.photo}" alt="${t.name}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`
-                        : `<span style="color:#fff;font-weight:bold;font-size:20px;">${initial}</span>`;
-
-                    const card = document.createElement("div");
-                    card.style.cssText = `
-                        display:flex;
-                        flex-direction:column;
-                        md:flex-row;
-                        md:align-items:center;
-                        justify-content:space-between;
-                        gap:24px;
-                        padding:16px;
-                        border-radius:12px;
-                        background:rgba(30,41,59,0.5);
-                        border:1px solid transparent;
-                        transition:all 0.3s ease;
-                    `;
+                    const avatarColor = ['#667eea', '#003366', '#f59e0b', '#ef4444', '#8b5cf6'][Math.floor(Math.random() * 5)];
                     
-                    card.onmouseover = function() {
-                        this.style.borderColor = 'rgba(51,65,85,0.5)';
-                        this.style.backgroundColor = 'rgba(26,35,58,0.3)';
-                    };
-                    
-                    card.onmouseout = function() {
-                        this.style.borderColor = 'transparent';
-                        this.style.backgroundColor = 'rgba(30,41,59,0.5)';
-                    };
-
-                    card.innerHTML = `
-                        <!-- Left: Identity & Details -->
-                        <div style="display:flex;align-items:center;gap:20px;flex:1;">
-                            <!-- Avatar -->
-                            <div style="position:relative;flex-shrink:0;">
-                                <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#9333ea);padding:2px;">
-                                    <div style="width:100%;height:100%;border-radius:50%;background:#0f1629;display:flex;align-items:center;justify-content:center;">
-                                        ${avatarHtml}
-                                    </div>
-                                </div>
-                                <div style="position:absolute;bottom:0;right:0;width:16px;height:16px;border-radius:50%;background:#10b981;border:2px solid #0f1629;"></div>
+                    row.innerHTML = `
+                        <td style="padding: 16px; display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, ${avatarColor}, ${avatarColor}99); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                                ${initial}
                             </div>
-
-                            <!-- Info -->
-                            <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:0;">
-                                <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-                                    <h4 style="font-size:16px;font-weight:bold;color:#fff;margin:0;transition:all 0.3s ease;" onmouseover="this.style.color='#818cf8'" onmouseout="this.style.color='#fff'">${t.name || 'Unknown'}</h4>
-                                    <span style="display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:6px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);font-size:9px;font-weight:bold;color:#5eead4;text-transform:uppercase;letter-spacing:0.5px;flex-shrink:0;">
-                                        <i class="fas fa-database" style="font-size:10px;"></i>
-                                        Database
-                                    </span>
-                                </div>
-                                <p style="font-size:13px;font-weight:500;color:#94a3b8;margin:0;display:flex;align-items:center;flex-wrap:wrap;gap:8px;">
-                                    <span style="font-family:monospace;font-size:11px;background:rgba(255,255,255,0.05);padding:4px 6px;border-radius:4px;color:#cbd5e1;">ID: ${t.id || 'N/A'}</span>
-                                    <span style="color:#475569;">&bull;</span>
-                                    <span>${(t.subjects || []).join(', ') || 'No subjects'}</span>
-                                    <span style="color:#475569;" ${!(t.designation || t.department) ? 'style="display:none;"' : ''}>&bull;</span>
-                                    <span style="color:#cbd5e1/70;">${t.designation || t.department || ''}</span>
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- Right: Tags & Actions -->
-                        <div style="display:flex;align-items:center;gap:16px;padding-left:56px;md:padding-left:0;">
-                            <span style="display:none;align-items:center;padding:6px 12px;border-radius:999px;background:#0f1629;border:1px solid #334155;font-size:12px;font-weight:600;color:#cbd5e1;box-shadow:inset 0 1px 3px rgba(0,0,0,0.3);@media (min-width:1024px) { display:flex; }">
-                                ${deptLabel}
-                            </span>
-                            
-                            <button onclick="event.stopPropagation();showTeacherProfile({...${JSON.stringify(t).replace(/"/g, '&quot;')},'id':'${(t.id || '').replace(/'/g, "\\'")}'});" style="position:relative;overflow:hidden;padding:10px 16px;border-radius:8px;background:#4f46e5;border:none;color:#fff;font-size:11px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;transition:all 0.3s ease;cursor:pointer;box-shadow:0 0 20px rgba(79,70,229,0.3);display:flex;align-items:center;gap:8px;flex-shrink:0;">
-                                <span>View Profile</span>
-                                <i class="fas fa-arrow-right" style="font-size:10px;"></i>
+                            <span style="font-weight: 500; color: #1f2937;">${t.name}</span>
+                        </td>
+                        <td style="padding: 16px; color: #6b7280; font-size: 14px; font-family: monospace;">${t.id}</td>
+                        <td style="padding: 16px; color: #6b7280; font-size: 14px;">${t.subjects ? t.subjects.join(', ') : '-'}</td>
+                        <td style="padding: 16px; text-align: right;">
+                            <button onclick='showTeacherProfile(${JSON.stringify(t).replace(/'/g, '&apos;').replace(/"/g, '&quot;')})' style="background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%); color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3); letter-spacing: 0.3px;">
+                                ??? VIEW
                             </button>
-                        </div>
+                        </td>
                     `;
-                    
-                    body.appendChild(card);
                 });
             }
         }
@@ -63228,15 +62104,7 @@ function renderAttendance() {
 
                 if (usernameExists) {
                     if (usernameError) {
-                        usernameError.style.display = 'block';
-                    }
-                    return;
-                }
-
-                // Check if this teacher already has credentials (prevent multiple)
-                if (facultyUsers[activeTeacherId] && Array.isArray(facultyUsers[activeTeacherId]) && facultyUsers[activeTeacherId].length > 0) {
-                    if (usernameError) {
-                        usernameError.textContent = 'This teacher already has user credentials. Delete existing credentials first to create new ones.';
+                        usernameError.textContent = 'This username already exists';
                         usernameError.style.display = 'block';
                     }
                     return;
@@ -63630,19 +62498,8 @@ function renderAttendance() {
                     profileData.email = document.getElementById('admin-email-edit').value;
                     profileData.phone = document.getElementById('admin-phone-edit').value;
                     
-                    // Save only to database API
-                    if (profileData.db_id) {
-                        fetch(`${API_BASE}/teachers/${profileData.db_id}`, {
-                            method: 'PUT',
-                            headers: {'Content-Type':'application/json'},
-                            body: JSON.stringify({
-                                name: profileData.name,
-                                email: profileData.email,
-                                phone: profileData.phone
-                            })
-                        }).catch(err => console.error('API error saving profile:', err));
-                    }
-                    
+                    localStorage.setItem("teachers", JSON.stringify(teachers));
+                    syncSettingToRailway('teachers_data', teachers);
                     showTeacherProfile(profileData);
                     renderTeacherDashboard();
                 }
@@ -63738,122 +62595,33 @@ function renderAttendance() {
                 };
                 reader.readAsDataURL(photoFile);
             } else {
-                updatedTeacher.photo = document.getElementById("editTeacherPreviewPhoto").src;
+                updatedTeacher.photo = document.getElementById("editTeacherPreviewPhoto").src; /* Retain existing photo if no new one */
                 finalizeUpdateTeacher();
             }
 
             function finalizeUpdateTeacher() {
-                showLoader('Saving changes to database...');
-                
-                // Only update in Railway database API
-                if (!updatedTeacher.db_id) {
-                    hideLoader();
-                    showMessageBox('Error', 'Cannot find teacher database ID');
-                    return;
-                }
-                
-                const payload = {
-                    name: updatedTeacher.name,
-                    email: updatedTeacher.email,
-                    phone: updatedTeacher.phone,
-                    subject: updatedTeacher.subjects ? updatedTeacher.subjects.join(', ') : '',
-                    designation: updatedTeacher.designation || '',
-                    gender: updatedTeacher.gender || '',
-                    date_of_joining: updatedTeacher.joining || '',
-                    qualification: updatedTeacher.qualification || '',
-                    photo_url: updatedTeacher.photo || ''
-                };
-                
-                console.log('📤 Updating teacher:', payload);
-                
-                fetch(`${API_BASE}/teachers/${updatedTeacher.db_id}`, {
-                    method: 'PUT',
-                    headers: {'Content-Type':'application/json'},
-                    body: JSON.stringify(payload)
-                })
-                .then(r => {
-                    console.log('📥 Update response status:', r.status);
-                    const contentType = r.headers.get("content-type");
-                    if (!contentType || !contentType.includes("application/json")) {
-                        return r.text().then(text => {
-                            console.error('❌ Response is not JSON! Got:', text.substring(0, 200));
-                            throw new Error('Server returned non-JSON response');
-                        });
-                    }
-                    return r.json();
-                })
-                .then(res => {
-                    console.log('✅ Update parsed response:', res);
-                    if (res.success) {
-                        // Update in memory
-                        teachers[index] = updatedTeacher;
-                        hideLoader();
-                        showMessageBox('Success', 'Teacher details updated successfully!');
-                        closeEditTeacherForm();
-                        showTeacherProfile(updatedTeacher);
-                        renderTeacherDashboard();
-                        renderTeacherTable();
-                    } else {
-                        hideLoader();
-                        showMessageBox('Error', 'Failed to update teacher: ' + (res.error || 'Unknown error'));
-                    }
-                })
-                .catch(err => {
-                    hideLoader();
-                    console.error('🚨 Update error:', err);
-                    showMessageBox('Error', 'Failed to update teacher: ' + err.message);
-                });
+                teachers[index] = updatedTeacher;
+                localStorage.setItem("teachers", JSON.stringify(teachers));
+                syncSettingToRailway('teachers_data', teachers);
+                hideLoader();
+                showMessageBox('Success', "Teacher details updated successfully!");
+                closeEditTeacherForm();
+                showTeacherProfile(updatedTeacher);
+                renderTeacherDashboard();
+                renderTeacherTable();
             }
         }
 
         function deleteTeacherFromProfile() {
             showLoader('Deleting teacher...');
-            const teacherToDelete = teachers.find(t => t.id === activeTeacherId && t.branch === selectedBranch);
+            teachers = teachers.filter(t => !(t.id === activeTeacherId && t.branch === selectedBranch));
+            localStorage.setItem("teachers", JSON.stringify(teachers));
+            syncSettingToRailway('teachers_data', teachers);
             
-            // Only delete from Railway database API
-            if (!teacherToDelete || !teacherToDelete.db_id) {
-                hideLoader();
-                showMessageBox('Error', 'Cannot find teacher database ID');
-                return;
-            }
-            
-            console.log('🗑️ Deleting teacher ID:', teacherToDelete.db_id);
-            
-            fetch(`${API_BASE}/teachers/${teacherToDelete.db_id}`, {
-                method: 'DELETE',
-                headers: {'Content-Type':'application/json'}
-            })
-            .then(r => {
-                console.log('📥 Delete response status:', r.status);
-                const contentType = r.headers.get("content-type");
-                if (!contentType || !contentType.includes("application/json")) {
-                    return r.text().then(text => {
-                        console.error('❌ Response is not JSON! Got:', text.substring(0, 200));
-                        throw new Error('Server returned non-JSON response');
-                    });
-                }
-                return r.json();
-            })
-            .then(res => {
-                console.log('✅ Delete parsed response:', res);
-                if (res.success) {
-                    // Remove from memory
-                    teachers = teachers.filter(t => !(t.id === activeTeacherId && t.branch === selectedBranch));
-                    hideLoader();
-                    showMessageBox('Success', 'Teacher deleted successfully!');
-                    closeTeacherProfile();
-                    showSection('teacherZone', document.querySelector('#teacherNav a')); 
-                    switchTeacherTab('dashboard');
-                } else {
-                    hideLoader();
-                    showMessageBox('Error', 'Failed to delete teacher: ' + (res.error || 'Unknown error'));
-                }
-            })
-            .catch(err => {
-                hideLoader();
-                console.error('🚨 Delete error:', err);
-                showMessageBox('Error', 'Failed to delete teacher: ' + err.message);
-            });
+            hideLoader();
+            showMessageBox('Success', "Teacher deleted successfully!");
+            closeTeacherProfile();
+            showSection('teacherZone', document.querySelector('#teacherNav a')); switchTeacherTab('dashboard');
         }
 
         /* --- Student Data Overview Functions (NEW) --- */
@@ -66998,7 +65766,7 @@ function renderAttendanceMarkingList(filterYear, filterSemester) {
 
         const statusClass = status === 'present' ? 'present' : status === 'absent' ? 'absent' : '';
         const displayText = status === 'present' ? 'Present' : status === 'absent' ? 'Absent' : 'Mark';
-        const iconHTML = status === 'present' ? '<i class="fas fa-check-circle"></i>' : status === 'absent' ? '<i class="fas fa-times-circle"></i>' : '<i class="fas fa-question-circle"></i>';
+        const iconHTML = status === 'present' ? '<i class="fas fa-check"></i>' : status === 'absent' ? '<i class="fas fa-times"></i>' : '<i class="fas fa-edit"></i>';
 
         card.innerHTML = `
             <img src="${s.photo || defaultAvatar}" alt="${s.name}">
@@ -68550,14 +67318,14 @@ function toggleAttendance(usn, toggleElement) {
         // Add new status class and update content
         if (newStatus === 'present') {
             toggleElement.classList.add('present');
-            iconSpan.innerHTML = '✓';
+            iconSpan.innerHTML = '?';
             textSpan.textContent = 'Present';
         } else if (newStatus === 'absent') {
             toggleElement.classList.add('absent');
-            iconSpan.innerHTML = '✕';
+            iconSpan.innerHTML = '?';
             textSpan.textContent = 'Absent';
         } else {
-            iconSpan.innerHTML = '📋';
+            iconSpan.innerHTML = '?';
             textSpan.textContent = 'Mark';
         }
 
