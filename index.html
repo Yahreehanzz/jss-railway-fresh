@@ -38120,292 +38120,279 @@ Easily access and review students' academic performance here. This section provi
     </div>
 </div>
 
-<!-- Professional Teacher Onboarding Setup Screen -->
-<div id="teacherSetupOverlay" style="z-index:999997;background:#f5f5f7;display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;flex-direction:column;justify-content:center;align-items:center;">
-    <style>
-        /* Setup Screen Entrance Animation */
-        @keyframes setupOverlayFadeIn {
-            from {
-                opacity: 0;
-                backdrop-filter: blur(0px);
-            }
-            to {
-                opacity: 1;
+<!-- Professional Teacher Setup Modal -->
+<div class="hidden overlay-base" id="teacherSetupOverlay" style="z-index:999997;">
+    <div class="teacher-setup-modal" id="setupModal">
+        <style>
+            /* Modal Overlay */
+            #teacherSetupOverlay {
+                background: rgba(0, 0, 0, 0.4);
                 backdrop-filter: blur(4px);
+                -webkit-backdrop-filter: blur(4px);
             }
-        }
 
-        @keyframes setupContainerSlideUp {
-            from {
+            #teacherSetupOverlay.show-setup {
+                animation: overlayFadeIn 0.4s ease-out forwards;
+            }
+
+            @keyframes overlayFadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+
+            /* Modal Window */
+            .teacher-setup-modal {
+                width: 95%;
+                max-width: 520px;
+                background: white;
+                border-radius: 20px;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+                animation: modalSlideIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+            }
+
+            @keyframes modalSlideIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px) scale(0.95);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0) scale(1);
+                }
+            }
+
+            /* Modal Header */
+            .setup-modal-header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 24px;
+                text-align: center;
+            }
+
+            .setup-modal-header h2 {
+                margin: 0 0 4px 0;
+                font-size: 24px;
+                font-weight: 600;
+                letter-spacing: -0.5px;
+            }
+
+            .setup-modal-header p {
+                margin: 0;
+                font-size: 14px;
+                opacity: 0.9;
+            }
+
+            /* Modal Content */
+            .setup-modal-content {
+                flex: 1;
+                padding: 32px 24px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                min-height: 350px;
+                position: relative;
+                font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            }
+
+            .setup-step-item {
+                position: absolute;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
                 opacity: 0;
-                transform: translateY(30px);
+                visibility: hidden;
+                transform: translateX(40px) scale(0.95);
+                transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+                width: 100%;
+                max-width: 450px;
             }
-            to {
+
+            .setup-step-item.active {
                 opacity: 1;
-                transform: translateY(0);
+                visibility: visible;
+                transform: translateX(0) scale(1);
             }
-        }
 
-        #teacherSetupOverlay.show-setup {
-            animation: setupOverlayFadeIn 0.5s ease-out forwards;
-        }
+            .setup-step-item.previous {
+                transform: translateX(-40px) scale(0.95);
+                opacity: 0;
+                visibility: hidden;
+            }
 
-        #teacherSetupOverlay.show-setup .setup-screen-container {
-            animation: setupContainerSlideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-        }
+            .setup-hero-icon {
+                width: 64px;
+                height: 64px;
+                color: #667eea;
+                margin-bottom: 16px;
+                filter: drop-shadow(0 4px 12px rgba(102, 126, 234, 0.2));
+            }
 
-        /* Setup Screen Styles */
-        .setup-screen-container {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            display: flex;
-            flex-direction: column;
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            background-color: #f5f5f7;
-            margin: 0;
-            overflow: hidden;
-            color: #1d1d1f;
-            user-select: none;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            opacity: 0;
-        }
+            .setup-title-text {
+                font-size: 22px;
+                font-weight: 600;
+                color: #1d1d1f;
+                margin: 0 0 8px 0;
+                text-align: center;
+            }
 
-        .setup-content-area {
-            flex: 1;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding-bottom: 80px;
-        }
+            .setup-subtitle-text {
+                font-size: 14px;
+                color: #86868b;
+                margin: 0 0 20px 0;
+                text-align: center;
+            }
 
-        .setup-step-item {
-            position: absolute;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateX(60px) scale(0.97);
-            transition: all 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
-            width: 100%;
-            max-width: 600px;
-        }
+            /* Inputs */
+            .setup-mac-input {
+                width: 100%;
+                max-width: 380px;
+                padding: 12px 16px;
+                margin-bottom: 12px;
+                border: 1px solid #e5e5ea;
+                border-radius: 10px;
+                font-size: 15px;
+                font-family: inherit;
+                transition: all 0.2s;
+                background: #f9f9fb;
+            }
 
-        .setup-step-item.active {
-            opacity: 1;
-            visibility: visible;
-            transform: translateX(0) scale(1);
-        }
+            .setup-mac-input:focus {
+                outline: none;
+                border-color: #667eea;
+                background: white;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }
 
-        .setup-step-item.previous {
-            transform: translateX(-60px) scale(0.97);
-            opacity: 0;
-            visibility: hidden;
-        }
+            .setup-mac-input::placeholder {
+                color: #a1a1a6;
+            }
 
-        .setup-mac-list-box {
-            width: 440px;
-            height: 260px;
-            background-color: white;
-            border: 1px solid #d2d2d7;
-            border-radius: 10px;
-            overflow-y: auto;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
-            text-align: left;
-            padding: 6px;
-        }
+            /* List Box */
+            .setup-mac-list-box {
+                width: 100%;
+                max-width: 380px;
+                height: 240px;
+                background: white;
+                border: 1px solid #e5e5ea;
+                border-radius: 10px;
+                overflow-y: auto;
+                padding: 6px;
+                margin-bottom: 12px;
+            }
 
-        .setup-mac-list-box:focus-within {
-            border-color: #007aff;
-            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.3);
-            outline: none;
-        }
+            .setup-mac-list-box:focus-within {
+                border-color: #667eea;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }
 
-        .setup-mac-list-item {
-            padding: 6px 14px;
-            font-size: 14px;
-            font-weight: 400;
-            cursor: pointer;
-            color: #1d1d1f;
-            border-radius: 6px;
-            margin-bottom: 2px;
-            transition: background-color 0.1s;
-        }
+            .setup-mac-list-item {
+                padding: 8px 12px;
+                font-size: 14px;
+                cursor: pointer;
+                color: #1d1d1f;
+                border-radius: 6px;
+                margin-bottom: 2px;
+                transition: all 0.15s;
+            }
 
-        .setup-mac-list-item:hover:not(.selected) {
-            background-color: #f5f5f7;
-        }
+            .setup-mac-list-item:hover:not(.selected) {
+                background-color: #f5f5f7;
+            }
 
-        .setup-mac-list-item.selected {
-            background-color: #007aff;
-            color: white;
-            font-weight: 500;
-        }
+            .setup-mac-list-item.selected {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                font-weight: 500;
+            }
 
-        .setup-mac-input {
-            width: 100%;
-            max-width: 340px;
-            padding: 10px 14px;
-            border: 1.5px solid transparent;
-            border-radius: 8px;
-            font-size: 14px;
-            background-color: rgba(0, 0, 0, 0.04);
-            transition: all 0.2s ease;
-            outline: none;
-            margin-bottom: 16px;
-            color: #1d1d1f;
-            font-family: inherit;
-        }
+            /* Buttons */
+            .setup-modal-footer {
+                padding: 16px 24px;
+                border-top: 1px solid #f2f2f7;
+                display: flex;
+                gap: 12px;
+                justify-content: flex-end;
+            }
 
-        .setup-mac-input::placeholder {
-            color: #86868b;
-        }
+            .setup-mac-btn {
+                padding: 10px 24px;
+                border: none;
+                border-radius: 8px;
+                font-size: 14px;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.2s;
+                font-family: inherit;
+            }
 
-        .setup-mac-input:focus {
-            background-color: #ffffff;
-            border-color: #007aff;
-            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.25);
-        }
+            .setup-mac-btn-primary {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+            }
 
-        .setup-nav-bar {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 80px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 40px;
-            background-color: rgba(245, 245, 247, 0.75);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(0, 0, 0, 0.05);
-            z-index: 50;
-            transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.5s;
-        }
+            .setup-mac-btn-primary:hover:not(:disabled) {
+                transform: translateY(-1px);
+                box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            }
 
-        .setup-mac-btn {
-            padding: 6px 20px;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            outline: none;
-            transition: all 0.15s ease;
-            min-width: 80px;
-            text-align: center;
-            border: 1px solid transparent;
-            font-family: inherit;
-        }
+            .setup-mac-btn-primary:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
 
-        .setup-mac-btn-secondary {
-            background-color: transparent;
-            color: #1d1d1f;
-        }
+            .setup-mac-btn-secondary {
+                background: #f5f5f7;
+                color: #1d1d1f;
+            }
 
-        .setup-mac-btn-secondary:hover {
-            background-color: rgba(0, 0, 0, 0.05);
-        }
+            .setup-mac-btn-secondary:hover:not(:disabled) {
+                background: #e8e8ed;
+            }
 
-        .setup-mac-btn-primary {
-            background-color: #007aff;
-            color: white;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-        }
+            /* Error Messages */
+            .setup-password-error, 
+            #setup-phone-error, 
+            #setup-otp-error {
+                color: #ff3b30;
+                font-size: 13px;
+                margin-top: 8px;
+                text-align: center;
+            }
 
-        .setup-mac-btn-primary:hover {
-            background-color: #006ce6;
-        }
+            /* Spinner */
+            .setup-mac-spinner {
+                width: 40px;
+                height: 40px;
+                border: 3px solid #f0f0f0;
+                border-top: 3px solid #667eea;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+            }
 
-        .setup-mac-btn-primary:active {
-            background-color: #005ecb;
-            transform: scale(0.98);
-        }
+            @keyframes spin {
+                to { transform: rotate(360deg); }
+            }
 
-        .setup-mac-btn-primary:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
+            /* Step progress indicator */
+            .setup-step-counter {
+                font-size: 12px;
+                color: #a1a1a6;
+                margin-top: 16px;
+                text-align: center;
+            }
+        </style>
 
-        .setup-mac-spinner {
-            width: 32px;
-            height: 32px;
-            border: 3px solid rgba(0, 0, 0, 0.08);
-            border-radius: 50%;
-            border-top-color: #86868b;
-            animation: setup-spin 0.8s cubic-bezier(0.6, 0.2, 0.4, 0.8) infinite;
-        }
+        <div class="setup-modal-header">
+            <h2>Setup Your Account</h2>
+            <p id="setup-step-title">Complete your profile</p>
+        </div>
 
-        @keyframes setup-spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .setup-mac-list-box::-webkit-scrollbar {
-            width: 12px;
-        }
-
-        .setup-mac-list-box::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .setup-mac-list-box::-webkit-scrollbar-thumb {
-            background-color: rgba(0, 0, 0, 0.15);
-            border-radius: 10px;
-            border: 3px solid white;
-        }
-
-        .setup-mac-list-box::-webkit-scrollbar-thumb:hover {
-            background-color: rgba(0, 0, 0, 0.3);
-        }
-
-        .setup-title-text {
-            font-size: 32px;
-            font-weight: 600;
-            letter-spacing: -0.01em;
-            color: #1d1d1f;
-            margin-bottom: 12px;
-        }
-
-        .setup-subtitle-text {
-            font-size: 15px;
-            color: #86868b;
-            margin-bottom: 32px;
-            text-align: center;
-            max-width: 380px;
-            line-height: 1.4;
-        }
-
-        .setup-hero-icon {
-            width: 72px;
-            height: 72px;
-            margin-bottom: 24px;
-            color: #007aff;
-            filter: drop-shadow(0 4px 12px rgba(0, 122, 255, 0.2));
-        }
-
-        .setup-password-error {
-            color: #dc2626;
-            font-size: 0.75rem;
-            opacity: 0;
-            transition: opacity 0.2s;
-            margin-top: 4px;
-            height: 16px;
-            font-weight: 600;
-        }
-
-        .setup-password-error.show {
-            opacity: 1;
-        }
-    </style>
-
-    <div class="setup-screen-container" id="setupScreenContainer" style="width:100%;height:100%;display:flex;flex-direction:column;">
-        <div class="setup-content-area">
+        <div class="setup-modal-content">
             <!-- Step 0: Country Selection -->
             <div class="setup-step-item active" id="setup-step-0">
                 <svg class="setup-hero-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -38413,58 +38400,49 @@ Easily access and review students' academic performance here. This section provi
                     <path d="M50 6C50 6 25 30 25 50C25 70 50 94 50 94" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
                     <path d="M50 6C50 6 75 30 75 50C75 70 50 94 50 94" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
                     <path d="M6 50H94" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
-                    <path d="M16 28H84" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
-                    <path d="M16 72H84" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
                 </svg>
-                <h1 class="setup-title-text">Select Your Region</h1>
+                <h3 class="setup-title-text">Select Your Region</h3>
+                <p class="setup-subtitle-text">Choose your country for phone verification</p>
                 <div class="setup-mac-list-box" id="country-list" tabindex="0">
-                    <div class="setup-mac-list-item selected" onclick="setupSelectItem(this)">United States</div>
+                    <div class="setup-mac-list-item selected" onclick="setupSelectItem(this)">India</div>
+                    <div class="setup-mac-list-item" onclick="setupSelectItem(this)">United States</div>
                     <div class="setup-mac-list-item" onclick="setupSelectItem(this)">Afghanistan</div>
-                    <div class="setup-mac-list-item" onclick="setupSelectItem(this)">Åland Islands</div>
                     <div class="setup-mac-list-item" onclick="setupSelectItem(this)">Albania</div>
                     <div class="setup-mac-list-item" onclick="setupSelectItem(this)">Algeria</div>
-                    <div class="setup-mac-list-item" onclick="setupSelectItem(this)">American Samoa</div>
-                    <div class="setup-mac-list-item" onclick="setupSelectItem(this)">Andorra</div>
-                    <div class="setup-mac-list-item" onclick="setupSelectItem(this)">Angola</div>
-                    <div class="setup-mac-list-item" onclick="setupSelectItem(this)">India</div>
-                    <div class="setup-mac-list-item" onclick="setupSelectItem(this)">Indonesia</div>
                     <div class="setup-mac-list-item" onclick="setupSelectItem(this)">Australia</div>
                     <div class="setup-mac-list-item" onclick="setupSelectItem(this)">Austria</div>
+                    <div class="setup-mac-list-item" onclick="setupSelectItem(this)">Indonesia</div>
                 </div>
             </div>
 
             <!-- Step 1: Account Creation -->
             <div class="setup-step-item" id="setup-step-1">
-                <div style="width:80px;height:80px;background:linear-gradient(to bottom,#cbd5e0,#a0aec0);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:24px;box-shadow:0 2px 8px rgba(0,0,0,0.1);border:1px solid #e2e8f0;">
-                    <svg style="width:40px;height:40px;color:white;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.1));" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                    </svg>
-                </div>
-                <h1 class="setup-title-text">Create Your Account</h1>
-                <div style="width:100%;display:flex;flex-direction:column;align-items:center;">
-                    <input type="text" id="setup-fullname" class="setup-mac-input" placeholder="Full Name" autocomplete="off">
-                    <input type="text" id="setup-accountname" class="setup-mac-input" placeholder="Account Name" autocomplete="off">
-                    <div style="height:8px;"></div>
-                    <input type="password" id="setup-password" class="setup-mac-input" placeholder="Password">
-                    <input type="password" id="setup-confirm-password" class="setup-mac-input" placeholder="Verify Password" onkeyup="setupCheckPasswords()">
-                    <p class="setup-password-error" id="setup-password-error">Passwords do not match</p>
-                </div>
+                <svg class="setup-hero-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+                <h3 class="setup-title-text">Create Account</h3>
+                <p class="setup-subtitle-text">Set up your login details</p>
+                <input type="text" id="setup-fullname" class="setup-mac-input" placeholder="Full Name" autocomplete="off">
+                <input type="text" id="setup-accountname" class="setup-mac-input" placeholder="Account Name" autocomplete="off">
+                <input type="password" id="setup-password" class="setup-mac-input" placeholder="Password">
+                <input type="password" id="setup-confirm-password" class="setup-mac-input" placeholder="Confirm Password" onkeyup="setupCheckPasswords()">
+                <p class="setup-password-error" id="setup-password-error">Passwords do not match</p>
             </div>
 
-            <!-- Step 2: Email & Phone for Verification -->
+            <!-- Step 2: Email & Phone -->
             <div class="setup-step-item" id="setup-step-2">
                 <svg class="setup-hero-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                 </svg>
-                <h1 class="setup-title-text">Verify Your Phone</h1>
-                <p class="setup-subtitle-text">Enter your email to receive verification code</p>
-                <input type="email" id="setup-email" class="setup-mac-input" placeholder="your.email@example.com" autocomplete="off" style="text-align:center;margin-bottom:12px;">
-                <div style="display:flex;gap:8px;justify-content:center;align-items:center;margin-bottom:16px;width:100%;">
-                    <input type="text" id="setup-country-code-2" class="setup-mac-input" placeholder="+91" style="width:80px;text-align:center;font-size:16px;" readonly>
-                    <input type="tel" id="setup-phone" class="setup-mac-input" placeholder="9876543210" style="flex:1;text-align:center;font-size:16px;letter-spacing:0.05em;" maxlength="15">
+                <h3 class="setup-title-text">Verify Phone</h3>
+                <p class="setup-subtitle-text">Enter email and phone number</p>
+                <input type="email" id="setup-email" class="setup-mac-input" placeholder="email@example.com" autocomplete="off">
+                <div style="display:flex;gap:8px;width:100%;max-width:380px;">
+                    <input type="text" id="setup-country-code-2" class="setup-mac-input" placeholder="+91" style="width:70px;flex-shrink:0;" readonly>
+                    <input type="tel" id="setup-phone" class="setup-mac-input" placeholder="9876543210" maxlength="15">
                 </div>
                 <p id="setup-phone-error" style="color:#ff3b30;font-size:13px;margin-top:8px;display:none;"></p>
-                <button onclick="setupSendOTP()" style="margin-top:12px;padding:8px 24px;background:#007aff;color:white;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.2s;" id="setup-send-otp-btn">Send Code to Email</button>
+                <button onclick="setupSendOTP()" style="margin-top:12px;padding:10px 24px;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);color:white;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.2s;" id="setup-send-otp-btn">Send Code to Email</button>
             </div>
 
             <!-- Step 3: OTP Verification -->
@@ -38472,359 +38450,41 @@ Easily access and review students' academic performance here. This section provi
                 <svg class="setup-hero-icon" style="color:#10b981;filter:drop-shadow(0 4px 12px rgba(16,185,129,0.2));" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
                 </svg>
-                <h1 class="setup-title-text">Verify Your Phone</h1>
-                <p class="setup-subtitle-text" id="setup-otp-subtitle">Enter the 6-digit code sent to your phone.</p>
-                <input type="text" id="setup-otp" maxlength="6" class="setup-mac-input" placeholder="------" style="text-align:center;font-size:24px;letter-spacing:0.4em;font-family:monospace;margin-bottom:12px;" oninput="this.value=this.value.replace(/[^0-9]/g,'');">
-                <p id="setup-otp-error" style="color:#ff3b30;font-size:13px;margin-bottom:8px;display:none;"></p>
-                <button onclick="setupResendOTP()" style="font-size:13px;color:#007aff;background:transparent;border:none;cursor:pointer;text-decoration:underline;padding:8px 0;" id="setup-resend-btn">Resend Code</button>
+                <h3 class="setup-title-text">Verify Code</h3>
+                <p class="setup-subtitle-text">Enter the 6-digit code sent to your email</p>
+                <input type="text" id="setup-otp" maxlength="6" class="setup-mac-input" placeholder="000000" style="text-align:center;font-size:18px;letter-spacing:0.3em;font-family:monospace;" oninput="this.value=this.value.replace(/[^0-9]/g,'');">
+                <p id="setup-otp-error" style="color:#ff3b30;font-size:13px;margin-top:8px;display:none;"></p>
+                <button onclick="setupResendOTP()" style="font-size:13px;color:#667eea;background:transparent;border:none;cursor:pointer;text-decoration:underline;padding:8px 0;margin-top:8px;">Resend Code</button>
             </div>
 
             <!-- Step 4: Loading -->
             <div class="setup-step-item" id="setup-step-4">
                 <div class="setup-mac-spinner" style="margin-bottom:32px;"></div>
-                <h1 class="setup-title-text" style="font-size:24px;">Setting Up Your Account...</h1>
+                <h3 class="setup-title-text">Setting Up...</h3>
+                <p class="setup-subtitle-text">Finalizing your account</p>
             </div>
 
             <!-- Step 5: Complete -->
             <div class="setup-step-item" id="setup-step-5">
-                <div style="width:96px;height:96px;background:linear-gradient(135deg,#3b82f6,#2563eb);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:32px;box-shadow:0 16px 48px rgba(59,130,246,0.3);">
-                    <svg style="width:48px;height:48px;color:white;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div style="width:80px;height:80px;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:16px;box-shadow:0 16px 48px rgba(102, 126, 234, 0.3);">
+                    <svg style="width:40px;height:40px;color:white;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
                     </svg>
                 </div>
-                <h1 class="setup-title-text">Setup Complete!</h1>
-                <p class="setup-subtitle-text">Your account is ready. Loading your dashboard...</p>
+                <h3 class="setup-title-text">Setup Complete!</h3>
+                <p class="setup-subtitle-text">Your account is ready. Loading dashboard...</p>
+            </div>
+
+            <div class="setup-step-counter" id="setup-counter" style="display:none;margin-top:auto;">
+                <span id="current-step">1</span> of <span id="total-steps">5</span>
             </div>
         </div>
 
-        <div class="setup-nav-bar" id="setup-nav-bar">
+        <div class="setup-modal-footer" id="setup-nav-bar">
             <button id="setup-btn-back" class="setup-mac-btn setup-mac-btn-secondary" onclick="setupGoBack()" style="opacity:0;pointer-events:none;">Back</button>
             <button id="setup-btn-next" class="setup-mac-btn setup-mac-btn-primary" onclick="setupGoNext()">Continue</button>
         </div>
     </div>
-
-    <script>
-        const COUNTRY_CODES = {
-            'India': '+91',
-            'United States': '+1',
-            'Afghanistan': '+93',
-            'Albania': '+355',
-            'Algeria': '+213',
-            'American Samoa': '+1-684',
-            'Andorra': '+376',
-            'Angola': '+244',
-            'Indonesia': '+62',
-            'Australia': '+61',
-            'Austria': '+43'
-        };
-
-        let setupCurrentStep = 0;
-        const setupTotalSteps = 6;
-        let setupSelectedCountry = 'India';
-        let setupOTPSent = false;
-        let setupOTPEmail = '';  // Store email for OTP verification
-
-        function setupSelectItem(el) {
-            document.querySelectorAll('.setup-mac-list-item').forEach(item => item.classList.remove('selected'));
-            el.classList.add('selected');
-            setupSelectedCountry = el.textContent.trim();
-            document.getElementById('country-list').focus();
-        }
-
-        function setupUpdateUI() {
-            const steps = document.querySelectorAll('.setup-step-item');
-            const btnBack = document.getElementById('setup-btn-back');
-            const btnNext = document.getElementById('setup-btn-next');
-            const navBar = document.getElementById('setup-nav-bar');
-
-            steps.forEach((step, idx) => {
-                step.classList.remove('active', 'previous');
-                if (idx === setupCurrentStep) {
-                    step.classList.add('active');
-                } else if (idx < setupCurrentStep) {
-                    step.classList.add('previous');
-                }
-            });
-
-            // Show country code when on phone step
-            if (setupCurrentStep === 2) {
-                const countryCode = COUNTRY_CODES[setupSelectedCountry] || COUNTRY_CODES['India'];
-                document.getElementById('setup-country-code-2').value = countryCode;
-            }
-
-            if (setupCurrentStep > 0 && setupCurrentStep < 3) {
-                btnBack.style.opacity = '1';
-                btnBack.style.pointerEvents = 'auto';
-            } else {
-                btnBack.style.opacity = '0';
-                btnBack.style.pointerEvents = 'none';
-            }
-
-            if (setupCurrentStep === 2 || setupCurrentStep === 3) {
-                btnNext.textContent = setupCurrentStep === 3 ? 'Verify' : 'Continue';
-            } else if (setupCurrentStep <= 1) {
-                btnNext.textContent = 'Continue';
-            } else if (setupCurrentStep === 4) {
-                navBar.style.transform = 'translateY(100%)';
-                navBar.style.opacity = '0';
-                setTimeout(() => {
-                    setupCurrentStep++;
-                    setupUpdateUI();
-                }, 3000);
-                return;
-            } else {
-                navBar.style.transform = 'translateY(100%)';
-                navBar.style.opacity = '0';
-            }
-
-            navBar.style.transform = 'translateY(0)';
-            navBar.style.opacity = '1';
-        }
-
-        function setupCheckPasswords() {
-            const pass = document.getElementById('setup-password').value;
-            const confirm = document.getElementById('setup-confirm-password').value;
-            const error = document.getElementById('setup-password-error');
-            const btn = document.getElementById('setup-btn-next');
-
-            if (confirm.length > 0 && pass !== confirm) {
-                error.classList.add('show');
-                btn.disabled = true;
-                return false;
-            } else {
-                error.classList.remove('show');
-                btn.disabled = false;
-                return true;
-            }
-        }
-
-        function setupValidateStep() {
-            if (setupCurrentStep === 1) {
-                const name = document.getElementById('setup-fullname').value.trim();
-                const pass = document.getElementById('setup-password').value;
-                if (!name || !pass || !setupCheckPasswords()) {
-                    setupTriggerShake('setup-step-1');
-                    return false;
-                }
-            }
-            if (setupCurrentStep === 2) {
-                if (!setupOTPSent) {
-                    setupTriggerShake('setup-step-2');
-                    const errorEl = document.getElementById('setup-phone-error');
-                    errorEl.textContent = 'Please send verification code first';
-                    errorEl.style.display = 'block';
-                    return false;
-                }
-                return true;
-            }
-            if (setupCurrentStep === 3) {
-                const otp = document.getElementById('setup-otp').value;
-                if (otp.length < 6) {
-                    setupTriggerShake('setup-step-3');
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        function setupTriggerShake(id) {
-            const step = document.getElementById(id);
-            step.style.transition = 'transform 0.1s ease-in-out';
-            step.style.transform = 'translateX(10px)';
-            setTimeout(() => step.style.transform = 'translateX(-10px)', 100);
-            setTimeout(() => {
-                step.style.transform = 'translateX(0)';
-                step.style.transition = 'all 0.7s cubic-bezier(0.2, 0.8, 0.2, 1)';
-            }, 200);
-        }
-
-        async function setupSendOTP() {
-            const email = document.getElementById('setup-email').value.trim();
-            const phone = document.getElementById('setup-phone').value.trim();
-            const errorEl = document.getElementById('setup-phone-error');
-            const btn = document.getElementById('setup-send-otp-btn');
-            
-            errorEl.style.display = 'none';
-            errorEl.textContent = '';
-            
-            // Validate email
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!email || !emailRegex.test(email)) {
-                errorEl.textContent = 'Please enter a valid email address';
-                errorEl.style.display = 'block';
-                return;
-            }
-            
-            if (!phone || phone.length < 7) {
-                errorEl.textContent = 'Please enter a valid phone number';
-                errorEl.style.display = 'block';
-                return;
-            }
-            
-            const countryCode = COUNTRY_CODES[setupSelectedCountry] || COUNTRY_CODES['India'];
-            
-            try {
-                btn.disabled = true;
-                btn.textContent = 'Sending...';
-                
-                const response = await fetch(`${API_BASE}/send-otp`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        email: email,
-                        phone: phone,
-                        countryCode: countryCode
-                    })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    setupOTPSent = true;
-                    setupOTPEmail = email; // Store email for verify step
-                    btn.textContent = 'Code Sent ✓';
-                    btn.style.background = '#34c759';
-                    
-                    setTimeout(() => {
-                        setupCurrentStep = 3;
-                        setupUpdateUI();
-                    }, 500);
-                } else {
-                    errorEl.textContent = data.error || 'Failed to send OTP';
-                    errorEl.style.display = 'block';
-                    btn.disabled = false;
-                    btn.textContent = 'Send Code to Email';
-                }
-            } catch (e) {
-                console.error('OTP Send Error:', e);
-                errorEl.textContent = 'Network error. Please try again.';
-                errorEl.style.display = 'block';
-                btn.disabled = false;
-                btn.textContent = 'Send Verification Code';
-            }
-        }
-
-        async function setupResendOTP() {
-            setupOTPSent = false;
-            setupCurrentStep = 2;
-            setupUpdateUI();
-            document.getElementById('setup-send-otp-btn').click();
-        }
-
-        async function setupVerifyOTP() {
-            const otp = document.getElementById('setup-otp').value.trim();
-            const errorEl = document.getElementById('setup-otp-error');
-            
-            errorEl.style.display = 'none';
-            errorEl.textContent = '';
-            
-            if (!otp || otp.length !== 6) {
-                errorEl.textContent = 'Please enter a 6-digit code';
-                errorEl.style.display = 'block';
-                setupTriggerShake('setup-step-3');
-                return false;
-            }
-            
-            try {
-                const response = await fetch(`${API_BASE}/verify-otp`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        email: setupOTPEmail,
-                        otp: otp
-                    })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    console.log('OTP Verified:', data.verifiedEmail, data.verifiedPhone);
-                    return true;
-                } else {
-                    errorEl.textContent = data.error || 'Invalid OTP';
-                    errorEl.style.display = 'block';
-                    setupTriggerShake('setup-step-3');
-                    return false;
-                }
-            } catch (e) {
-                console.error('OTP Verify Error:', e);
-                errorEl.textContent = 'Network error. Please try again.';
-                errorEl.style.display = 'block';
-                return false;
-            }
-        }
-
-        function setupGoNext() {
-            if (!setupValidateStep()) return;
-            
-            if (setupCurrentStep === 3) {
-                // Verify OTP before proceeding
-                setupVerifyOTP().then((verified) => {
-                    if (verified) {
-                        if (setupCurrentStep < setupTotalSteps) {
-                            setupCurrentStep++;
-                            setupUpdateUI();
-                        }
-                        if (setupCurrentStep === 5) {
-                            setTimeout(() => {
-                                completeTeacherSetup();
-                            }, 2000);
-                        }
-                    }
-                });
-                return;
-            }
-            
-            if (setupCurrentStep < setupTotalSteps) {
-                setupCurrentStep++;
-                setupUpdateUI();
-            }
-            if (setupCurrentStep === 5) {
-                setTimeout(() => {
-                    completeTeacherSetup();
-                }, 2000);
-            }
-        }
-
-        function setupGoBack() {
-            if (setupCurrentStep > 0) {
-                setupCurrentStep--;
-                setupUpdateUI();
-            }
-        }
-
-        async function completeTeacherSetup() {
-            const setupData = {
-                fullName: document.getElementById('setup-fullname').value,
-                accountName: document.getElementById('setup-accountname').value,
-                email: document.getElementById('setup-email').value,
-                phone: document.getElementById('setup-phone').value,
-                setupCompleted: true,
-                setupDate: new Date().toISOString()
-            };
-
-            localStorage.setItem('teacherSetupData', JSON.stringify(setupData));
-
-            try {
-                const facultyTeacherId = sessionStorage.getItem('facultyTeacherId');
-                fetch(`${API_BASE}/save-teacher-setup`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ teacherId: facultyTeacherId, setupData })
-                }).catch(() => {});
-            } catch (e) {}
-
-            hideSetupOverlay();
-            setTimeout(() => show2FAModal(), 300);
-        }
-
-        document.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && setupCurrentStep < 4) {
-                setupGoNext();
-            }
-        });
-    </script>
-</div>
 
 <!-- Role Password Modal (for HOD/Admin) -->
 <div class="hidden overlay-base" id="rolePasswordOverlay" style="z-index:999998;">
