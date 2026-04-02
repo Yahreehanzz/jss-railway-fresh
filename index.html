@@ -61752,157 +61752,18 @@ function renderAttendance() {
                 if (!teachers || teachers.length === 0) {
                     console.warn('[WARN] Teachers not loaded, attempting to load from localStorage...');
                     teachers = JSON.parse(localStorage.getItem("teachers") || "[]");
+                    
+                    // If still empty, try to fetch from API
+                    if (!teachers || teachers.length === 0) {
+                        console.warn('[WARN] Teachers still empty, attempting API fetch...');
+                        container.innerHTML = `<div style="text-align:center;padding:24px;color:rgba(148,163,184,1);font-size:13px;">Loading staff data...</div>`;
+                        
+                        fetchTeachersAndRender(container);
+                        return;
+                    }
                 }
                 
-                container.innerHTML = "";
-
-                // Get teachers for current branch
-                const branchTeachers = teachers ? teachers.filter(t => t.branch === selectedBranch) : [];
-                console.log('[DEBUG] Teachers for branch:', branchTeachers.length, 'Branch:', selectedBranch);
-
-                // Update section header badge
-                const badge = document.getElementById('dashboardStaffCountBadge');
-                if (badge) badge.textContent = branchTeachers.length;
-
-                if (branchTeachers.length === 0) {
-                    container.innerHTML = `<div style="text-align:center;padding:24px;color:rgba(148,163,184,1);font-size:13px;">No staff members found in this branch. Please ensure teachers are added.</div>`;
-                    return;
-                }
-
-                branchTeachers.forEach(t => {
-                    try {
-                        if (!t || !t.name) {
-                            console.warn('[WARN] Invalid teacher object:', t);
-                            return;
-                        }
-
-                        const initial = t.name.charAt(0).toUpperCase();
-                        const deptLabel = t.department || (t.subjects && t.subjects[0]) || 'Staff';
-                        const subjectsList = (t.subjects && t.subjects.length > 0) ? t.subjects.slice(0, 2).join(', ') : 'N/A';
-                        
-                        // Create gradient avatar backgrounds
-                        const colors = ['6366f1', '8b5cf6', 'ec4899', 'f59e0b', '10b981'];
-                        const colorIndex = (t.id || 'default').charCodeAt(0) % colors.length;
-                        const bgGradient = colors[colorIndex];
-
-                        const avatarHtml = t.photo 
-                            ? `<img src="${t.photo}" alt="${t.name}" style="width:100%;height:100%;object-fit:cover;"/>`
-                            : `<span style="font-weight:700;font-size:20px;background:linear-gradient(135deg,#${bgGradient},#${colors[(colorIndex+1)%colors.length]});-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">${initial}</span>`;
-
-                        // Create card
-                        const card = document.createElement("div");
-                        card.style.cssText = `
-                            background: rgba(20,28,48,0.8);
-                            backdrop-filter: blur(20px);
-                            -webkit-backdrop-filter: blur(20px);
-                            border: 1px solid rgba(99,102,241,0.2);
-                            border-radius: 20px;
-                            padding: 18px;
-                            display: flex;
-                            align-items: center;
-                            gap: 16px;
-                            transition: all 0.35s cubic-bezier(0.4,0.0,0.2,1);
-                            cursor: pointer;
-                            position: relative;
-                            overflow: hidden;
-                            box-shadow: 0 4px 20px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.1);
-                        `;
-
-                        card.innerHTML = `
-                            <!-- Avatar Section -->
-                            <div style="position:relative;flex-shrink:0;">
-                                <div style="width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,rgba(99,102,241,0.15),rgba(16,185,129,0.1));display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(99,102,241,0.3);overflow:hidden;">
-                                    ${avatarHtml}
-                                </div>
-                                <div style="position:absolute;bottom:0;right:0;width:14px;height:14px;background:rgba(16,185,129,0.9);border-radius:50%;border:2px solid rgba(20,28,48,0.8);box-shadow:0 0 8px rgba(16,185,129,0.6);"></div>
-                            </div>
-                            
-                            <!-- Info Section -->
-                            <div style="flex:1;display:flex;flex-direction:column;gap:6px;min-width:0;">
-                                <div style="display:flex;align-items:baseline;gap:10px;">
-                                    <h4 style="margin:0;font-size:14px;font-weight:700;color:rgba(226,232,240,1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                                        ${t.name || 'Unknown'}
-                                    </h4>
-                                    <span style="padding:3px 8px;background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);border-radius:6px;font-size:10px;font-weight:600;color:rgba(129,140,248,0.9);white-space:nowrap;">
-                                        ${t.id || 'N/A'}
-                                    </span>
-                                </div>
-                                <div style="display:flex;gap:12px;align-items:center;">
-                                    <span style="font-size:11px;color:rgba(148,163,184,0.9);display:flex;align-items:center;gap:5px;">
-                                        <i class="fas fa-book" style="font-size:10px;color:rgba(16,185,129,0.7);"></i>
-                                        ${subjectsList.length > 25 ? subjectsList.substring(0, 25) + '...' : subjectsList}
-                                    </span>
-                                </div>
-                                <div style="display:flex;gap:8px;align-items:center;">
-                                    <span style="padding:4px 10px;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.25);border-radius:8px;font-size:10px;font-weight:600;color:rgba(110,231,183,0.95);text-transform:capitalize;">
-                                        📚 ${deptLabel}
-                                    </span>
-                                    <span style="font-size:9px;color:rgba(148,163,184,0.7);">•</span>
-                                    <span style="font-size:10px;color:rgba(148,163,184,0.8);">Active Now</span>
-                                </div>
-                            </div>
-                            
-                            <!-- Action Button -->
-                            <button style="
-                                background: linear-gradient(135deg,rgba(16,185,129,0.15),rgba(6,182,212,0.1));
-                                border: 1.5px solid rgba(16,185,129,0.4);
-                                color: rgba(110,231,183,0.95);
-                                padding: 9px 18px;
-                                border-radius: 10px;
-                                font-size: 11px;
-                                font-weight: 700;
-                                cursor: pointer;
-                                transition: all 0.25s ease;
-                                white-space: nowrap;
-                                flex-shrink: 0;
-                                letter-spacing: 0.5px;
-                                box-shadow: 0 2px 8px rgba(16,185,129,0.15);
-                                position: relative;
-                                overflow: hidden;
-                            " onclick="event.stopPropagation();showTeacherProfile('${(t.id || '').replace(/'/g, "\\'")}')">
-                                <span style="position:relative;z-index:2;display:flex;align-items:center;gap:6px;">
-                                    <i class="fas fa-user" style="font-size:10px;"></i>
-                                    PROFILE
-                                </span>
-                            </button>
-                        `;
-
-                        // Professional hover effect
-                        card.addEventListener('mouseenter', function() {
-                            this.style.background = 'rgba(25,35,55,0.9)';
-                            this.style.borderColor = 'rgba(99,102,241,0.4)';
-                            this.style.boxShadow = '0 12px 32px rgba(99,102,241,0.2), inset 0 1px 1px rgba(255,255,255,0.15)';
-                            this.style.transform = 'translateY(-2px) scale(1.01)';
-                            
-                            const btn = this.querySelector('button');
-                            if (btn) {
-                                btn.style.background = 'linear-gradient(135deg,rgba(16,185,129,0.25),rgba(6,182,212,0.2))';
-                                btn.style.borderColor = 'rgba(16,185,129,0.6)';
-                                btn.style.boxShadow = '0 4px 12px rgba(16,185,129,0.25)';
-                            }
-                        });
-                        
-                        card.addEventListener('mouseleave', function() {
-                            this.style.background = 'rgba(20,28,48,0.8)';
-                            this.style.borderColor = 'rgba(99,102,241,0.2)';
-                            this.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.1)';
-                            this.style.transform = 'translateY(0) scale(1)';
-                            
-                            const btn = this.querySelector('button');
-                            if (btn) {
-                                btn.style.background = 'linear-gradient(135deg,rgba(16,185,129,0.15),rgba(6,182,212,0.1))';
-                                btn.style.borderColor = 'rgba(16,185,129,0.4)';
-                                btn.style.boxShadow = '0 2px 8px rgba(16,185,129,0.15)';
-                            }
-                        });
-
-                        container.appendChild(card);
-                    } catch (itemError) {
-                        console.error('[ERROR] Error rendering dashboard staff item:', t, itemError);
-                    }
-                });
-
-                console.log('[DEBUG] renderDashboardStaffList completed, rendered:', branchTeachers.length, 'teachers');
+                renderStaffListCards(container);
             } catch (error) {
                 console.error('[ERROR] renderDashboardStaffList error:', error);
                 const container = document.getElementById("staffListContainer");
@@ -61910,6 +61771,178 @@ function renderAttendance() {
                     container.innerHTML = `<div style="text-align:center;padding:24px;color:rgba(200,50,50,1);font-size:13px;">Error loading staff list. Check console for details.</div>`;
                 }
             }
+        }
+
+        function fetchTeachersAndRender(container) {
+            const API_BASE = window.API_BASE || 'https://jss-railway.up.railway.app';
+            fetch(`${API_BASE}/api/teachers`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success && data.data && Array.isArray(data.data)) {
+                        teachers = data.data;
+                        localStorage.setItem('teachers', JSON.stringify(teachers));
+                        console.log('[DEBUG] Teachers loaded from API, count:', teachers.length);
+                        renderStaffListCards(container);
+                    } else {
+                        throw new Error('Invalid API response');
+                    }
+                })
+                .catch(err => {
+                    console.error('[ERROR] Failed to fetch teachers from API:', err);
+                    container.innerHTML = `<div style="text-align:center;padding:24px;color:rgba(200,50,50,1);font-size:13px;">Unable to load staff data. Try refreshing the page.</div>`;
+                });
+        }
+
+        function renderStaffListCards(container) {
+            container.innerHTML = "";
+
+            // Get teachers for current branch
+            const branchTeachers = teachers ? teachers.filter(t => t.branch === selectedBranch) : [];
+            console.log('[DEBUG] Teachers for branch:', branchTeachers.length, 'Branch:', selectedBranch);
+
+            // Update section header badge
+            const badge = document.getElementById('dashboardStaffCountBadge');
+            if (badge) badge.textContent = branchTeachers.length;
+
+            if (branchTeachers.length === 0) {
+                container.innerHTML = `<div style="text-align:center;padding:24px;color:rgba(148,163,184,1);font-size:13px;">No staff members found in this branch. Please ensure teachers are added.</div>`;
+                return;
+            }
+
+            branchTeachers.forEach(t => {
+                try {
+                    if (!t || !t.name) {
+                        console.warn('[WARN] Invalid teacher object:', t);
+                        return;
+                    }
+
+                    const initial = t.name.charAt(0).toUpperCase();
+                    const deptLabel = t.department || (t.subjects && t.subjects[0]) || 'Staff';
+                    const subjectsList = (t.subjects && t.subjects.length > 0) ? t.subjects.slice(0, 2).join(', ') : 'N/A';
+                    
+                    // Create gradient avatar backgrounds
+                    const colors = ['6366f1', '8b5cf6', 'ec4899', 'f59e0b', '10b981'];
+                    const colorIndex = (t.id || 'default').charCodeAt(0) % colors.length;
+                    const bgGradient = colors[colorIndex];
+
+                    const avatarHtml = t.photo 
+                        ? `<img src="${t.photo}" alt="${t.name}" style="width:100%;height:100%;object-fit:cover;"/>`
+                        : `<span style="font-weight:700;font-size:20px;background:linear-gradient(135deg,#${bgGradient},#${colors[(colorIndex+1)%colors.length]});-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">${initial}</span>`;
+
+                    // Create card
+                    const card = document.createElement("div");
+                    card.style.cssText = `
+                        background: rgba(20,28,48,0.8);
+                        backdrop-filter: blur(20px);
+                        -webkit-backdrop-filter: blur(20px);
+                        border: 1px solid rgba(99,102,241,0.2);
+                        border-radius: 20px;
+                        padding: 18px;
+                        display: flex;
+                        align-items: center;
+                        gap: 16px;
+                        transition: all 0.35s cubic-bezier(0.4,0.0,0.2,1);
+                        cursor: pointer;
+                        position: relative;
+                        overflow: hidden;
+                        box-shadow: 0 4px 20px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.1);
+                    `;
+
+                    card.innerHTML = `
+                        <!-- Avatar Section -->
+                        <div style="position:relative;flex-shrink:0;">
+                            <div style="width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,rgba(99,102,241,0.15),rgba(16,185,129,0.1));display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(99,102,241,0.3);overflow:hidden;">
+                                ${avatarHtml}
+                            </div>
+                            <div style="position:absolute;bottom:0;right:0;width:14px;height:14px;background:rgba(16,185,129,0.9);border-radius:50%;border:2px solid rgba(20,28,48,0.8);box-shadow:0 0 8px rgba(16,185,129,0.6);"></div>
+                        </div>
+                        
+                        <!-- Info Section -->
+                        <div style="flex:1;display:flex;flex-direction:column;gap:6px;min-width:0;">
+                            <div style="display:flex;align-items:baseline;gap:10px;">
+                                <h4 style="margin:0;font-size:14px;font-weight:700;color:rgba(226,232,240,1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                                    ${t.name || 'Unknown'}
+                                </h4>
+                                <span style="padding:3px 8px;background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);border-radius:6px;font-size:10px;font-weight:600;color:rgba(129,140,248,0.9);white-space:nowrap;">
+                                    ${t.id || 'N/A'}
+                                </span>
+                            </div>
+                            <div style="display:flex;gap:12px;align-items:center;">
+                                <span style="font-size:11px;color:rgba(148,163,184,0.9);display:flex;align-items:center;gap:5px;">
+                                    <i class="fas fa-book" style="font-size:10px;color:rgba(16,185,129,0.7);"></i>
+                                    ${subjectsList.length > 25 ? subjectsList.substring(0, 25) + '...' : subjectsList}
+                                </span>
+                            </div>
+                            <div style="display:flex;gap:8px;align-items:center;">
+                                <span style="padding:4px 10px;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.25);border-radius:8px;font-size:10px;font-weight:600;color:rgba(110,231,183,0.95);text-transform:capitalize;">
+                                    📚 ${deptLabel}
+                                </span>
+                                <span style="font-size:9px;color:rgba(148,163,184,0.7);">•</span>
+                                <span style="font-size:10px;color:rgba(148,163,184,0.8);">Active Now</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Action Button -->
+                        <button style="
+                            background: linear-gradient(135deg,rgba(16,185,129,0.15),rgba(6,182,212,0.1));
+                            border: 1.5px solid rgba(16,185,129,0.4);
+                            color: rgba(110,231,183,0.95);
+                            padding: 9px 18px;
+                            border-radius: 10px;
+                            font-size: 11px;
+                            font-weight: 700;
+                            cursor: pointer;
+                            transition: all 0.25s ease;
+                            white-space: nowrap;
+                            flex-shrink: 0;
+                            letter-spacing: 0.5px;
+                            box-shadow: 0 2px 8px rgba(16,185,129,0.15);
+                            position: relative;
+                            overflow: hidden;
+                        " onclick="event.stopPropagation();showTeacherProfile('${(t.id || '').replace(/'/g, "\\'")}')">
+                            <span style="position:relative;z-index:2;display:flex;align-items:center;gap:6px;">
+                                <i class="fas fa-user" style="font-size:10px;"></i>
+                                PROFILE
+                            </span>
+                        </button>
+                    `;
+
+                    // Professional hover effect
+                    card.addEventListener('mouseenter', function() {
+                        this.style.background = 'rgba(25,35,55,0.9)';
+                        this.style.borderColor = 'rgba(99,102,241,0.4)';
+                        this.style.boxShadow = '0 12px 32px rgba(99,102,241,0.2), inset 0 1px 1px rgba(255,255,255,0.15)';
+                        this.style.transform = 'translateY(-2px) scale(1.01)';
+                        
+                        const btn = this.querySelector('button');
+                        if (btn) {
+                            btn.style.background = 'linear-gradient(135deg,rgba(16,185,129,0.25),rgba(6,182,212,0.2))';
+                            btn.style.borderColor = 'rgba(16,185,129,0.6)';
+                            btn.style.boxShadow = '0 4px 12px rgba(16,185,129,0.25)';
+                        }
+                    });
+                    
+                    card.addEventListener('mouseleave', function() {
+                        this.style.background = 'rgba(20,28,48,0.8)';
+                        this.style.borderColor = 'rgba(99,102,241,0.2)';
+                        this.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.1)';
+                        this.style.transform = 'translateY(0) scale(1)';
+                        
+                        const btn = this.querySelector('button');
+                        if (btn) {
+                            btn.style.background = 'linear-gradient(135deg,rgba(16,185,129,0.15),rgba(6,182,212,0.1))';
+                            btn.style.borderColor = 'rgba(16,185,129,0.4)';
+                            btn.style.boxShadow = '0 2px 8px rgba(16,185,129,0.15)';
+                        }
+                    });
+
+                    container.appendChild(card);
+                } catch (itemError) {
+                    console.error('[ERROR] Error rendering dashboard staff item:', t, itemError);
+                }
+            });
+
+            console.log('[DEBUG] renderStaffListCards completed, rendered:', branchTeachers.length, 'teachers');
         }
 
         function addTeacher() {
