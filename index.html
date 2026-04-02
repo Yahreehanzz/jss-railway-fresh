@@ -41410,11 +41410,11 @@ function restoreTeacherZonePhoto() {
             }
           }
 
-          // Show modal
+          // Show modal (override !important with setProperty)
           console.log('[DEBUG] Opening modal...');
-          modal.style.display = 'flex';
-          modal.style.alignItems = 'center';
-          modal.style.justifyContent = 'center';
+          modal.style.setProperty('display', 'flex', 'important');
+          modal.style.setProperty('align-items', 'center', 'important');
+          modal.style.setProperty('justify-content', 'center', 'important');
           console.log('[DEBUG] Modal is now visible');
           
         } catch(error) {
@@ -41428,7 +41428,7 @@ function restoreTeacherZonePhoto() {
         const modal = document.getElementById('profileModal');
         if (modal) {
           console.log('[DEBUG] Closing modal');
-          modal.style.display = 'none';
+          modal.style.setProperty('display', 'none', 'important');
         }
       }
 
