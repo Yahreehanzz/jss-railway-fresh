@@ -41048,236 +41048,57 @@ function restoreTeacherZonePhoto() {
     </div>
 
   <!-- HOME panel -->
-    <div class="tc-panel active" id="tcp-home" style="padding: 32px; background: #f8f9fa; min-height: 100vh;">
-        <!-- Professional Admin Profile Management UI -->
-        <div style="max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 32px; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-            
-            <!-- Main Layout -->
-            <div style="display: flex; flex-direction: column; gap: 24px;">
-                
-                <!-- Left Sidebar Navigation -->
-                <aside style="display: flex; gap: 12px; overflow-x: auto; padding-bottom: 16px; margin-bottom: 16px;">
-                    <button onclick="switchAdminTab('personal')" id="admin-nav-personal" style="flex: 0 0 auto; display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-radius: 9999px; background: rgba(99, 102, 241, 0.1); color: #1f2937; font-weight: 600; font-size: 14px; border: none; cursor: pointer; transition: all 0.3s; white-space: nowrap;">
-                        <i class="fas fa-user" style="width: 16px;"></i> Personal Info
-                    </button>
-                    <button onclick="switchAdminTab('subjects')" id="admin-nav-subjects" style="flex: 0 0 auto; display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-radius: 9999px; color: #6b7280; font-weight: 500; font-size: 14px; border: none; cursor: pointer; transition: all 0.3s; white-space: nowrap;">
-                        <i class="fas fa-book-open" style="width: 16px;"></i> Assigned Roles
-                    </button>
-                    <button onclick="switchAdminTab('user')" id="admin-nav-user" style="flex: 0 0 auto; display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-radius: 9999px; color: #6b7280; font-weight: 500; font-size: 14px; border: none; cursor: pointer; transition: all 0.3s; white-space: nowrap;">
-                        <i class="fas fa-shield-alt" style="width: 16px;"></i> Account Details
-                    </button>
-                </aside>
-
-                <!-- Main Content Area -->
-                <main style="background: white; border-radius: 32px; box-shadow: 0 4px 24px rgba(0,0,0,0.02); border: 1px solid rgba(0,0,0,0.05); padding: 48px; min-height: 600px;">
-                    
-                    <!-- SECTION 1: Personal Info -->
-                    <div id="admin-content-personal" style="display: block;">
-                        <!-- Header -->
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; border-bottom: 1px solid #e5e7eb; padding-bottom: 24px;">
-                            <h2 style="font-size: 24px; font-weight: 700; color: #111827; margin: 0;">Personal Information</h2>
-                            <div style="display: flex; align-items: center; gap: 12px;">
-                                <button onclick="toggleAdminEditMode()" id="admin-edit-btn" style="display: flex; align-items: center; gap: 8px; color: #4b5563; background: white; border: 1px solid #d1d5db; font-weight: 500; font-size: 14px; padding: 10px 20px; border-radius: 9999px; cursor: pointer; transition: all 0.3s; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-                                    <i class="fas fa-edit" style="width: 14px;"></i> <span id="admin-edit-btn-text">Edit</span>
-                                </button>
-                                <button id="admin-save-btn" onclick="toggleAdminEditMode()" style="display: none; align-items: center; gap: 8px; color: white; background: #111827; font-weight: 500; font-size: 14px; padding: 10px 24px; border-radius: 9999px; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 12px rgba(17, 24, 39, 0.3); border: none;">
-                                    <i class="fas fa-check" style="width: 14px;"></i> Save Changes
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Avatar Section -->
-                        <div style="margin-bottom: 40px;">
-                            <div style="position: relative; width: 96px; height: 96px; border-radius: 9999px; border: 1px solid #e5e7eb; overflow: hidden; background: #f3f4f6; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                                <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: white; font-size: 40px; font-weight: 700;">A</div>
-                                <div style="position: absolute; bottom: 0; inset-x: 0; height: 28px; background: rgba(17,24,39,0.9); display: flex; align-items: center; justify-content: center;">
-                                    <i class="fas fa-lock" style="font-size: 10px; color: white;"></i>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- READ-ONLY VIEW MODE -->
-                        <div id="admin-view-mode" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 32px; margin-bottom: 48px;">
-                            <div>
-                                <p style="font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">Admin Name</p>
-                                <p style="font-size: 16px; font-weight: 600; color: #111827; margin: 0;">Sowrab ha</p>
-                            </div>
-                            <div>
-                                <p style="font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">Email Address</p>
-                                <p style="font-size: 16px; font-weight: 600; color: #111827; margin: 0;">admin@gmail.com</p>
-                            </div>
-                            <div>
-                                <p style="font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">Phone Number</p>
-                                <p style="font-size: 16px; font-weight: 600; color: #111827; margin: 0;">+91 8789 798 7987</p>
-                            </div>
-                            <div>
-                                <p style="font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">Institution</p>
-                                <p style="font-size: 16px; font-weight: 600; color: #111827; margin: 0;">Govt Polytechnic Beelagi</p>
-                            </div>
-                            <div>
-                                <p style="font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">Location</p>
-                                <p style="font-size: 16px; font-weight: 600; color: #111827; margin: 0;">Beelagi, Karnataka</p>
-                            </div>
-                            <div>
-                                <p style="font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">Zip Code</p>
-                                <p style="font-size: 16px; font-weight: 600; color: #111827; margin: 0;">591123</p>
-                            </div>
-                        </div>
-
-                        <!-- EDIT MODE -->
-                        <div id="admin-edit-mode" style="display: none; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px; margin-bottom: 48px;">
-                            <div>
-                                <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 8px;">Admin Name</label>
-                                <input type="text" value="Sowrab ha" style="width: 100%; padding: 14px 20px; border-radius: 9999px; border: 1px solid #e5e7eb; font-size: 14px; font-weight: 500; color: #111827; transition: all 0.3s;">
-                            </div>
-                            <div>
-                                <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 8px;">Email Address</label>
-                                <input type="email" value="admin@gmail.com" style="width: 100%; padding: 14px 20px; border-radius: 9999px; border: 1px solid #bfdbfe; background: rgba(191,219,254,0.2); font-size: 14px; font-weight: 500; color: #111827; transition: all 0.3s;">
-                            </div>
-                            <div>
-                                <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 8px;">Phone Number</label>
-                                <input type="tel" value="+91 8789 798 7987" style="width: 100%; padding: 14px 20px; border-radius: 9999px; border: 1px solid #e5e7eb; font-size: 14px; font-weight: 500; color: #111827; transition: all 0.3s;">
-                            </div>
-                            <div>
-                                <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 8px;">Institution</label>
-                                <input type="text" value="Govt Polytechnic Beelagi" style="width: 100%; padding: 14px 20px; border-radius: 9999px; border: 1px solid #e5e7eb; font-size: 14px; font-weight: 500; color: #111827; transition: all 0.3s;">
-                            </div>
-                            <div>
-                                <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 8px;">Location</label>
-                                <input type="text" value="Beelagi, Karnataka" style="width: 100%; padding: 14px 20px; border-radius: 9999px; border: 1px solid #e5e7eb; font-size: 14px; font-weight: 500; color: #111827; transition: all 0.3s;">
-                            </div>
-                            <div>
-                                <label style="display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 8px;">Zip Code</label>
-                                <input type="text" value="591123" style="width: 100%; padding: 14px 20px; border-radius: 9999px; border: 1px solid #e5e7eb; font-size: 14px; font-weight: 500; color: #111827; transition: all 0.3s;">
-                            </div>
-                        </div>
-
-                        <!-- Delete Account Section -->
-                        <div style="margin-top: 32px; border-top: 1px solid #e5e7eb; padding-top: 32px; display: flex; justify-content: space-between; align-items: center;">
-                            <h3 style="font-size: 16px; font-weight: 700; color: #111827; margin: 0;">System Settings</h3>
-                            <button style="padding: 12px 24px; background: rgba(239,68,68,0.05); color: #dc2626; font-weight: 600; border: none; border-radius: 9999px; cursor: pointer; transition: all 0.3s; font-size: 14px;">Reset Password</button>
-                        </div>
+    <div class="tc-panel active" id="tcp-home">
+        <div class="tc-home-hero-frosted">
+            <div class="tc-home-grid"></div>
+            <div class="tc-photo-bg" id="tcPhotoBg"><div class="tc-photo-overlay"></div></div>
+            <input type="file" id="tcPhotoInput" accept="image/*" style="display:none" onchange="handleTeacherZonePhoto(this)">
+            <div class="tc-upload-btn" id="tcUploadBtn" onclick="document.getElementById('tcPhotoInput').click()">
+                <div class="tc-upload-circle"><i class="fas fa-camera"></i></div>
+                <span class="tc-upload-label">Upload Portal Photo</span>
+            </div>
+            <div class="tc-photo-action-btns" id="tcPhotoBtns" style="display:none;position:absolute;top:18px;right:18px;z-index:10;gap:8px;background:rgba(15,23,42,0.65);backdrop-filter:blur(10px);padding:7px 10px;border-radius:14px;border:1px solid rgba(255,255,255,0.1);">
+                <button class="tc-change-photo-btn" id="tcChangeBtn" onclick="document.getElementById('tcPhotoInput').click()"><i class="fas fa-camera"></i> Change</button>
+                <button class="tc-change-photo-btn" id="tcRemoveBtn" onclick="removeTeacherZonePhoto()" style="background:rgba(239,68,68,0.18);border-color:rgba(239,68,68,0.45);color:#fca5a5;"><i class="fas fa-trash"></i> Remove</button>
+            </div>
+            <div class="tc-home-text">
+                <div class="tc-home-eyebrow-wrap">
+                    <div class="tc-home-eyebrow-bar"></div>
+                    <span class="tc-home-eyebrow">Govt. Polytechnic, Beelagi &nbsp;?&nbsp; Staff Portal</span>
+                </div>
+                <h1 class="tc-home-title">Welcome to the<br>Teacher Zone.</h1>
+                <p class="tc-home-subtitle">Manage attendance, leave, timetables and more ?<br>all in one professional portal.</p>
+                <div class="tc-home-meta">
+                    <span><i class="fas fa-clipboard-check"></i>Attendance</span>
+                    <span><i class="fas fa-calendar-alt"></i>Leave Management</span>
+                    <span><i class="fas fa-clock"></i>Timetables</span>
+                </div>
+            </div>
+            <div class="tc-home-actions">
+                <button class="tc-action-card primary" onclick="switchTeacherTab('dashboard')">
+                    <div class="tc-action-icon"><i class="fas fa-chart-bar"></i></div>
+                    <div class="tc-action-info">
+                        <span class="tc-action-label">Overview</span>
+                        <span class="tc-action-title">View Dashboard</span>
                     </div>
-
-                    <!-- SECTION 2: Assigned Roles -->
-                    <div id="admin-content-subjects" style="display: none;">
-                        <div style="border-bottom: 1px solid #e5e7eb; padding-bottom: 24px; margin-bottom: 32px;">
-                            <h2 style="font-size: 24px; font-weight: 700; color: #111827; margin: 0 0 8px 0;">Assigned Roles & Permissions</h2>
-                            <p style="font-size: 14px; color: #6b7280; margin: 0;">Administrative roles and access levels assigned to this account.</p>
-                        </div>
-
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
-                            <div style="padding: 24px; border-radius: 24px; border: 1px solid #e5e7eb; box-shadow: 0 2px 12px rgba(0,0,0,0.02); background: white; cursor: pointer; transition: all 0.3s; hover:box-shadow: 0 12px 24px rgba(0,0,0,0.06);">
-                                <div style="width: 48px; height: 48px; border-radius: 9999px; background: rgba(99,102,241,0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 20px; transition: all 0.3s; transform: scale(1);">
-                                    <i class="fas fa-crown" style="font-size: 20px; color: #6366f1;"></i>
-                                </div>
-                                <h3 style="font-size: 18px; font-weight: 700; color: #111827; margin: 0 0 6px 0;">Principal</h3>
-                                <p style="font-size: 14px; color: #6b7280; margin: 0 0 16px 0;">Admin Department</p>
-                                <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: #059669; background: rgba(16,185,129,0.1); padding: 6px 12px; border-radius: 9999px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
-                                    <span style="width: 6px; height: 6px; border-radius: 9999px; background: #10b981;"></span> Active
-                                </span>
-                            </div>
-
-                            <div style="padding: 24px; border-radius: 24px; border: 1px solid #e5e7eb; box-shadow: 0 2px 12px rgba(0,0,0,0.02); background: white; cursor: pointer; transition: all 0.3s;">
-                                <div style="width: 48px; height: 48px; border-radius: 9999px; background: rgba(168,85,247,0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 20px; transition: all 0.3s;">
-                                    <i class="fas fa-lock-open" style="font-size: 20px; color: #a855f7;"></i>
-                                </div>
-                                <h3 style="font-size: 18px; font-weight: 700; color: #111827; margin: 0 0 6px 0;">Full Access</h3>
-                                <p style="font-size: 14px; color: #6b7280; margin: 0 0 16px 0;">All System Modules</p>
-                                <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: #059669; background: rgba(16,185,129,0.1); padding: 6px 12px; border-radius: 9999px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
-                                    <span style="width: 6px; height: 6px; border-radius: 9999px; background: #10b981;"></span> Active
-                                </span>
-                            </div>
-                        </div>
+                </button>
+                <button class="tc-action-card" onclick="switchTeacherTab('add')">
+                    <div class="tc-action-icon"><i class="fas fa-user-plus"></i></div>
+                    <div class="tc-action-info">
+                        <span class="tc-action-label">Onboarding</span>
+                        <span class="tc-action-title">Add Teacher</span>
                     </div>
-
-                    <!-- SECTION 3: Account Details -->
-                    <div id="admin-content-user" style="display: none;">
-                        <div style="border-bottom: 1px solid #e5e7eb; padding-bottom: 24px; margin-bottom: 32px;">
-                            <h2 style="font-size: 24px; font-weight: 700; color: #111827; margin: 0 0 8px 0;">Account Details</h2>
-                            <p style="font-size: 14px; color: #6b7280; margin: 0;">System-level information and administrative metadata.</p>
-                        </div>
-
-                        <div style="background: rgba(249,250,251,0.5); border-radius: 32px; border: 1px solid #e5e7eb; padding: 32px;">
-                            <div style="display: flex; flex-direction: column; gap: 32px;">
-                                <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 32px; border-bottom: 1px solid rgba(229,231,235,0.6);">
-                                    <div>
-                                        <p style="font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">System Admin ID</p>
-                                        <p style="font-size: 28px; font-weight: 700; color: #111827; margin: 0;">ADMIN001</p>
-                                    </div>
-                                    <span style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 9999px; background: rgba(16,185,129,0.1); color: #047857; font-weight: 700; font-size: 13px; border: 1px solid rgba(16,185,129,0.2);">
-                                        <i class="fas fa-check-circle" style="font-size: 12px;"></i> Verified Admin
-                                    </span>
-                                </div>
-                                
-                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 32px;">
-                                    <div>
-                                        <p style="font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Primary Role</p>
-                                        <p style="font-size: 16px; font-weight: 600; color: #111827; margin: 0;">Principal / Administrator</p>
-                                    </div>
-                                    <div>
-                                        <p style="font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Account Created</p>
-                                        <p style="font-size: 16px; font-weight: 600; color: #111827; margin: 0;">March 15, 2024</p>
-                                    </div>
-                                    <div>
-                                        <p style="font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Last Login</p>
-                                        <p style="font-size: 16px; font-weight: 600; color: #111827; margin: 0;">Today at 09:42 AM</p>
-                                    </div>
-                                    <div>
-                                        <p style="font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Two-Factor Auth</p>
-                                        <p style="font-size: 16px; font-weight: 600; color: #059669; margin: 0;">Enabled ✓</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                </button>
+                <button class="tc-action-card" onclick="switchTeacherTab('manage')">
+                    <div class="tc-action-icon"><i class="fas fa-users-cog"></i></div>
+                    <div class="tc-action-info">
+                        <span class="tc-action-label">Staff</span>
+                        <span class="tc-action-title">Manage Staff</span>
                     </div>
-
-                </main>
+                </button>
             </div>
         </div>
     </div>
-
-    <script>
-        function switchAdminTab(tabId) {
-            document.querySelectorAll('[id^="admin-content-"]').forEach(el => el.style.display = 'none');
-            document.getElementById('admin-content-' + tabId).style.display = 'block';
-            
-            document.querySelectorAll('[id^="admin-nav-"]').forEach(btn => {
-                btn.style.background = 'transparent';
-                btn.style.color = '#6b7280';
-                btn.style.fontWeight = '500';
-            });
-            
-            const activeBtn = document.getElementById('admin-nav-' + tabId);
-            activeBtn.style.background = 'rgba(99, 102, 241, 0.1)';
-            activeBtn.style.color = '#1f2937';
-            activeBtn.style.fontWeight = '600';
-        }
-
-        let adminIsEditing = false;
-        function toggleAdminEditMode() {
-            adminIsEditing = !adminIsEditing;
-            const viewMode = document.getElementById('admin-view-mode');
-            const editMode = document.getElementById('admin-edit-mode');
-            const editBtn = document.getElementById('admin-edit-btn');
-            const saveBtn = document.getElementById('admin-save-btn');
-            const editBtnText = document.getElementById('admin-edit-btn-text');
-
-            if (adminIsEditing) {
-                viewMode.style.display = 'none';
-                editMode.style.display = 'grid';
-                editBtnText.textContent = 'Cancel';
-                editBtn.style.background = 'rgba(229, 231, 235, 0.7)';
-                saveBtn.style.display = 'flex';
-            } else {
-                viewMode.style.display = 'grid';
-                editMode.style.display = 'none';
-                editBtnText.textContent = 'Edit';
-                editBtn.style.background = 'white';
-                saveBtn.style.display = 'none';
-            }
-        }
-    </script>
 
   <!-- DASHBOARD panel -->
   <div class="tc-panel" id="tcp-dashboard">
