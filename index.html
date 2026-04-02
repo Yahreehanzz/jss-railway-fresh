@@ -41131,7 +41131,7 @@ function restoreTeacherZonePhoto() {
                     <i class="fas fa-users"></i>
                 </div>
                 <div style="display:flex;flex-direction:column;">
-                    <h2 style="font-size:36px;font-weight:900;color:#ffffff;margin:0;letter-spacing:-1px;line-height:1;">1</h2>
+                    <h2 id="dashboardTotalStaffCount" style="font-size:36px;font-weight:900;color:#ffffff;margin:0;letter-spacing:-1px;line-height:1;">1</h2>
                     <p style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:rgba(100,116,139,1);margin-top:4px;margin-bottom:0;">Total Staff <span style="margin:0 4px;color:rgba(71,85,105,1);">&bull;</span> Current Branch</p>
                 </div>
             </div>
@@ -41142,7 +41142,7 @@ function restoreTeacherZonePhoto() {
                     <i class="fas fa-presentation"></i>
                 </div>
                 <div style="display:flex;flex-direction:column;">
-                    <h2 style="font-size:36px;font-weight:900;color:#ffffff;margin:0;letter-spacing:-1px;line-height:1;">1</h2>
+                    <h2 id="dashboardActiveTeachersCount" style="font-size:36px;font-weight:900;color:#ffffff;margin:0;letter-spacing:-1px;line-height:1;">1</h2>
                     <p style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:rgba(100,116,139,1);margin-top:4px;margin-bottom:0;">Active Teachers</p>
                 </div>
             </div>
@@ -41156,55 +41156,14 @@ function restoreTeacherZonePhoto() {
             <div style="padding:20px 24px;border-bottom:1px solid rgba(255,255,255,0.05);background:rgba(255,255,255,0.02);display:flex;align-items:center;gap:12px;">
                 <i class="fas fa-contact-card" style="font-size:16px;color:rgba(100,116,139,1);"></i>
                 <h3 style="font-size:13px;font-weight:700;color:rgba(226,232,240,1);letter-spacing:2px;text-transform:uppercase;margin:0;">All Staff</h3>
-                <span style="padding:4px 10px;border-radius:9999px;background:rgba(99,102,241,0.2);color:rgba(165,180,252,1);font-size:11px;font-weight:700;border:1px solid rgba(99,102,241,0.2);margin-left:auto;">1</span>
+                <span id="dashboardStaffCountBadge" style="padding:4px 10px;border-radius:9999px;background:rgba(99,102,241,0.2);color:rgba(165,180,252,1);font-size:11px;font-weight:700;border:1px solid rgba(99,102,241,0.2);margin-left:auto;">1</span>
             </div>
 
             <!-- List Container -->
             <div style="padding:16px 24px;">
-                <!-- Single Staff Item -->
-                <div style="display:flex;flex-direction:column;gap:24px;padding:16px;border-radius:12px;background:rgba(15,22,41,0.5);border:1px solid transparent;transition:all 0.3s ease;cursor:pointer;">
-                    
-                    <!-- Left: Identity & Details -->
-                    <div style="display:flex;align-items:center;gap:20px;">
-                        <!-- Avatar -->
-                        <div style="position:relative;">
-                            <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,rgba(99,102,241,1),rgba(139,92,246,1));padding:2px;">
-                                <div style="width:100%;height:100%;border-radius:50%;background:rgba(7,11,20,1);display:flex;align-items:center;justify-content:center;color:#ffffff;font-weight:700;font-size:18px;">S</div>
-                            </div>
-                            <!-- Status Indicator -->
-                            <div style="position:absolute;bottom:0;right:0;width:14px;height:14px;border-radius:50%;background:rgba(16,185,129,1);border:2px solid rgba(7,11,20,1);"></div>
-                        </div>
-
-                        <!-- Info -->
-                        <div style="display:flex;flex-direction:column;gap:4px;flex:1;">
-                            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-                                <h4 style="font-size:16px;font-weight:700;color:#ffffff;margin:0;">Sowrab ha</h4>
-                                <span style="display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:6px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);font-size:10px;font-weight:700;color:rgba(16,185,129,1);text-transform:uppercase;letter-spacing:1px;">
-                                    <i class="fas fa-database" style="font-size:10px;"></i>
-                                    Database
-                                </span>
-                            </div>
-                            <p style="font-size:13px;font-weight:500;color:rgba(100,116,139,1);display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:0;">
-                                <span style="color:rgba(203,213,225,1);font-family:monospace;font-size:12px;background:rgba(255,255,255,0.05);padding:2px 6px;border-radius:4px;">ID: 787878</span>
-                                <span style="color:rgba(71,85,105,1);">&bull;</span>
-                                <span>Fundamentals of Computer</span>
-                                <span style="color:rgba(71,85,105,1);">&bull;</span>
-                                <span>Sem 1</span>
-                                <span style="color:rgba(71,85,105,1);">&bull;</span>
-                                <span style="color:rgba(199,210,254,1);">Theory</span>
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Right: Actions & Tags -->
-                    <div style="display:flex;align-items:center;gap:16px;justify-content:space-between;flex-wrap:wrap;padding-left:0;">
-                        <span style="display:none;align-items:center;padding:4px 12px;border-radius:9999px;background:rgba(7,11,20,1);border:1px solid rgba(71,85,105,1);font-size:11px;font-weight:600;color:rgba(203,213,225,1);box-shadow:0 -2px 6px rgba(0,0,0,0.3) inset;">
-                            INFORMATION SCIENCE
-                        </span>
-                        
-                        <button onclick="viewStaffProfile('Sowrab ha')" style="padding:8px 16px;border-radius:8px;background:rgba(99,102,241,1);color:#ffffff;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;border:none;cursor:pointer;transition:all 0.3s ease;box-shadow:0 0 20px rgba(99,102,241,0.3);display:flex;align-items:center;gap:8px;margin-left:auto;">View Profile <i class="fas fa-arrow-right" style="font-size:10px;"></i></button>
-                    </div>
-
+                <!-- Dynamic Staff List will render here -->
+                <div id="staffListContainer" style="display:flex;flex-direction:column;gap:12px;">
+                    <!-- Loading... -->
                 </div>
             </div>
 
@@ -61668,35 +61627,16 @@ function renderAttendance() {
                 console.log('[DEBUG] Filtered teachers by branch:', filteredByBranchTeachers.length);
 
                 const total = filteredByBranchTeachers.length;
-                const isCS = t => (t.department && (t.department.toLowerCase().includes('computer') || t.department.toLowerCase().includes('cs'))) || (t.subjects && t.subjects.includes('Computer Science'));
-                const isEC = t => (t.department && (t.department.toLowerCase().includes('electron') || t.department.toLowerCase().includes('ec'))) || (t.subjects && t.subjects.includes('Electronics'));
-                const isME = t => (t.department && (t.department.toLowerCase().includes('mech') || t.department.toLowerCase().includes('me'))) || (t.subjects && t.subjects.includes('Mechanical'));
-                const csTeachers = filteredByBranchTeachers.filter(isCS).length;
-                const ecTeachers = filteredByBranchTeachers.filter(isEC).length;
-                const meTeachers = filteredByBranchTeachers.filter(isME).length;
-                const hodCount   = filteredByBranchTeachers.length;
-
-                const totalEl = document.getElementById("totalTeachersCount");
-                const csEl = document.getElementById("csTeachersCount");
-                const ecEl = document.getElementById("ecTeachersCount");
-                const meEl = document.getElementById("meTeachersCount");
                 
-                if (totalEl) totalEl.textContent = total;
-                if (csEl) csEl.textContent = csTeachers;
-                if (ecEl) ecEl.textContent = ecTeachers;
-                if (meEl) meEl.textContent = meTeachers;
-
-                // Branch-specific dept card
-                const bdc = document.getElementById('tcBranchDeptCount'); 
-                if (bdc) bdc.textContent = total;
-                const bdl = document.getElementById('tcBranchDeptLabel'); 
-                if (bdl) bdl.textContent = 'Staff';
-                const hc  = document.getElementById('tcHODCount');        
-                if (hc)  hc.textContent  = hodCount;
+                // Update metric cards
+                const totalStaffEl = document.getElementById("dashboardTotalStaffCount");
+                if (totalStaffEl) totalStaffEl.textContent = total;
+                
+                const activeTeachersEl = document.getElementById("dashboardActiveTeachersCount");
+                if (activeTeachersEl) activeTeachersEl.textContent = total;
 
                 console.log('[DEBUG] Rendering teacher list...');
-                renderTeacherList();
-                updateTeacherDeptProgressBars();
+                renderDashboardStaffList();
                 console.log('[DEBUG] renderTeacherDashboard completed successfully');
             } catch (error) {
                 console.error('[ERROR] renderTeacherDashboard error:', error);
@@ -61784,6 +61724,109 @@ function renderAttendance() {
                 console.log('[DEBUG] renderTeacherList completed successfully');
             } catch (error) {
                 console.error('[ERROR] renderTeacherList error:', error);
+            }
+        }
+
+        function renderDashboardStaffList() {
+            try {
+                const container = document.getElementById("staffListContainer");
+                if (!container) {
+                    console.warn('[WARN] staffListContainer element not found');
+                    return;
+                }
+
+                console.log('[DEBUG] renderDashboardStaffList called, teachers count:', teachers?.length || 0);
+                container.innerHTML = "";
+
+                // Get teachers for current branch
+                const branchTeachers = teachers.filter(t => t.branch === selectedBranch);
+                console.log('[DEBUG] Teachers for branch:', branchTeachers.length);
+
+                // Update section header badge
+                const badge = document.getElementById('dashboardStaffCountBadge');
+                if (badge) badge.textContent = branchTeachers.length;
+
+                if (branchTeachers.length === 0) {
+                    container.innerHTML = `<div style="text-align:center;padding:24px;color:rgba(148,163,184,1);font-size:13px;">No staff members found in this branch.</div>`;
+                    return;
+                }
+
+                branchTeachers.forEach(t => {
+                    try {
+                        const dept = (t.department || t.subjects?.[0] || 'other').toLowerCase();
+                        let deptClass = 'other', deptLabel = t.department || (t.subjects && t.subjects[0]) || 'Staff';
+
+                        const initial = t.name ? t.name.charAt(0).toUpperCase() : '?';
+                        const avatarHtml = t.photo 
+                            ? `<img src="${t.photo}" alt="${t.name}" style="width:100%;height:100%;object-fit:cover;"/>`
+                            : `<span style="font-weight:700;font-size:18px;color:rgba(165,180,252,1);">${initial}</span>`;
+
+                        // Create staff item with glassmorphism styling
+                        const item = document.createElement("div");
+                        item.style.cssText = `
+                            background: rgba(255,255,255,0.05);
+                            backdrop-filter: blur(10px);
+                            -webkit-backdrop-filter: blur(10px);
+                            border: 1px solid rgba(255,255,255,0.1);
+                            border-radius: 16px;
+                            padding: 16px;
+                            display: flex;
+                            align-items: center;
+                            gap: 14px;
+                            transition: all 0.3s ease;
+                            cursor: pointer;
+                        `;
+
+                        item.innerHTML = `
+                            <div style="width:48px;height:48px;border-radius:12px;background:rgba(99,102,241,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;border:1px solid rgba(99,102,241,0.3);">
+                                ${avatarHtml}
+                            </div>
+                            <div style="flex:1;display:flex;flex-direction:column;gap:4px;min-width:0;">
+                                <div style="font-weight:600;color:rgba(226,232,240,1);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                                    ${t.name || 'Unknown'}
+                                </div>
+                                <div style="font-size:11px;color:rgba(148,163,184,1);">
+                                    ${t.id || 'N/A'} &nbsp;•&nbsp; ${(t.subjects && t.subjects.length > 0) ? t.subjects[0] : 'N/A'}
+                                </div>
+                            </div>
+                            <button style="
+                                background: rgba(16,185,129,0.1);
+                                border: 1px solid rgba(16,185,129,0.3);
+                                color: rgba(110,231,183,1);
+                                padding: 8px 16px;
+                                border-radius: 8px;
+                                font-size: 11px;
+                                font-weight: 600;
+                                cursor: pointer;
+                                transition: all 0.2s ease;
+                                white-space: nowrap;
+                                flex-shrink: 0;
+                            " onclick="event.stopPropagation();showTeacherProfile('${t.id}')">
+                                VIEW PROFILE
+                            </button>
+                        `;
+
+                        // Hover effect
+                        item.addEventListener('mouseenter', function() {
+                            this.style.background = 'rgba(255,255,255,0.08)';
+                            this.style.borderColor = 'rgba(99,102,241,0.4)';
+                            this.style.transform = 'translateX(4px)';
+                        });
+                        item.addEventListener('mouseleave', function() {
+                            this.style.background = 'rgba(255,255,255,0.05)';
+                            this.style.borderColor = 'rgba(255,255,255,0.1)';
+                            this.style.transform = 'translateX(0)';
+                        });
+
+                        container.appendChild(item);
+                    } catch (itemError) {
+                        console.warn('[WARN] Error rendering dashboard staff item:', t, itemError);
+                    }
+                });
+
+                console.log('[DEBUG] renderDashboardStaffList completed successfully');
+            } catch (error) {
+                console.error('[ERROR] renderDashboardStaffList error:', error);
             }
         }
 
@@ -62379,7 +62422,18 @@ function renderAttendance() {
         function showTeacherProfile(teacher) {
             try {
                 showLoader('Loading teacher profile...');
-                activeTeacherId = teacher.id;
+                
+                // Handle both teacher object and teacher ID string
+                if (typeof teacher === 'string') {
+                    activeTeacherId = teacher;
+                } else if (typeof teacher === 'object' && teacher.id) {
+                    activeTeacherId = teacher.id;
+                } else {
+                    console.error('Invalid teacher parameter');
+                    hideLoader();
+                    return;
+                }
+                
                 const profileData = teachers.find(t => t.id === activeTeacherId && t.branch === selectedBranch);
                 if (!profileData) {
                     console.warn('Teacher profile not found');
