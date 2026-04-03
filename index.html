@@ -62230,28 +62230,28 @@ function renderAttendance() {
                         flex-direction: row;
                         align-items: center;
                         justify-content: space-between;
-                        gap: 24px;
-                        padding: 24px;
-                        border-radius: 16px;
-                        background: rgba(20, 28, 48, 0.5);
+                        gap: 20px;
+                        padding: 20px;
+                        border-radius: 14px;
+                        background: rgba(15, 22, 41, 0.8);
                         border: 1px solid rgba(255, 255, 255, 0.08);
-                        hover: border rgba(113, 119, 144, 0.5);
                         transition: all 0.3s ease;
                         cursor: pointer;
                         position: relative;
                         overflow: hidden;
+                        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
                     `;
 
                     card.innerHTML = `
                         <!-- Left: Identity & Details -->
-                        <div style="display: flex; align-items: center; gap: 20px; flex: 1;">
+                        <div style="display: flex; align-items: center; gap: 16px; flex: 1; min-width: 0;">
                             <!-- Avatar -->
                             <div style="position: relative; flex-shrink: 0;">
                                 <div style="
-                                    width: 56px;
-                                    height: 56px;
+                                    width: 52px;
+                                    height: 52px;
                                     border-radius: 50%;
-                                    background: linear-gradient(to bottom right, #6366f1, #a855f7);
+                                    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
                                     padding: 2px;
                                     display: flex;
                                     align-items: center;
@@ -62267,7 +62267,7 @@ function renderAttendance() {
                                         justify-content: center;
                                         color: white;
                                         font-weight: 700;
-                                        font-size: 20px;
+                                        font-size: 18px;
                                     ">
                                         ${initial}
                                     </div>
@@ -62277,24 +62277,24 @@ function renderAttendance() {
                                     position: absolute;
                                     bottom: 0;
                                     right: 0;
-                                    width: 16px;
-                                    height: 16px;
+                                    width: 14px;
+                                    height: 14px;
                                     border-radius: 50%;
                                     background: #10b981;
                                     border: 2px solid #070B14;
-                                    box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+                                    box-shadow: 0 0 6px rgba(16, 185, 129, 0.7);
                                 "></div>
                             </div>
 
                             <!-- Info -->
-                            <div style="display: flex; flex-direction: column; gap: 8px; min-width: 0; flex: 1;">
+                            <div style="display: flex; flex-direction: column; gap: 6px; min-width: 0; flex: 1;">
                                 <!-- Name & Active Badge -->
-                                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
                                     <h4 style="
                                         margin: 0;
-                                        font-size: 16px;
+                                        font-size: 15px;
                                         font-weight: 700;
-                                        color: white;
+                                        color: rgba(241, 245, 249, 1);
                                         white-space: nowrap;
                                         overflow: hidden;
                                         text-overflow: ellipsis;
@@ -62302,28 +62302,29 @@ function renderAttendance() {
                                         ${t.name || 'Unknown'}
                                     </h4>
                                     <span style="
-                                        padding: 4px 10px;
-                                        background: rgba(16, 185, 129, 0.2);
+                                        padding: 3px 9px;
+                                        background: rgba(16, 185, 129, 0.15);
                                         color: rgba(110, 231, 183, 1);
                                         border: 1px solid rgba(16, 185, 129, 0.3);
-                                        border-radius: 6px;
-                                        font-size: 10px;
+                                        border-radius: 5px;
+                                        font-size: 9px;
                                         font-weight: 700;
                                         text-transform: uppercase;
                                         display: flex;
                                         align-items: center;
-                                        gap: 4px;
+                                        gap: 3px;
                                         white-space: nowrap;
+                                        letter-spacing: 0.4px;
                                     ">
-                                        <i class="fas fa-check-circle" style="font-size: 9px;"></i>
-                                        ACTIVE
+                                        <i class="fas fa-check-circle" style="font-size: 8px;"></i>
+                                        Active
                                     </span>
                                 </div>
                                 
-                                <!-- ID, Subject, Designation -->
+                                <!-- ID, Subject, Teacher -->
                                 <p style="
                                     margin: 0;
-                                    font-size: 13px;
+                                    font-size: 12px;
                                     font-weight: 500;
                                     color: rgba(148, 163, 184, 1);
                                     display: flex;
@@ -62332,117 +62333,123 @@ function renderAttendance() {
                                     gap: 8px;
                                 ">
                                     <span style="
-                                        color: rgba(226, 232, 240, 1);
-                                        font-family: monospace;
-                                        font-size: 11px;
-                                        background: rgba(255, 255, 255, 0.05);
-                                        padding: 4px 8px;
-                                        border-radius: 4px;
+                                        color: rgba(226, 232, 240, 0.9);
+                                        font-family: 'Courier New', monospace;
+                                        font-size: 10px;
+                                        font-weight: 600;
+                                        background: rgba(255, 255, 255, 0.08);
+                                        padding: 3px 7px;
+                                        border-radius: 3px;
                                         white-space: nowrap;
                                     ">ID: ${teacherId}</span>
-                                    <span style="color: rgba(113, 119, 144, 1);">&bull;</span>
-                                    <span>${subjectsList}</span>
-                                    <span style="color: rgba(113, 119, 144, 1);">&bull;</span>
-                                    <span style="color: rgba(129, 140, 248, 0.7);">Teacher</span>
+                                    <span style="color: rgba(113, 119, 144, 0.8);">&bull;</span>
+                                    <span style="color: rgba(148, 163, 184, 0.95);">${subjectsList.length > 30 ? subjectsList.substring(0, 30) + '...' : subjectsList}</span>
+                                    <span style="color: rgba(113, 119, 144, 0.8);">&bull;</span>
+                                    <span style="color: rgba(129, 140, 248, 0.85); font-weight: 600;">Teacher</span>
                                 </p>
                             </div>
+                        </div>
+
+                        <!-- Middle: Department (hidden on small screens) -->
+                        <div style="
+                            display: none;
+                            align-items: center;
+                            padding: 6px 12px;
+                            border-radius: 8px;
+                            background: rgba(15, 22, 41, 1);
+                            border: 1px solid rgba(113, 119, 144, 0.3);
+                            font-size: 11px;
+                            font-weight: 600;
+                            color: rgba(226, 232, 240, 0.9);
+                            white-space: nowrap;
+                            flex-shrink: 0;
+                        ">
+                            ${deptLabel}
                         </div>
 
                         <!-- Right: Actions -->
                         <div style="
                             display: flex;
                             align-items: center;
-                            gap: 10px;
+                            gap: 8px;
                             flex-shrink: 0;
                         ">
-                            <span style="
-                                hidden: true;
-                                padding: 6px 12px;
-                                border-radius: 20px;
-                                background: #070B14;
-                                border: 1px solid rgba(113, 119, 144, 1);
-                                font-size: 11px;
-                                font-weight: 600;
-                                color: rgba(226, 232, 240, 1);
-                                display: none;
-                            ">
-                                ${deptLabel}
-                            </span>
-                            
                             <button onclick="event.stopPropagation(); showTeacherProfile('${teacherId.replace(/'/g, "\\'")}')" style="
-                                background: rgba(99, 102, 241, 0.15);
-                                border: 1px solid rgba(99, 102, 241, 0.2);
-                                color: rgba(129, 140, 248, 1);
-                                padding: 8px 16px;
-                                border-radius: 10px;
-                                font-size: 11px;
+                                background: rgba(99, 102, 241, 0.12);
+                                border: 1px solid rgba(99, 102, 241, 0.25);
+                                color: rgba(129, 140, 248, 0.95);
+                                padding: 7px 14px;
+                                border-radius: 8px;
+                                font-size: 10px;
                                 font-weight: 700;
                                 cursor: pointer;
                                 transition: all 0.25s ease;
                                 display: flex;
                                 align-items: center;
-                                gap: 6px;
+                                gap: 5px;
                                 text-transform: uppercase;
                                 letter-spacing: 0.5px;
                                 white-space: nowrap;
-                            " onmouseover="this.style.background='rgba(99, 102, 241, 0.3)'; this.style.borderColor='rgba(99, 102, 241, 0.4)';" onmouseout="this.style.background='rgba(99, 102, 241, 0.15)'; this.style.borderColor='rgba(99, 102, 241, 0.2)';">
-                                <i class="fas fa-eye" style="font-size: 10px;"></i>
+                            " onmouseover="this.style.background='rgba(99, 102, 241, 0.25)'; this.style.borderColor='rgba(99, 102, 241, 0.4)';" onmouseout="this.style.background='rgba(99, 102, 241, 0.12)'; this.style.borderColor='rgba(99, 102, 241, 0.25)';">
+                                <i class="fas fa-eye" style="font-size: 9px;"></i>
                                 VIEW
                             </button>
 
                             <button style="
-                                background: rgba(99, 102, 241, 0.15);
-                                border: 1px solid rgba(99, 102, 241, 0.2);
-                                color: rgba(129, 140, 248, 1);
-                                padding: 8px 16px;
-                                border-radius: 10px;
-                                font-size: 11px;
+                                background: rgba(99, 102, 241, 0.12);
+                                border: 1px solid rgba(99, 102, 241, 0.25);
+                                color: rgba(129, 140, 248, 0.95);
+                                padding: 7px 14px;
+                                border-radius: 8px;
+                                font-size: 10px;
                                 font-weight: 700;
                                 cursor: pointer;
                                 transition: all 0.25s ease;
                                 display: flex;
                                 align-items: center;
-                                gap: 6px;
+                                gap: 5px;
                                 text-transform: uppercase;
                                 letter-spacing: 0.5px;
                                 white-space: nowrap;
-                            " onmouseover="this.style.background='rgba(99, 102, 241, 0.3)'; this.style.borderColor='rgba(99, 102, 241, 0.4)';" onmouseout="this.style.background='rgba(99, 102, 241, 0.15)'; this.style.borderColor='rgba(99, 102, 241, 0.2)';">
-                                <i class="fas fa-edit" style="font-size: 10px;"></i>
+                            " onmouseover="this.style.background='rgba(99, 102, 241, 0.25)'; this.style.borderColor='rgba(99, 102, 241, 0.4)';" onmouseout="this.style.background='rgba(99, 102, 241, 0.12)'; this.style.borderColor='rgba(99, 102, 241, 0.25)';">
+                                <i class="fas fa-edit" style="font-size: 9px;"></i>
                                 EDIT
                             </button>
 
                             <button onclick="event.stopPropagation();" style="
-                                background: rgba(239, 68, 68, 0.15);
-                                border: 1px solid rgba(239, 68, 68, 0.2);
-                                color: rgba(252, 165, 165, 1);
-                                padding: 8px 16px;
-                                border-radius: 10px;
-                                font-size: 11px;
+                                background: rgba(239, 68, 68, 0.12);
+                                border: 1px solid rgba(239, 68, 68, 0.25);
+                                color: rgba(252, 165, 165, 0.95);
+                                padding: 7px 14px;
+                                border-radius: 8px;
+                                font-size: 10px;
                                 font-weight: 700;
                                 cursor: pointer;
                                 transition: all 0.25s ease;
                                 display: flex;
                                 align-items: center;
-                                gap: 6px;
+                                gap: 5px;
                                 text-transform: uppercase;
                                 letter-spacing: 0.5px;
                                 white-space: nowrap;
-                            " onmouseover="this.style.background='rgba(239, 68, 68, 0.3)'; this.style.borderColor='rgba(239, 68, 68, 0.4)';" onmouseout="this.style.background='rgba(239, 68, 68, 0.15)'; this.style.borderColor='rgba(239, 68, 68, 0.2)';">
-                                <i class="fas fa-trash" style="font-size: 10px;"></i>
+                            " onmouseover="this.style.background='rgba(239, 68, 68, 0.25)'; this.style.borderColor='rgba(239, 68, 68, 0.4)';" onmouseout="this.style.background='rgba(239, 68, 68, 0.12)'; this.style.borderColor='rgba(239, 68, 68, 0.25)';">
+                                <i class="fas fa-trash" style="font-size: 9px;"></i>
                                 DELETE
                             </button>
                         </div>
                     `;
 
-                    // Hover effects for card
+                    // Professional hover effect for entire card
                     card.addEventListener('mouseenter', function() {
-                        this.style.borderColor = 'rgba(113, 119, 144, 0.5)';
-                        this.style.background = 'rgba(25, 35, 55, 0.3)';
+                        this.style.borderColor = 'rgba(99, 102, 241, 0.3)';
+                        this.style.background = 'rgba(20, 28, 48, 0.9)';
+                        this.style.boxShadow = '0 8px 25px rgba(99, 102, 241, 0.15)';
                     });
                     
                     card.addEventListener('mouseleave', function() {
                         this.style.borderColor = 'rgba(255, 255, 255, 0.08)';
-                        this.style.background = 'rgba(20, 28, 48, 0.5)';
+                        this.style.background = 'rgba(15, 22, 41, 0.8)';
+                        this.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.2)';
                     });
 
                     container.appendChild(card);
