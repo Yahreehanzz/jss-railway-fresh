@@ -41157,6 +41157,10 @@ function restoreTeacherZonePhoto() {
                 <i class="fas fa-contact-card" style="font-size:16px;color:rgba(100,116,139,1);"></i>
                 <h3 style="font-size:13px;font-weight:700;color:rgba(226,232,240,1);letter-spacing:2px;text-transform:uppercase;margin:0;">All Staff</h3>
                 <span id="dashboardStaffCountBadge" style="padding:4px 10px;border-radius:9999px;background:rgba(99,102,241,0.2);color:rgba(165,180,252,1);font-size:11px;font-weight:700;border:1px solid rgba(99,102,241,0.2);margin-left:auto;">1</span>
+                <button onclick="refreshTeacherData()" style="padding:6px 12px;background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);border-radius:8px;color:rgba(129,140,248,1);font-size:11px;font-weight:600;cursor:pointer;transition:all 0.2s ease;display:flex;align-items:center;gap:6px;">
+                    <i class="fas fa-sync-alt" style="font-size:10px;"></i>
+                    REFRESH
+                </button>
             </div>
 
             <!-- List Container -->
@@ -61615,26 +61619,40 @@ function renderAttendance() {
 
         function renderTeacherDashboard() {
             try {
-                console.log('[DEBUG] renderTeacherDashboard called, teachers count:', teachers?.length || 0);
+                // Ensure selectedBranch is set
+                if (!selectedBranch || selectedBranch === null) {
+                    selectedBranch = 'Information Science';
+                    console.log('[DEBUG] selectedBranch was null, set to:', selectedBranch);
+                }
+                
+                console.log('[DEBUG] renderTeacherDashboard called');
                 console.log('[DEBUG] selectedBranch:', selectedBranch);
+                console.log('[DEBUG] teachers count:', teachers?.length || 0);
                 
                 // Ensure teachers are loaded
                 if (!teachers || teachers.length === 0) {
-                    console.warn('[WARN] Teachers data not loaded, loading from localStorage...');
+                    console.warn('[WARN] Teachers data not loaded, attempting to load...');
                     teachers = JSON.parse(localStorage.getItem("teachers") || "[]");
                     console.log('[DEBUG] After localStorage load, teachers count:', teachers.length);
-                }
-                
-                if (!teachers || teachers.length === 0) {
-                    console.error('[ERROR] No teachers found even after localStorage load');
-                    const container = document.getElementById("staffListContainer");
-                    if (container) {
-                        container.innerHTML = `<div style="text-align:center;padding:24px;color:rgba(148,163,184,1);font-size:13px;">No staff data loaded. Please refresh or contact admin.</div>`;
+                    
+                    if (!teachers || teachers.length === 0) {
+                        console.error('[ERROR] No teachers found even after localStorage load');
+                        const container = document.getElementById("staffListContainer");
+                        if (container) {
+                            container.innerHTML = `<div style="text-align:center;padding:24px;color:rgba(148,163,184,1);font-size:13px;">Loading staff data...</div>`;
+                        }
+                        // Trigger API fetch
+                        fetchAndRenderTeachers();
+                        return;
                     }
-                    return;
                 }
                 
-                const filteredByBranchTeachers = teachers.filter(t => t.branch === selectedBranch);
+                const filteredByBranchTeachers = teachers.filter(t => {
+                    const matches = t.branch === selectedBranch;
+                    if (!matches) console.log('[DEBUG] Skipping teacher (branch mismatch):', t.name, 'has branch:', t.branch);
+                    return matches;
+                });
+                
                 console.log('[DEBUG] Filtered teachers by branch:', filteredByBranchTeachers.length);
 
                 const total = filteredByBranchTeachers.length;
@@ -61652,6 +61670,76 @@ function renderAttendance() {
             } catch (error) {
                 console.error('[ERROR] renderTeacherDashboard error:', error);
             }
+        }
+
+        function fetchAndRenderTeachers() {
+            const API_BASE = window.API_BASE || 'https://jss-railway.up.railway.app';
+            console.log('[DEBUG] Fetching teachers from:', API_BASE);
+            
+            fetch(`${API_BASE}/api/teachers`)
+                .then(r => {
+                    console.log('[DEBUG] API response status:', r.status);
+                    return r.json();
+                })
+                .then(data => {
+                    console.log('[DEBUG] API teachers data:', data);
+                    if (data && data.success && data.data && Array.isArray(data.data)) {
+                        teachers = data.data;
+                        localStorage.setItem('teachers', JSON.stringify(teachers));
+                        console.log('[DEBUG] Teachers loaded from API, count:', teachers.length);
+                        console.log('[DEBUG] Teachers data sample:', teachers.slice(0, 2));
+                        
+                        // Retry rendering
+                        renderDashboardStaffList();
+                    } else {
+                        throw new Error('Invalid API response: ' + JSON.stringify(data));
+                    }
+                })
+                .catch(err => {
+                    console.error('[ERROR] Failed to fetch teachers from API:', err);
+                });
+        }
+
+        function refreshTeacherData() {
+            const btn = event.target.closest('button');
+            if (!btn) return;
+            
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="font-size:10px;"></i> LOADING...';
+            btn.disabled = true;
+            btn.style.opacity = '0.6';
+            
+            const API_BASE = window.API_BASE || 'https://jss-railway.up.railway.app';
+            console.log('[REFRESH] Refreshing teacher data from API...');
+            
+            fetch(`${API_BASE}/api/teachers`)
+                .then(r => {
+                    if (!r.ok) throw new Error(`API error: ${r.status}`);
+                    return r.json();
+                })
+                .then(data => {
+                    console.log('[REFRESH] API response:', data);
+                    if (data && data.success && data.data && Array.isArray(data.data)) {
+                        teachers = data.data;
+                        localStorage.setItem('teachers', JSON.stringify(teachers));
+                        console.log('[REFRESH] Teachers refreshed, count:', teachers.length);
+                        
+                        // Re-render dashboard
+                        renderDashboardStaffList();
+                        showMessageBox('✓ Success', 'Staff data refreshed successfully!', 'success');
+                    } else {
+                        throw new Error('Invalid response from API');
+                    }
+                })
+                .catch(err => {
+                    console.error('[REFRESH ERROR]:', err);
+                    showMessageBox('✗ Error', 'Failed to refresh staff data. Please try again.', 'error');
+                })
+                .finally(() => {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                });
         }
 
         function renderTeacherList() {
@@ -76838,10 +76926,29 @@ function initializeTeacherPortal() {
         console.log('[INIT] Set default branch to:', selectedBranch);
     }
     
-    // Ensure teachers array exists
-    if (!Array.isArray(teachers)) {
-        teachers = [];
-        console.log('[INIT] Teachers array initialized');
+    // Ensure teachers array exists and load from localStorage
+    if (!Array.isArray(teachers) || teachers.length === 0) {
+        const stored = JSON.parse(localStorage.getItem("teachers") || "[]");
+        teachers = stored;
+        console.log('[INIT] Teachers loaded from localStorage, count:', teachers.length);
+    }
+    
+    // If no teachers in localStorage, fetch from API
+    if (!teachers || teachers.length === 0) {
+        console.log('[INIT] No teachers in storage, fetching from API...');
+        setTimeout(() => {
+            const API_BASE = window.API_BASE || 'https://jss-railway.up.railway.app';
+            fetch(`${API_BASE}/api/teachers`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data && data.success && data.data && Array.isArray(data.data)) {
+                        teachers = data.data;
+                        localStorage.setItem('teachers', JSON.stringify(teachers));
+                        console.log('[INIT] Teachers loaded from API on startup, count:', teachers.length);
+                    }
+                })
+                .catch(err => console.error('[INIT] Failed to fetch teachers on startup:', err));
+        }, 500);
     }
     
     // Make critical functions globally accessible
@@ -76854,6 +76961,9 @@ function initializeTeacherPortal() {
     window.switchTeacherTab = switchTeacherTab;
     window.renderTeacherDashboard = renderTeacherDashboard;
     window.renderTeacherList = renderTeacherList;
+    window.renderDashboardStaffList = renderDashboardStaffList;
+    window.refreshTeacherData = refreshTeacherData;
+    window.fetchAndRenderTeachers = fetchAndRenderTeachers;
     window.handleTeacherZonePhoto = handleTeacherZonePhoto;
     window.toggleTeacherTheme = toggleTeacherTheme;
     window.toggleTeacherProfileDropdown = toggleTeacherProfileDropdown;
