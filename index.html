@@ -61655,7 +61655,8 @@ function renderAttendance() {
                 
                 console.log('[DEBUG] Filtered teachers by branch:', filteredByBranchTeachers.length);
 
-                const total = filteredByBranchTeachers.length;
+                // Show total teachers count in metrics (not filtered by branch)
+                const total = teachers.length;
                 
                 // Update metric cards
                 const totalStaffEl = document.getElementById("dashboardTotalStaffCount");
@@ -61664,7 +61665,7 @@ function renderAttendance() {
                 const activeTeachersEl = document.getElementById("dashboardActiveTeachersCount");
                 if (activeTeachersEl) activeTeachersEl.textContent = total;
 
-                console.log('[DEBUG] Rendering teacher list...');
+                console.log('[DEBUG] Rendering teacher list with', filteredByBranchTeachers.length, 'branch-matched teachers (total:', total, ')');
                 renderDashboardStaffList();
                 console.log('[DEBUG] renderTeacherDashboard completed successfully');
             } catch (error) {
@@ -61959,18 +61960,41 @@ function renderAttendance() {
 
             // Get teachers for current branch
             const branchTeachers = teachers ? teachers.filter(t => t.branch === selectedBranch) : [];
-            console.log('[DEBUG] Teachers for branch:', branchTeachers.length, 'Branch:', selectedBranch);
+            
+            console.log('[DEBUG] ======== BRANCH FILTERING DEBUG ========');
+            console.log('[DEBUG] selectedBranch:', selectedBranch);
+            console.log('[DEBUG] Total teachers in array:', teachers?.length || 0);
+            console.log('[DEBUG] Teachers list:', teachers);
+            console.log('[DEBUG] Teachers branches:', teachers ? teachers.map(t => ({ name: t.name, branch: t.branch })) : 'NO TEACHERS');
+            console.log('[DEBUG] Filtered teachers by branch:', branchTeachers.length);
+            console.log('[DEBUG] ======== END DEBUG ========');
 
             // Update section header badge
             const badge = document.getElementById('dashboardStaffCountBadge');
             if (badge) badge.textContent = branchTeachers.length;
 
             if (branchTeachers.length === 0) {
-                container.innerHTML = `<div style="text-align:center;padding:24px;color:rgba(148,163,184,1);font-size:13px;">No staff members found in this branch. Please ensure teachers are added.</div>`;
+                // Show all teachers if branch filter returns nothing
+                console.warn('[WARN] No teachers match branch filter, showing ALL teachers');
+                const allTeachers = teachers || [];
+                
+                if (allTeachers.length === 0) {
+                    container.innerHTML = `<div style="text-align:center;padding:24px;color:rgba(148,163,184,1);font-size:13px;">No staff members found. Please ensure teachers are added.</div>`;
+                    return;
+                }
+                
+                // Show all teachers with warning
+                renderTeacherCards(container, allTeachers, true);
                 return;
             }
 
-            branchTeachers.forEach(t => {
+            renderTeacherCards(container, branchTeachers, false);
+
+            console.log('[DEBUG] renderStaffListCards completed, rendered:', branchTeachers.length, 'teachers');
+        }
+
+        function renderTeacherCards(container, teachersList, isAllTeachers) {
+            teachersList.forEach(t => {
                 try {
                     if (!t || !t.name) {
                         console.warn('[WARN] Invalid teacher object:', t);
@@ -62007,6 +62031,7 @@ function renderAttendance() {
                         position: relative;
                         overflow: hidden;
                         box-shadow: 0 4px 20px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.1);
+                        ${isAllTeachers ? 'opacity: 0.8;' : ''}
                     `;
 
                     card.innerHTML = `
@@ -62102,8 +62127,6 @@ function renderAttendance() {
                     console.error('[ERROR] Error rendering dashboard staff item:', t, itemError);
                 }
             });
-
-            console.log('[DEBUG] renderStaffListCards completed, rendered:', branchTeachers.length, 'teachers');
         }
 
         function addTeacher() {
