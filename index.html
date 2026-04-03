@@ -62014,7 +62014,7 @@ function renderAttendance() {
                     
                     // Create gradient avatar backgrounds
                     const colors = ['6366f1', '8b5cf6', 'ec4899', 'f59e0b', '10b981'];
-                    const colorIndex = (t.id || 'default').charCodeAt(0) % colors.length;
+                    const colorIndex = String(t.id || 'default').charCodeAt(0) % colors.length;
                     const bgGradient = colors[colorIndex];
 
                     const avatarHtml = t.photo 
