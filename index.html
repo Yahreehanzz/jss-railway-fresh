@@ -62092,7 +62092,7 @@ function renderAttendance() {
                             box-shadow: 0 2px 8px rgba(16,185,129,0.15);
                             position: relative;
                             overflow: hidden;
-                        " onclick="event.stopPropagation();showTeacherProfile('${(t.id || '').replace(/'/g, "\\'")}')">
+                        " onclick="event.stopPropagation();showTeacherProfile('${String(t.id || '').replace(/'/g, "\\'")}')">
                             <span style="position:relative;z-index:2;display:flex;align-items:center;gap:6px;">
                                 <i class="fas fa-user" style="font-size:10px;"></i>
                                 PROFILE
