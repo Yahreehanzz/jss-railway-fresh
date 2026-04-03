@@ -45253,6 +45253,7 @@ function restoreTeacherZonePhoto() {
         
         // ========== END OF EARLY FUNCTION DECLARATIONS ==========
         let teachers = [];
+        let isLoadingTeachers = false; // Prevent concurrent API calls
         let attendance = {};
         let fees = {};
         let manualAttendance = {};
@@ -61674,6 +61675,13 @@ function renderAttendance() {
         }
 
         function fetchAndRenderTeachers() {
+            // Prevent concurrent API calls
+            if (isLoadingTeachers) {
+                console.log('[DEBUG] Already loading teachers, skipping duplicate request');
+                return;
+            }
+            
+            isLoadingTeachers = true;
             const endpoints = [
                 'https://jss-railway.up.railway.app/api/teachers',
                 'https://jss-railway.up.railway.app/teachers',
@@ -61687,6 +61695,7 @@ function renderAttendance() {
             const tryFetch = (index) => {
                 if (index >= endpoints.length) {
                     console.error('[DEBUG] All endpoints failed to load teachers');
+                    isLoadingTeachers = false;
                     return;
                 }
                 
@@ -61711,12 +61720,14 @@ function renderAttendance() {
                             teachers = data.data;
                             localStorage.setItem('teachers', JSON.stringify(teachers));
                             console.log('[DEBUG] ✓ Teachers successfully loaded from:', endpoint, 'Count:', teachers.length);
+                            isLoadingTeachers = false;
                             renderDashboardStaffList();
                         } else if (data && Array.isArray(data)) {
                             // Direct array response
                             teachers = data;
                             localStorage.setItem('teachers', JSON.stringify(teachers));
                             console.log('[DEBUG] ✓ Teachers loaded (direct array) from:', endpoint, 'Count:', teachers.length);
+                            isLoadingTeachers = false;
                             renderDashboardStaffList();
                         } else {
                             throw new Error('Invalid response format');
