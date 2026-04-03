@@ -62733,7 +62733,7 @@ function renderAttendance() {
                 
                 // Handle both teacher object and teacher ID string
                 if (typeof teacher === 'string') {
-                    activeTeacherId = teacher;
+                    activeTeacherId = Number(teacher);
                 } else if (typeof teacher === 'object' && teacher.id) {
                     activeTeacherId = teacher.id;
                 } else {
@@ -62742,9 +62742,10 @@ function renderAttendance() {
                     return;
                 }
                 
-                const profileData = teachers.find(t => t.id === activeTeacherId && t.branch === selectedBranch);
+                // Find teacher by ID only (we show all teachers, not filtered by branch)
+                const profileData = teachers.find(t => Number(t.id) === Number(activeTeacherId));
                 if (!profileData) {
-                    console.warn('Teacher profile not found');
+                    console.warn('Teacher profile not found. Looking for ID:', activeTeacherId, 'Available IDs:', teachers.map(t => t.id));
                     hideLoader();
                     return;
                 }
