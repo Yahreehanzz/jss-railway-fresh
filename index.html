@@ -62219,124 +62219,230 @@ function renderAttendance() {
 
                     const initial = t.name.charAt(0).toUpperCase();
                     const deptLabel = t.department || (t.subjects && t.subjects[0]) || 'Staff';
-                    const subjectsList = (t.subjects && t.subjects.length > 0) ? t.subjects.slice(0, 2).join(', ') : 'N/A';
-                    console.log('[DEBUG] Rendering teacher card:', t.name);
+                    const subjectsList = (t.subjects && t.subjects.length > 0) ? t.subjects.join(', ') : 'No subjects assigned';
+                    const teacherId = String(t.id || '');
                     
-                    // Create gradient avatar backgrounds
-                    const colors = ['6366f1', '8b5cf6', 'ec4899', 'f59e0b', '10b981'];
-                    const colorIndex = String(t.id || 'default').charCodeAt(0) % colors.length;
-                    const bgGradient = colors[colorIndex];
+                    console.log('[DEBUG] Rendering teacher card:', t.name);
 
-                    const avatarHtml = t.photo 
-                        ? `<img src="${t.photo}" alt="${t.name}" style="width:100%;height:100%;object-fit:cover;"/>`
-                        : `<span style="font-weight:700;font-size:20px;background:linear-gradient(135deg,#${bgGradient},#${colors[(colorIndex+1)%colors.length]});-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">${initial}</span>`;
-
-                    // Create card
                     const card = document.createElement("div");
                     card.style.cssText = `
-                        background: rgba(20,28,48,0.8);
-                        backdrop-filter: blur(20px);
-                        -webkit-backdrop-filter: blur(20px);
-                        border: 1px solid rgba(99,102,241,0.2);
-                        border-radius: 20px;
-                        padding: 18px;
                         display: flex;
+                        flex-direction: row;
                         align-items: center;
-                        gap: 16px;
-                        transition: all 0.35s cubic-bezier(0.4,0.0,0.2,1);
+                        justify-content: space-between;
+                        gap: 24px;
+                        padding: 24px;
+                        border-radius: 16px;
+                        background: rgba(20, 28, 48, 0.5);
+                        border: 1px solid rgba(255, 255, 255, 0.08);
+                        hover: border rgba(113, 119, 144, 0.5);
+                        transition: all 0.3s ease;
                         cursor: pointer;
                         position: relative;
                         overflow: hidden;
-                        box-shadow: 0 4px 20px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.1);
-                        ${isAllTeachers ? 'opacity: 0.8;' : ''}
                     `;
 
                     card.innerHTML = `
-                        <!-- Avatar Section -->
-                        <div style="position:relative;flex-shrink:0;">
-                            <div style="width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,rgba(99,102,241,0.15),rgba(16,185,129,0.1));display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(99,102,241,0.3);overflow:hidden;">
-                                ${avatarHtml}
+                        <!-- Left: Identity & Details -->
+                        <div style="display: flex; align-items: center; gap: 20px; flex: 1;">
+                            <!-- Avatar -->
+                            <div style="position: relative; flex-shrink: 0;">
+                                <div style="
+                                    width: 56px;
+                                    height: 56px;
+                                    border-radius: 50%;
+                                    background: linear-gradient(to bottom right, #6366f1, #a855f7);
+                                    padding: 2px;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                ">
+                                    <div style="
+                                        width: 100%;
+                                        height: 100%;
+                                        border-radius: 50%;
+                                        background: #070B14;
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        color: white;
+                                        font-weight: 700;
+                                        font-size: 20px;
+                                    ">
+                                        ${initial}
+                                    </div>
+                                </div>
+                                <!-- Status Indicator -->
+                                <div style="
+                                    position: absolute;
+                                    bottom: 0;
+                                    right: 0;
+                                    width: 16px;
+                                    height: 16px;
+                                    border-radius: 50%;
+                                    background: #10b981;
+                                    border: 2px solid #070B14;
+                                    box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+                                "></div>
                             </div>
-                            <div style="position:absolute;bottom:0;right:0;width:14px;height:14px;background:rgba(16,185,129,0.9);border-radius:50%;border:2px solid rgba(20,28,48,0.8);box-shadow:0 0 8px rgba(16,185,129,0.6);"></div>
+
+                            <!-- Info -->
+                            <div style="display: flex; flex-direction: column; gap: 8px; min-width: 0; flex: 1;">
+                                <!-- Name & Active Badge -->
+                                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                                    <h4 style="
+                                        margin: 0;
+                                        font-size: 16px;
+                                        font-weight: 700;
+                                        color: white;
+                                        white-space: nowrap;
+                                        overflow: hidden;
+                                        text-overflow: ellipsis;
+                                    ">
+                                        ${t.name || 'Unknown'}
+                                    </h4>
+                                    <span style="
+                                        padding: 4px 10px;
+                                        background: rgba(16, 185, 129, 0.2);
+                                        color: rgba(110, 231, 183, 1);
+                                        border: 1px solid rgba(16, 185, 129, 0.3);
+                                        border-radius: 6px;
+                                        font-size: 10px;
+                                        font-weight: 700;
+                                        text-transform: uppercase;
+                                        display: flex;
+                                        align-items: center;
+                                        gap: 4px;
+                                        white-space: nowrap;
+                                    ">
+                                        <i class="fas fa-check-circle" style="font-size: 9px;"></i>
+                                        ACTIVE
+                                    </span>
+                                </div>
+                                
+                                <!-- ID, Subject, Designation -->
+                                <p style="
+                                    margin: 0;
+                                    font-size: 13px;
+                                    font-weight: 500;
+                                    color: rgba(148, 163, 184, 1);
+                                    display: flex;
+                                    align-items: center;
+                                    flex-wrap: wrap;
+                                    gap: 8px;
+                                ">
+                                    <span style="
+                                        color: rgba(226, 232, 240, 1);
+                                        font-family: monospace;
+                                        font-size: 11px;
+                                        background: rgba(255, 255, 255, 0.05);
+                                        padding: 4px 8px;
+                                        border-radius: 4px;
+                                        white-space: nowrap;
+                                    ">ID: ${teacherId}</span>
+                                    <span style="color: rgba(113, 119, 144, 1);">&bull;</span>
+                                    <span>${subjectsList}</span>
+                                    <span style="color: rgba(113, 119, 144, 1);">&bull;</span>
+                                    <span style="color: rgba(129, 140, 248, 0.7);">Teacher</span>
+                                </p>
+                            </div>
                         </div>
-                        
-                        <!-- Info Section -->
-                        <div style="flex:1;display:flex;flex-direction:column;gap:6px;min-width:0;">
-                            <div style="display:flex;align-items:baseline;gap:10px;">
-                                <h4 style="margin:0;font-size:14px;font-weight:700;color:rgba(226,232,240,1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                                    ${t.name || 'Unknown'}
-                                </h4>
-                                <span style="padding:3px 8px;background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);border-radius:6px;font-size:10px;font-weight:600;color:rgba(129,140,248,0.9);white-space:nowrap;">
-                                    ${t.id || 'N/A'}
-                                </span>
-                            </div>
-                            <div style="display:flex;gap:12px;align-items:center;">
-                                <span style="font-size:11px;color:rgba(148,163,184,0.9);display:flex;align-items:center;gap:5px;">
-                                    <i class="fas fa-book" style="font-size:10px;color:rgba(16,185,129,0.7);"></i>
-                                    ${subjectsList.length > 25 ? subjectsList.substring(0, 25) + '...' : subjectsList}
-                                </span>
-                            </div>
-                            <div style="display:flex;gap:8px;align-items:center;">
-                                <span style="padding:4px 10px;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.25);border-radius:8px;font-size:10px;font-weight:600;color:rgba(110,231,183,0.95);text-transform:capitalize;">
-                                    📚 ${deptLabel}
-                                </span>
-                                <span style="font-size:9px;color:rgba(148,163,184,0.7);">•</span>
-                                <span style="font-size:10px;color:rgba(148,163,184,0.8);">Active Now</span>
-                            </div>
-                        </div>
-                        
-                        <!-- Action Button -->
-                        <button style="
-                            background: linear-gradient(135deg,rgba(16,185,129,0.15),rgba(6,182,212,0.1));
-                            border: 1.5px solid rgba(16,185,129,0.4);
-                            color: rgba(110,231,183,0.95);
-                            padding: 9px 18px;
-                            border-radius: 10px;
-                            font-size: 11px;
-                            font-weight: 700;
-                            cursor: pointer;
-                            transition: all 0.25s ease;
-                            white-space: nowrap;
+
+                        <!-- Right: Actions -->
+                        <div style="
+                            display: flex;
+                            align-items: center;
+                            gap: 10px;
                             flex-shrink: 0;
-                            letter-spacing: 0.5px;
-                            box-shadow: 0 2px 8px rgba(16,185,129,0.15);
-                            position: relative;
-                            overflow: hidden;
-                        " onclick="event.stopPropagation();showTeacherProfile('${String(t.id || '').replace(/'/g, "\\'")}')">
-                            <span style="position:relative;z-index:2;display:flex;align-items:center;gap:6px;">
-                                <i class="fas fa-user" style="font-size:10px;"></i>
-                                PROFILE
+                        ">
+                            <span style="
+                                hidden: true;
+                                padding: 6px 12px;
+                                border-radius: 20px;
+                                background: #070B14;
+                                border: 1px solid rgba(113, 119, 144, 1);
+                                font-size: 11px;
+                                font-weight: 600;
+                                color: rgba(226, 232, 240, 1);
+                                display: none;
+                            ">
+                                ${deptLabel}
                             </span>
-                        </button>
+                            
+                            <button onclick="event.stopPropagation(); showTeacherProfile('${teacherId.replace(/'/g, "\\'")}')" style="
+                                background: rgba(99, 102, 241, 0.15);
+                                border: 1px solid rgba(99, 102, 241, 0.2);
+                                color: rgba(129, 140, 248, 1);
+                                padding: 8px 16px;
+                                border-radius: 10px;
+                                font-size: 11px;
+                                font-weight: 700;
+                                cursor: pointer;
+                                transition: all 0.25s ease;
+                                display: flex;
+                                align-items: center;
+                                gap: 6px;
+                                text-transform: uppercase;
+                                letter-spacing: 0.5px;
+                                white-space: nowrap;
+                            " onmouseover="this.style.background='rgba(99, 102, 241, 0.3)'; this.style.borderColor='rgba(99, 102, 241, 0.4)';" onmouseout="this.style.background='rgba(99, 102, 241, 0.15)'; this.style.borderColor='rgba(99, 102, 241, 0.2)';">
+                                <i class="fas fa-eye" style="font-size: 10px;"></i>
+                                VIEW
+                            </button>
+
+                            <button style="
+                                background: rgba(99, 102, 241, 0.15);
+                                border: 1px solid rgba(99, 102, 241, 0.2);
+                                color: rgba(129, 140, 248, 1);
+                                padding: 8px 16px;
+                                border-radius: 10px;
+                                font-size: 11px;
+                                font-weight: 700;
+                                cursor: pointer;
+                                transition: all 0.25s ease;
+                                display: flex;
+                                align-items: center;
+                                gap: 6px;
+                                text-transform: uppercase;
+                                letter-spacing: 0.5px;
+                                white-space: nowrap;
+                            " onmouseover="this.style.background='rgba(99, 102, 241, 0.3)'; this.style.borderColor='rgba(99, 102, 241, 0.4)';" onmouseout="this.style.background='rgba(99, 102, 241, 0.15)'; this.style.borderColor='rgba(99, 102, 241, 0.2)';">
+                                <i class="fas fa-edit" style="font-size: 10px;"></i>
+                                EDIT
+                            </button>
+
+                            <button onclick="event.stopPropagation();" style="
+                                background: rgba(239, 68, 68, 0.15);
+                                border: 1px solid rgba(239, 68, 68, 0.2);
+                                color: rgba(252, 165, 165, 1);
+                                padding: 8px 16px;
+                                border-radius: 10px;
+                                font-size: 11px;
+                                font-weight: 700;
+                                cursor: pointer;
+                                transition: all 0.25s ease;
+                                display: flex;
+                                align-items: center;
+                                gap: 6px;
+                                text-transform: uppercase;
+                                letter-spacing: 0.5px;
+                                white-space: nowrap;
+                            " onmouseover="this.style.background='rgba(239, 68, 68, 0.3)'; this.style.borderColor='rgba(239, 68, 68, 0.4)';" onmouseout="this.style.background='rgba(239, 68, 68, 0.15)'; this.style.borderColor='rgba(239, 68, 68, 0.2)';">
+                                <i class="fas fa-trash" style="font-size: 10px;"></i>
+                                DELETE
+                            </button>
+                        </div>
                     `;
 
-                    // Professional hover effect
+                    // Hover effects for card
                     card.addEventListener('mouseenter', function() {
-                        this.style.background = 'rgba(25,35,55,0.9)';
-                        this.style.borderColor = 'rgba(99,102,241,0.4)';
-                        this.style.boxShadow = '0 12px 32px rgba(99,102,241,0.2), inset 0 1px 1px rgba(255,255,255,0.15)';
-                        this.style.transform = 'translateY(-2px) scale(1.01)';
-                        
-                        const btn = this.querySelector('button');
-                        if (btn) {
-                            btn.style.background = 'linear-gradient(135deg,rgba(16,185,129,0.25),rgba(6,182,212,0.2))';
-                            btn.style.borderColor = 'rgba(16,185,129,0.6)';
-                            btn.style.boxShadow = '0 4px 12px rgba(16,185,129,0.25)';
-                        }
+                        this.style.borderColor = 'rgba(113, 119, 144, 0.5)';
+                        this.style.background = 'rgba(25, 35, 55, 0.3)';
                     });
                     
                     card.addEventListener('mouseleave', function() {
-                        this.style.background = 'rgba(20,28,48,0.8)';
-                        this.style.borderColor = 'rgba(99,102,241,0.2)';
-                        this.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.1)';
-                        this.style.transform = 'translateY(0) scale(1)';
-                        
-                        const btn = this.querySelector('button');
-                        if (btn) {
-                            btn.style.background = 'linear-gradient(135deg,rgba(16,185,129,0.15),rgba(6,182,212,0.1))';
-                            btn.style.borderColor = 'rgba(16,185,129,0.4)';
-                            btn.style.boxShadow = '0 2px 8px rgba(16,185,129,0.15)';
-                        }
+                        this.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+                        this.style.background = 'rgba(20, 28, 48, 0.5)';
                     });
 
                     container.appendChild(card);
