@@ -61673,31 +61673,61 @@ function renderAttendance() {
         }
 
         function fetchAndRenderTeachers() {
-            const API_BASE = window.API_BASE || 'https://jss-railway.up.railway.app';
-            console.log('[DEBUG] Fetching teachers from:', API_BASE);
+            const endpoints = [
+                'https://jss-railway.up.railway.app/api/teachers',
+                'https://jss-railway.up.railway.app/teachers',
+                '/api/teachers',
+                '/teachers'
+            ];
             
-            fetch(`${API_BASE}/api/teachers`)
-                .then(r => {
-                    console.log('[DEBUG] API response status:', r.status);
-                    return r.json();
-                })
-                .then(data => {
-                    console.log('[DEBUG] API teachers data:', data);
-                    if (data && data.success && data.data && Array.isArray(data.data)) {
-                        teachers = data.data;
-                        localStorage.setItem('teachers', JSON.stringify(teachers));
-                        console.log('[DEBUG] Teachers loaded from API, count:', teachers.length);
-                        console.log('[DEBUG] Teachers data sample:', teachers.slice(0, 2));
-                        
-                        // Retry rendering
-                        renderDashboardStaffList();
-                    } else {
-                        throw new Error('Invalid API response: ' + JSON.stringify(data));
+            let attempts = 0;
+            console.log('[DEBUG] Attempting to fetch teachers from multiple endpoints...');
+            
+            const tryFetch = (index) => {
+                if (index >= endpoints.length) {
+                    console.error('[DEBUG] All endpoints failed to load teachers');
+                    return;
+                }
+                
+                const endpoint = endpoints[index];
+                console.log(`[DEBUG] Attempt ${index + 1}/${endpoints.length}: ${endpoint}`);
+                
+                fetch(endpoint, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
                     }
                 })
-                .catch(err => {
-                    console.error('[ERROR] Failed to fetch teachers from API:', err);
-                });
+                    .then(r => {
+                        console.log('[DEBUG] Response status:', r.status, 'from', endpoint);
+                        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                        return r.json();
+                    })
+                    .then(data => {
+                        console.log('[DEBUG] Data received from', endpoint, ':', data);
+                        if (data && data.success && data.data && Array.isArray(data.data)) {
+                            teachers = data.data;
+                            localStorage.setItem('teachers', JSON.stringify(teachers));
+                            console.log('[DEBUG] ✓ Teachers successfully loaded from:', endpoint, 'Count:', teachers.length);
+                            renderDashboardStaffList();
+                        } else if (data && Array.isArray(data)) {
+                            // Direct array response
+                            teachers = data;
+                            localStorage.setItem('teachers', JSON.stringify(teachers));
+                            console.log('[DEBUG] ✓ Teachers loaded (direct array) from:', endpoint, 'Count:', teachers.length);
+                            renderDashboardStaffList();
+                        } else {
+                            throw new Error('Invalid response format');
+                        }
+                    })
+                    .catch(err => {
+                        console.warn('[DEBUG] Failed on endpoint', endpoint, '- trying next...', err.message);
+                        tryFetch(index + 1);
+                    });
+            };
+            
+            tryFetch(0);
         }
 
         function refreshTeacherData() {
@@ -61709,37 +61739,80 @@ function renderAttendance() {
             btn.disabled = true;
             btn.style.opacity = '0.6';
             
-            const API_BASE = window.API_BASE || 'https://jss-railway.up.railway.app';
-            console.log('[REFRESH] Refreshing teacher data from API...');
+            const endpoints = [
+                'https://jss-railway.up.railway.app/api/teachers',
+                'https://jss-railway.up.railway.app/teachers',
+                '/api/teachers',
+                '/teachers'
+            ];
             
-            fetch(`${API_BASE}/api/teachers`)
-                .then(r => {
-                    if (!r.ok) throw new Error(`API error: ${r.status}`);
-                    return r.json();
-                })
-                .then(data => {
-                    console.log('[REFRESH] API response:', data);
-                    if (data && data.success && data.data && Array.isArray(data.data)) {
-                        teachers = data.data;
-                        localStorage.setItem('teachers', JSON.stringify(teachers));
-                        console.log('[REFRESH] Teachers refreshed, count:', teachers.length);
-                        
-                        // Re-render dashboard
-                        renderDashboardStaffList();
-                        showMessageBox('✓ Success', 'Staff data refreshed successfully!', 'success');
-                    } else {
-                        throw new Error('Invalid response from API');
-                    }
-                })
-                .catch(err => {
-                    console.error('[REFRESH ERROR]:', err);
-                    showMessageBox('✗ Error', 'Failed to refresh staff data. Please try again.', 'error');
-                })
-                .finally(() => {
+            console.log('[REFRESH] Refreshing teacher data...');
+            
+            const tryEndpoint = (index) => {
+                if (index >= endpoints.length) {
+                    console.error('[REFRESH] All endpoints failed');
+                    showMessageBox('✗ Error', 'Could not reach server. Please check your connection.', 'error');
                     btn.innerHTML = originalText;
                     btn.disabled = false;
                     btn.style.opacity = '1';
-                });
+                    return;
+                }
+                
+                const endpoint = endpoints[index];
+                console.log(`[REFRESH] Trying endpoint (${index + 1}/${endpoints.length}): ${endpoint}`);
+                
+                fetch(endpoint, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                    .then(r => {
+                        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                        return r.json();
+                    })
+                    .then(data => {
+                        console.log('[REFRESH] ✓ Success with endpoint:', endpoint);
+                        
+                        let teachersData = null;
+                        
+                        // Try different response formats
+                        if (data && data.success && data.data && Array.isArray(data.data)) {
+                            teachersData = data.data;
+                        } else if (data && Array.isArray(data)) {
+                            teachersData = data;
+                        }
+                        
+                        if (teachersData && Array.isArray(teachersData)) {
+                            teachers = teachersData;
+                            localStorage.setItem('teachers', JSON.stringify(teachers));
+                            console.log('[REFRESH] Teachers count:', teachers.length);
+                            
+                            renderDashboardStaffList();
+                            
+                            // Show success message - keep visible for 4 seconds
+                            const msgBox = showMessageBox('✓ Success', 'Staff data refreshed! Found ' + teachers.length + ' teachers.', 'success');
+                            setTimeout(() => {
+                                if (msgBox && msgBox.parentNode) {
+                                    msgBox.classList.add('fade-out');
+                                }
+                            }, 4000);
+                            
+                            btn.innerHTML = originalText;
+                            btn.disabled = false;
+                            btn.style.opacity = '1';
+                        } else {
+                            throw new Error('Invalid data format');
+                        }
+                    })
+                    .catch(err => {
+                        console.warn('[REFRESH] Endpoint failed:', endpoint, err.message);
+                        tryEndpoint(index + 1);
+                    });
+            };
+            
+            tryEndpoint(0);
         }
 
         function renderTeacherList() {
@@ -76937,17 +77010,50 @@ function initializeTeacherPortal() {
     if (!teachers || teachers.length === 0) {
         console.log('[INIT] No teachers in storage, fetching from API...');
         setTimeout(() => {
-            const API_BASE = window.API_BASE || 'https://jss-railway.up.railway.app';
-            fetch(`${API_BASE}/api/teachers`)
-                .then(r => r.json())
-                .then(data => {
-                    if (data && data.success && data.data && Array.isArray(data.data)) {
-                        teachers = data.data;
-                        localStorage.setItem('teachers', JSON.stringify(teachers));
-                        console.log('[INIT] Teachers loaded from API on startup, count:', teachers.length);
-                    }
+            const endpoints = [
+                'https://jss-railway.up.railway.app/api/teachers',
+                'https://jss-railway.up.railway.app/teachers',
+                '/api/teachers',
+                '/teachers'
+            ];
+            
+            const tryInit = (idx) => {
+                if (idx >= endpoints.length) {
+                    console.warn('[INIT] Failed to load teachers from all endpoints on startup');
+                    return;
+                }
+                
+                fetch(endpoints[idx], {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }
                 })
-                .catch(err => console.error('[INIT] Failed to fetch teachers on startup:', err));
+                    .then(r => {
+                        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                        return r.json();
+                    })
+                    .then(data => {
+                        let teachersData = null;
+                        if (data && data.success && data.data && Array.isArray(data.data)) {
+                            teachersData = data.data;
+                        } else if (Array.isArray(data)) {
+                            teachersData = data;
+                        }
+                        
+                        if (teachersData) {
+                            teachers = teachersData;
+                            localStorage.setItem('teachers', JSON.stringify(teachers));
+                            console.log('[INIT] ✓ Teachers loaded from API on startup, count:', teachers.length);
+                        } else {
+                            throw new Error('Invalid format');
+                        }
+                    })
+                    .catch(err => {
+                        console.warn('[INIT] Endpoint failed:', endpoints[idx], err.message);
+                        tryInit(idx + 1);
+                    });
+            };
+            
+            tryInit(0);
         }, 500);
     }
     
