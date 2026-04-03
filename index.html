@@ -41101,154 +41101,178 @@ function restoreTeacherZonePhoto() {
     </div>
 
   <!-- DASHBOARD panel - PROFESSIONAL GLASSMORPHISM DESIGN -->
-  <div class="tc-panel" id="tcp-dashboard" style="background:linear-gradient(135deg,rgba(5,5,15,0.95),rgba(15,20,35,0.95));min-height:calc(100vh - 64px);overflow-y:auto;position:relative;">
+  <div class="tc-panel" id="tcp-dashboard" style="background-color: #070B14; min-height:calc(100vh - 64px); overflow-y:auto; position:relative;">
     <!-- Ambient Background Elements -->
-    <div style="position:fixed;top:-10%;left:-10%;width:500px;height:500px;background:radial-gradient(circle,rgba(99,102,241,0.15) 0%,transparent 70%);z-index:0;pointer-events:none;"></div>
-    <div style="position:fixed;top:20%;right:-10%;width:600px;height:600px;background:radial-gradient(circle,rgba(16,185,129,0.1) 0%,transparent 70%);z-index:0;pointer-events:none;"></div>
+    <div class="bg-grid"></div>
+    <div class="glow-spot-1"></div>
+    <div class="glow-spot-2"></div>
 
-    <!-- Grid Overlay -->
-    <div style="position:fixed;top:0;left:0;width:100vw;height:100vh;background-size:50px 50px;background-image:linear-gradient(to right,rgba(255,255,255,0.02) 1px,transparent 1px),linear-gradient(to bottom,rgba(255,255,255,0.02) 1px,transparent 1px);mask-image:radial-gradient(ellipse at top,black 20%,transparent 70%);z-index:0;pointer-events:none;"></div>
+    <!-- Top Navigation Bar -->
+    <nav style="position: sticky; top: 0; z-index: 30; background: rgba(15, 22, 41, 0.6); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid rgba(113, 119, 144, 0.2); border-radius: 0;">
+        <div style="max-width: 100%; margin: 0 auto; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 40px; height: 40px; border-radius: 8px; background: linear-gradient(to bottom right, #6366f1, #10b981); display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-shield-alt" style="color: white; font-size: 20px;"></i>
+                </div>
+                <div>
+                    <h1 style="font-size: 14px; font-weight: 700; color: white; margin: 0; letter-spacing: 0.5px;">Admin Portal</h1>
+                    <p style="font-size: 12px; color: rgba(100, 116, 139, 1); margin: 0; letter-spacing: 0.5px;">Govt. Polytechnic, Beelagi</p>
+                </div>
+            </div>
+            <button style="padding: 8px; border-radius: 8px; hover: background-color rgba(71, 85, 105, 0.2); transition: all 0.3s ease; background: none; border: none; cursor: pointer;" onclick="alert('Logout functionality')">
+                <i class="fas fa-sign-out-alt" style="color: rgba(100, 116, 139, 1); font-size: 18px;"></i>
+            </button>
+        </div>
+    </nav>
 
-    <main class="relative z-10 max-w-7xl mx-auto px-6 py-12 lg:px-12 lg:py-16 min-h-screen flex flex-col gap-10">
+    <main style="max-width: 75rem; margin: 0 auto; padding: 48px 24px; min-height: 100vh; display: flex; flex-direction: column; gap: 40px; position: relative; z-index: 10;">
         
         <!-- Page Header -->
-        <header class="flex flex-col gap-2 relative z-10">
-            <div style="display:flex;align-items:center;gap:12px;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(100,116,139,1);">
-                <i class="fas fa-layout-grid" style="font-size:14px;color:rgba(71,85,105,1);"></i>
+        <header style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 12px; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: rgba(100, 116, 139, 1);">
+                <i class="fas fa-chart-line" style="font-size: 14px; color: rgba(71, 85, 105, 1);"></i>
                 <span>Administration</span>
-                <span style="color:rgba(71,85,105,1);">&bull;</span>
-                <span style="color:rgba(129,140,248,0.8);">Staff Management</span>
+                <span style="color: rgba(71, 85, 105, 1);">&bull;</span>
+                <span style="color: rgba(129, 140, 248, 0.8);">Staff Management</span>
             </div>
-            <h1 style="font-size:clamp(32px,5vw,48px);font-weight:900;color:#ffffff;letter-spacing:-1px;margin:8px 0 0;">Admin <span style="background:linear-gradient(135deg,#34d399,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Dashboard</span></h1>
+            <h1 style="font-size: 48px; font-weight: 900; color: #ffffff; letter-spacing: -1px; margin: 8px 0 0;">
+                Admin <span style="background: linear-gradient(to right, #34d399, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Dashboard</span>
+            </h1>
         </header>
 
         <!-- Key Metrics Grid -->
-        <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;position:relative;z-10;">
+        <section style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
             
             <!-- Total Staff -->
-            <div style="background:rgba(15,22,41,0.6);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.05);box-shadow:0 4px 30px rgba(0,0,0,0.1);transition:transform 0.3s ease,box-shadow 0.3s ease,border-color 0.3s ease;border-radius:24px;padding:24px;display:flex;flex-direction:column;gap:16px;position:relative;overflow:hidden;group:hover">
-                <div style="display:flex;align-items:flex-start;justify-content:space-between;">
-                    <div style="display:flex;flex-direction:column;gap:8px;">
-                        <div id="dashboard-total-staff" style="font-size:36px;font-weight:900;color:#ffffff;letter-spacing:-1px;line-height:1;">2</div>
-                        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:rgba(100,116,139,1);">Total Staff</div>
+            <div style="background: rgba(15, 22, 41, 0.6); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); border-radius: 24px; padding: 24px; display: flex; flex-direction: column; gap: 16px; transition: all 0.3s ease;">
+                <div style="display: flex; align-items: flex-start; justify-content: space-between;">
+                    <div>
+                        <div id="total-staff" style="font-size: 32px; font-weight: 800; color: #f1f5f9; margin: 0; letter-spacing: -1px; line-height: 1;">1</div>
+                        <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: rgba(100, 116, 139, 1); margin-top: 4px;">Total Staff</div>
                     </div>
-                    <div style="width:48px;height:48px;border-radius:12px;background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.2);display:flex;align-items:center;justify-content:center;color:rgba(129,140,248,1);font-size:24px;flex-shrink:0;">
+                    <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.2); display: flex; align-items: center; justify-content: center; color: rgba(129, 140, 248, 1); font-size: 24px;">
                         <i class="fas fa-users"></i>
                     </div>
                 </div>
-                <p style="font-size:12px;color:rgba(148,163,184,0.9);margin:0;">Active members</p>
+                <p style="font-size: 12px; color: rgba(100, 116, 139, 1); margin: 0;">Active members</p>
             </div>
 
             <!-- Active Teachers -->
-            <div style="background:rgba(15,22,41,0.6);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.05);box-shadow:0 4px 30px rgba(0,0,0,0.1);transition:transform 0.3s ease,box-shadow 0.3s ease,border-color 0.3s ease;border-radius:24px;padding:24px;display:flex;flex-direction:column;gap:16px;position:relative;overflow:hidden;">
-                <div style="display:flex;align-items:flex-start;justify-content:space-between;">
-                    <div style="display:flex;flex-direction:column;gap:8px;">
-                        <div id="dashboard-active-teachers" style="font-size:36px;font-weight:900;color:#ffffff;letter-spacing:-1px;line-height:1;">2</div>
-                        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:rgba(100,116,139,1);">Active Teachers</div>
+            <div style="background: rgba(15, 22, 41, 0.6); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); border-radius: 24px; padding: 24px; display: flex; flex-direction: column; gap: 16px; transition: all 0.3s ease;">
+                <div style="display: flex; align-items: flex-start; justify-content: space-between;">
+                    <div>
+                        <div id="active-teachers" style="font-size: 32px; font-weight: 800; color: #f1f5f9; margin: 0; letter-spacing: -1px; line-height: 1;">1</div>
+                        <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: rgba(100, 116, 139, 1); margin-top: 4px;">Active Teachers</div>
                     </div>
-                    <div style="width:48px;height:48px;border-radius:12px;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.2);display:flex;align-items:center;justify-content:center;color:rgba(110,231,183,1);font-size:24px;flex-shrink:0;">
+                    <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); display: flex; align-items: center; justify-content: center; color: rgba(110, 231, 183, 1); font-size: 24px;">
                         <i class="fas fa-chalkboard-user"></i>
                     </div>
                 </div>
-                <p style="font-size:12px;color:rgba(148,163,184,0.9);margin:0;">Teaching staff</p>
+                <p style="font-size: 12px; color: rgba(100, 116, 139, 1); margin: 0;">Teaching staff</p>
             </div>
 
             <!-- Total Departments -->
-            <div style="background:rgba(15,22,41,0.6);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.05);box-shadow:0 4px 30px rgba(0,0,0,0.1);transition:transform 0.3s ease,box-shadow 0.3s ease,border-color 0.3s ease;border-radius:24px;padding:24px;display:flex;flex-direction:column;gap:16px;position:relative;overflow:hidden;">
-                <div style="display:flex;align-items:flex-start;justify-content:space-between;">
-                    <div style="display:flex;flex-direction:column;gap:8px;">
-                        <div id="dashboard-depts" style="font-size:36px;font-weight:900;color:#ffffff;letter-spacing:-1px;line-height:1;">1</div>
-                        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:rgba(100,116,139,1);">Departments</div>
+            <div style="background: rgba(15, 22, 41, 0.6); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); border-radius: 24px; padding: 24px; display: flex; flex-direction: column; gap: 16px; transition: all 0.3s ease;">
+                <div style="display: flex; align-items: flex-start; justify-content: space-between;">
+                    <div>
+                        <div id="total-depts" style="font-size: 32px; font-weight: 800; color: #f1f5f9; margin: 0; letter-spacing: -1px; line-height: 1;">1</div>
+                        <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: rgba(100, 116, 139, 1); margin-top: 4px;">Departments</div>
                     </div>
-                    <div style="width:48px;height:48px;border-radius:12px;background:rgba(251,146,60,0.15);border:1px solid rgba(251,146,60,0.2);display:flex;align-items:center;justify-content:center;color:rgba(251,146,60,1);font-size:24px;flex-shrink:0;">
+                    <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(251, 146, 60, 0.1); border: 1px solid rgba(251, 146, 60, 0.2); display: flex; align-items: center; justify-content: center; color: rgba(251, 146, 60, 1); font-size: 24px;">
                         <i class="fas fa-building"></i>
                     </div>
                 </div>
-                <p style="font-size:12px;color:rgba(148,163,184,0.9);margin:0;">Organized units</p>
+                <p style="font-size: 12px; color: rgba(100, 116, 139, 1); margin: 0;">Organized units</p>
             </div>
 
             <!-- System Status -->
-            <div style="background:rgba(15,22,41,0.6);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.05);box-shadow:0 4px 30px rgba(0,0,0,0.1);transition:transform 0.3s ease,box-shadow 0.3s ease,border-color 0.3s ease;border-radius:24px;padding:24px;display:flex;flex-direction:column;gap:16px;position:relative;overflow:hidden;">
-                <div style="display:flex;align-items:flex-start;justify-content:space-between;">
-                    <div style="display:flex;flex-direction:column;gap:8px;">
-                        <div style="font-size:20px;font-weight:900;color:rgba(16,185,129,1);letter-spacing:-1px;line-height:1;">Online</div>
-                        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:rgba(100,116,139,1);">System Status</div>
+            <div style="background: rgba(15, 22, 41, 0.6); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); border-radius: 24px; padding: 24px; display: flex; flex-direction: column; gap: 16px; transition: all 0.3s ease;">
+                <div style="display: flex; align-items: flex-start; justify-content: space-between;">
+                    <div>
+                        <div style="font-size: 20px; font-weight: 800; color: rgba(16, 185, 129, 1); margin: 0; letter-spacing: -1px; line-height: 1;">Online</div>
+                        <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: rgba(100, 116, 139, 1); margin-top: 4px;">System Status</div>
                     </div>
-                    <div style="width:48px;height:48px;border-radius:12px;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.2);display:flex;align-items:center;justify-content:center;color:rgba(110,231,183,1);font-size:24px;flex-shrink:0;">
+                    <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); display: flex; align-items: center; justify-content: center; color: rgba(110, 231, 183, 1); font-size: 24px;">
                         <i class="fas fa-activity"></i>
                     </div>
                 </div>
-                <p style="font-size:12px;color:rgba(148,163,184,0.9);margin:0;">All systems operational</p>
+                <p style="font-size: 12px; color: rgba(100, 116, 139, 1); margin: 0;">All systems operational</p>
             </div>
 
         </section>
 
-        <!-- Main Content Area with Tabs -->
-        <section style="background:rgba(15,22,41,0.6);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.05);box-shadow:0 4px 30px rgba(0,0,0,0.1);border-radius:24px;overflow:hidden;display:flex;flex-direction:column;position:relative;z-10;">
+        <!-- Main Content Area -->
+        <section style="background: rgba(15, 22, 41, 0.6); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); border-radius: 24px; overflow: hidden; display: flex; flex-direction: column;">
             
             <!-- Tabs Navigation -->
-            <div style="padding:20px 24px;border-bottom:1px solid rgba(255,255,255,0.05);background:rgba(255,255,255,0.02);display:flex;gap:8px;">
-                <button class="dash-tab-btn dash-tab-active" onclick="switchDashboardTab('staff')" style="padding:12px 24px;border-radius:12px;border:1px solid rgba(255,255,255,0.05);background:rgba(15,22,41,0.4);color:rgba(148,163,184,1);cursor:pointer;transition:all 0.3s ease;font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;gap:8px;">
-                    <i class="fas fa-users" style="font-size:13px;"></i>
+            <div style="padding: 20px 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); background: rgba(255, 255, 255, 0.02); display: flex; gap: 8px;">
+                <button class="tab-btn active" onclick="switchTab('staff')" style="padding: 12px 20px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05); background: rgba(15, 22, 41, 0.4); color: rgba(148, 163, 184, 1); cursor: pointer; transition: all 0.3s ease; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-users" style="font-size: 13px;"></i>
                     Staff Management
                 </button>
-                <button class="dash-tab-btn" onclick="switchDashboardTab('attendance')" style="padding:12px 24px;border-radius:12px;border:1px solid rgba(255,255,255,0.05);background:rgba(15,22,41,0.4);color:rgba(148,163,184,1);cursor:pointer;transition:all 0.3s ease;font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;gap:8px;">
-                    <i class="fas fa-clipboard-check" style="font-size:13px;"></i>
+                <button class="tab-btn" onclick="switchTab('attendance')" style="padding: 12px 20px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05); background: rgba(15, 22, 41, 0.4); color: rgba(148, 163, 184, 1); cursor: pointer; transition: all 0.3s ease; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-clipboard-check" style="font-size: 13px;"></i>
                     Attendance Records
                 </button>
-                <button class="dash-tab-btn" onclick="switchDashboardTab('analytics')" style="padding:12px 24px;border-radius:12px;border:1px solid rgba(255,255,255,0.05);background:rgba(15,22,41,0.4);color:rgba(148,163,184,1);cursor:pointer;transition:all 0.3s ease;font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;gap:8px;">
-                    <i class="fas fa-chart-bar" style="font-size:13px;"></i>
+                <button class="tab-btn" onclick="switchTab('analytics')" style="padding: 12px 20px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05); background: rgba(15, 22, 41, 0.4); color: rgba(148, 163, 184, 1); cursor: pointer; transition: all 0.3s ease; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-chart-bar" style="font-size: 13px;"></i>
                     Analytics
                 </button>
             </div>
 
             <!-- STAFF MANAGEMENT TAB -->
-            <div id="dash-tab-staff" class="dash-tab-content dash-tab-active" style="padding:24px;">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
-                    <h3 style="font-size:18px;font-weight:700;color:#ffffff;letter-spacing:1px;margin:0;text-transform:uppercase;">All Staff Members</h3>
-                    <button onclick="refreshTeacherData()" style="padding:8px 16px;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.4);border-radius:10px;color:rgba(110,231,183,0.95);font-size:11px;font-weight:700;cursor:pointer;transition:all 0.25s ease;display:flex;align-items:center;gap:6px;letter-spacing:0.5px;">
-                        <i class="fas fa-sync-alt" style="font-size:10px;"></i>
-                        REFRESH
+            <div id="tab-staff" class="tab-content active" style="padding: 24px 32px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+                    <h3 style="font-size: 18px; font-weight: 700; color: #ffffff; letter-spacing: 1px; margin: 0; text-transform: uppercase;">All Staff Members</h3>
+                    <button onclick="refreshTeacherData()" style="padding: 9px 18px; background: rgba(16, 185, 129, 0.15); border: 1.5px solid rgba(16, 185, 129, 0.4); border-radius: 10px; color: rgba(110, 231, 183, 0.95); font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.25s ease; display: flex; align-items: center; gap: 6px; letter-spacing: 0.5px;">
+                        <i class="fas fa-plus" style="font-size: 11px;"></i>
+                        ADD STAFF
                     </button>
                 </div>
 
                 <!-- Staff List Container -->
-                <div id="staffListContainer" style="display:flex;flex-direction:column;gap:12px;">
+                <div id="staff-list" style="display: flex; flex-direction: column; gap: 16px;">
                     <!-- Dynamic staff cards render here -->
+                </div>
+
+                <!-- Empty State -->
+                <div id="empty-state" style="display: none; text-align: center; padding: 48px 20px;">
+                    <i class="fas fa-inbox" style="font-size: 48px; color: rgba(71, 85, 105, 1); margin-bottom: 16px;"></i>
+                    <p style="color: rgba(100, 116, 139, 1); font-size: 14px;">No staff members found. Add one to get started.</p>
                 </div>
             </div>
 
             <!-- ATTENDANCE RECORDS TAB -->
-            <div id="dash-tab-attendance" class="dash-tab-content" style="padding:24px;display:none;">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
-                    <h3 style="font-size:18px;font-weight:700;color:#ffffff;letter-spacing:1px;margin:0;text-transform:uppercase;">Attendance Records</h3>
-                    <button style="padding:8px 16px;background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.4);border-radius:10px;color:rgba(129,140,248,0.95);font-size:11px;font-weight:700;cursor:pointer;transition:all 0.25s ease;display:flex;align-items:center;gap:6px;letter-spacing:0.5px;">
-                        <i class="fas fa-download" style="font-size:10px;"></i>
+            <div id="tab-attendance" class="tab-content" style="padding: 24px 32px; display: none;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+                    <h3 style="font-size: 18px; font-weight: 700; color: #ffffff; letter-spacing: 1px; margin: 0; text-transform: uppercase;">Attendance Records</h3>
+                    <button style="padding: 9px 18px; background: rgba(99, 102, 241, 0.15); border: 1.5px solid rgba(99, 102, 241, 0.4); border-radius: 10px; color: rgba(129, 140, 248, 0.95); font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.25s ease; display: flex; align-items: center; gap: 6px; letter-spacing: 0.5px;">
+                        <i class="fas fa-download" style="font-size: 10px;"></i>
                         EXPORT
                     </button>
                 </div>
 
                 <!-- Attendance Table -->
-                <div style="overflow-x:auto;">
-                    <table style="width:100%;font-size:13px;border-collapse:collapse;">
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
                         <thead>
-                            <tr style="border-bottom:1px solid rgba(255,255,255,0.1);">
-                                <th style="text-align:left;padding:12px 16px;font-weight:700;color:rgba(226,232,240,1);text-transform:uppercase;font-size:11px;letter-spacing:1px;">Staff Name</th>
-                                <th style="text-align:left;padding:12px 16px;font-weight:700;color:rgba(226,232,240,1);text-transform:uppercase;font-size:11px;letter-spacing:1px;">ID</th>
-                                <th style="text-align:left;padding:12px 16px;font-weight:700;color:rgba(226,232,240,1);text-transform:uppercase;font-size:11px;letter-spacing:1px;">Department</th>
-                                <th style="text-align:center;padding:12px 16px;font-weight:700;color:rgba(226,232,240,1);text-transform:uppercase;font-size:11px;letter-spacing:1px;">Status</th>
-                                <th style="text-align:left;padding:12px 16px;font-weight:700;color:rgba(226,232,240,1);text-transform:uppercase;font-size:11px;letter-spacing:1px;">Time</th>
+                            <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                                <th style="text-align: left; padding: 12px 16px; font-weight: 700; color: rgba(226, 232, 240, 1); text-transform: uppercase; font-size: 11px; letter-spacing: 1px;">Staff Name</th>
+                                <th style="text-align: left; padding: 12px 16px; font-weight: 700; color: rgba(226, 232, 240, 1); text-transform: uppercase; font-size: 11px; letter-spacing: 1px;">ID</th>
+                                <th style="text-align: left; padding: 12px 16px; font-weight: 700; color: rgba(226, 232, 240, 1); text-transform: uppercase; font-size: 11px; letter-spacing: 1px;">Department</th>
+                                <th style="text-align: center; padding: 12px 16px; font-weight: 700; color: rgba(226, 232, 240, 1); text-transform: uppercase; font-size: 11px; letter-spacing: 1px;">Status</th>
+                                <th style="text-align: left; padding: 12px 16px; font-weight: 700; color: rgba(226, 232, 240, 1); text-transform: uppercase; font-size: 11px; letter-spacing: 1px;">Time</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr style="border-bottom:1px solid rgba(255,255,255,0.05);transition:background-color 0.2s ease;">
-                                <td style="padding:12px 16px;color:rgba(226,232,240,1);">Sample Teacher</td>
-                                <td style="padding:12px 16px;color:rgba(148,163,184,1);">T001</td>
-                                <td style="padding:12px 16px;color:rgba(148,163,184,1);">Information Science</td>
-                                <td style="padding:12px 16px;text-align:center;">
-                                    <span style="padding:4px 12px;background:rgba(16,185,129,0.2);color:rgba(110,231,183,1);border:1px solid rgba(16,185,129,0.3);border-radius:6px;font-size:11px;font-weight:700;">Present</span>
+                            <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05); transition: background-color 0.2s ease;">
+                                <td style="padding: 12px 16px; color: rgba(226, 232, 240, 1);">Sample Teacher</td>
+                                <td style="padding: 12px 16px; color: rgba(148, 163, 184, 1);">T001</td>
+                                <td style="padding: 12px 16px; color: rgba(148, 163, 184, 1);">Information Science</td>
+                                <td style="padding: 12px 16px; text-align: center;">
+                                    <span style="padding: 4px 12px; background: rgba(16, 185, 129, 0.2); color: rgba(110, 231, 183, 1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 6px; font-size: 11px; font-weight: 700;">Present</span>
                                 </td>
-                                <td style="padding:12px 16px;color:rgba(148,163,184,1);">09:30 AM</td>
+                                <td style="padding: 12px 16px; color: rgba(148, 163, 184, 1);">09:30 AM</td>
                             </tr>
                         </tbody>
                     </table>
@@ -41256,23 +41280,23 @@ function restoreTeacherZonePhoto() {
             </div>
 
             <!-- ANALYTICS TAB -->
-            <div id="dash-tab-analytics" class="dash-tab-content" style="padding:24px;display:none;">
-                <h3 style="font-size:18px;font-weight:700;color:#ffffff;letter-spacing:1px;margin:0 0 24px 0;text-transform:uppercase;">Analytics & Reports</h3>
+            <div id="tab-analytics" class="tab-content" style="padding: 24px 32px; display: none;">
+                <h3 style="font-size: 18px; font-weight: 700; color: #ffffff; letter-spacing: 1px; margin: 0 0 24px 0; text-transform: uppercase;">Analytics & Reports</h3>
                 
                 <!-- Analytics Grid -->
-                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
                     <!-- Attendance Trend -->
-                    <div style="background:rgba(15,22,41,0.5);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.03);box-shadow:0 2px 20px rgba(0,0,0,0.05);border-radius:16px;padding:20px;">
-                        <h4 style="font-size:14px;font-weight:700;color:#ffffff;margin:0 0 16px 0;">Attendance Trend</h4>
-                        <div style="height:160px;background:rgba(255,255,255,0.03);border-radius:12px;display:flex;align-items:center;justify-content:center;color:rgba(148,163,184,0.7);font-size:13px;">
+                    <div style="background: rgba(15, 22, 41, 0.5); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.03); box-shadow: 0 2px 20px rgba(0, 0, 0, 0.05); border-radius: 16px; padding: 20px;">
+                        <h4 style="font-size: 14px; font-weight: 700; color: #ffffff; margin: 0 0 16px 0;">Attendance Trend</h4>
+                        <div style="height: 160px; background: rgba(255, 255, 255, 0.03); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: rgba(148, 163, 184, 0.7); font-size: 13px;">
                             📊 Chart visualization coming soon
                         </div>
                     </div>
 
                     <!-- Department Distribution -->
-                    <div style="background:rgba(15,22,41,0.5);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.03);box-shadow:0 2px 20px rgba(0,0,0,0.05);border-radius:16px;padding:20px;">
-                        <h4 style="font-size:14px;font-weight:700;color:#ffffff;margin:0 0 16px 0;">Department Distribution</h4>
-                        <div style="height:160px;background:rgba(255,255,255,0.03);border-radius:12px;display:flex;align-items:center;justify-content:center;color:rgba(148,163,184,0.7);font-size:13px;">
+                    <div style="background: rgba(15, 22, 41, 0.5); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.03); box-shadow: 0 2px 20px rgba(0, 0, 0, 0.05); border-radius: 16px; padding: 20px;">
+                        <h4 style="font-size: 14px; font-weight: 700; color: #ffffff; margin: 0 0 16px 0;">Department Distribution</h4>
+                        <div style="height: 160px; background: rgba(255, 255, 255, 0.03); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: rgba(148, 163, 184, 0.7); font-size: 13px;">
                             📈 Chart visualization coming soon
                         </div>
                     </div>
@@ -41284,19 +41308,100 @@ function restoreTeacherZonePhoto() {
     </main>
 
     <style>
-        .dash-tab-active { display: block !important; }
-        .dash-tab-content { display: none; animation: fadeInUp 0.4s ease-out; }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .dash-tab-btn.dash-tab-active { background: linear-gradient(135deg,rgba(99,102,241,0.3),rgba(16,185,129,0.2)); color: rgba(224,231,255,1); border-color: rgba(99,102,241,0.3); box-shadow: 0 0 20px rgba(99,102,241,0.2); }
-        .dash-tab-btn:hover { background: rgba(15,22,41,0.6); color: rgba(203,213,225,1); border-color: rgba(255,255,255,0.08); }
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-size: 50px 50px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            mask-image: radial-gradient(ellipse at top, black 20%, transparent 70%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .glow-spot-1 {
+            position: fixed;
+            top: -10%;
+            left: -10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .glow-spot-2 {
+            position: fixed;
+            top: 20%;
+            right: -10%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeInUp 0.4s ease-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(16, 185, 129, 0.2)) !important;
+            color: rgba(224, 231, 255, 1) !important;
+            border-color: rgba(99, 102, 241, 0.3) !important;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.2) !important;
+        }
+
+        .tab-btn:hover {
+            background: rgba(15, 22, 41, 0.6) !important;
+            color: rgba(203, 213, 225, 1) !important;
+        }
     </style>
 
     <script>
-        function switchDashboardTab(tabName) {
-            document.querySelectorAll('.dash-tab-content').forEach(tab => tab.classList.remove('dash-tab-active'));
-            document.querySelectorAll('.dash-tab-btn').forEach(btn => btn.classList.remove('dash-tab-active'));
-            document.getElementById(`dash-tab-${tabName}`).classList.add('dash-tab-active');
-            event.target.closest('.dash-tab-btn').classList.add('dash-tab-active');
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            event.target.closest('.tab-btn').classList.add('active');
+        }
+
+        // Initialize dashboard on load
+        function initializeDashboard() {
+            renderDashboard();
+        }
+
+        function renderDashboard() {
+            if (typeof renderTeacherDashboard === 'function') {
+                renderTeacherDashboard();
+            }
+        }
+
+        // Initialize on page load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeDashboard);
+        } else {
+            initializeDashboard();
         }
     </script>
   </div>
@@ -61745,14 +61850,7 @@ function renderAttendance() {
 
         function renderTeacherDashboard() {
             try {
-                // Ensure selectedBranch is set
-                if (!selectedBranch || selectedBranch === null) {
-                    selectedBranch = 'Information Science';
-                    console.log('[DEBUG] selectedBranch was null, set to:', selectedBranch);
-                }
-                
                 console.log('[DEBUG] renderTeacherDashboard called');
-                console.log('[DEBUG] selectedBranch:', selectedBranch);
                 console.log('[DEBUG] teachers count:', teachers?.length || 0);
                 
                 // Ensure teachers are loaded
@@ -61763,7 +61861,7 @@ function renderAttendance() {
                     
                     if (!teachers || teachers.length === 0) {
                         console.error('[ERROR] No teachers found even after localStorage load');
-                        const container = document.getElementById("staffListContainer");
+                        const container = document.getElementById("staff-list");
                         if (container) {
                             container.innerHTML = `<div style="text-align:center;padding:24px;color:rgba(148,163,184,1);font-size:13px;">Loading staff data...</div>`;
                         }
@@ -61773,25 +61871,22 @@ function renderAttendance() {
                     }
                 }
                 
-                const filteredByBranchTeachers = teachers.filter(t => {
-                    const matches = t.branch === selectedBranch;
-                    if (!matches) console.log('[DEBUG] Skipping teacher (branch mismatch):', t.name, 'has branch:', t.branch);
-                    return matches;
-                });
-                
-                console.log('[DEBUG] Filtered teachers by branch:', filteredByBranchTeachers.length);
-
-                // Show total teachers count in metrics (not filtered by branch)
                 const total = teachers.length;
                 
-                // Update metric cards
-                const totalStaffEl = document.getElementById("dashboard-total-staff");
+                // Update metric cards with NEW IDs
+                const totalStaffEl = document.getElementById("total-staff");
                 if (totalStaffEl) totalStaffEl.textContent = total;
                 
-                const activeTeachersEl = document.getElementById("dashboard-active-teachers");
+                const activeTeachersEl = document.getElementById("active-teachers");
                 if (activeTeachersEl) activeTeachersEl.textContent = total;
 
-                console.log('[DEBUG] Rendering teacher list with', filteredByBranchTeachers.length, 'branch-matched teachers (total:', total, ')');
+                const deptsEl = document.getElementById("total-depts");
+                if (deptsEl) {
+                    const uniqueDepts = new Set(teachers.map(t => t.department || t.subjects?.[0] || 'Other').filter(d => d));
+                    deptsEl.textContent = uniqueDepts.size;
+                }
+
+                console.log('[DEBUG] Rendering teacher list with', total, 'teachers');
                 renderDashboardStaffList();
                 console.log('[DEBUG] renderTeacherDashboard completed successfully');
             } catch (error) {
@@ -62038,9 +62133,9 @@ function renderAttendance() {
 
         function renderDashboardStaffList() {
             try {
-                const container = document.getElementById("staffListContainer");
+                const container = document.getElementById("staff-list");
                 if (!container) {
-                    console.error('[ERROR] staffListContainer element not found');
+                    console.error('[ERROR] staff-list element not found');
                     return;
                 }
 
@@ -62064,7 +62159,7 @@ function renderAttendance() {
                 renderStaffListCards(container);
             } catch (error) {
                 console.error('[ERROR] renderDashboardStaffList error:', error);
-                const container = document.getElementById("staffListContainer");
+                const container = document.getElementById("staff-list");
                 if (container) {
                     container.innerHTML = `<div style="text-align:center;padding:24px;color:rgba(200,50,50,1);font-size:13px;">Error loading staff list. Check console for details.</div>`;
                 }
@@ -62094,39 +62189,18 @@ function renderAttendance() {
         function renderStaffListCards(container) {
             container.innerHTML = "";
 
-            // Get teachers for current branch
-            const branchTeachers = teachers ? teachers.filter(t => t.branch === selectedBranch) : [];
+            // Show ALL teachers (no branch filtering on new dashboard)
+            const allTeachers = teachers || [];
             
-            console.log('[DEBUG] ======== BRANCH FILTERING DEBUG ========');
-            console.log('[DEBUG] selectedBranch:', selectedBranch);
-            console.log('[DEBUG] Total teachers in array:', teachers?.length || 0);
-            console.log('[DEBUG] Teachers list:', teachers);
-            console.log('[DEBUG] Teachers branches:', teachers ? teachers.map(t => ({ name: t.name, branch: t.branch })) : 'NO TEACHERS');
-            console.log('[DEBUG] Filtered teachers by branch:', branchTeachers.length);
-            console.log('[DEBUG] ======== END DEBUG ========');
+            console.log('[DEBUG] Rendering', allTeachers.length, 'staff members');
 
-            // Update section header badge
-            const badge = document.getElementById('dashboardStaffCountBadge');
-            if (badge) badge.textContent = branchTeachers.length;
-
-            if (branchTeachers.length === 0) {
-                // Show all teachers if branch filter returns nothing
-                console.warn('[WARN] No teachers match branch filter, showing ALL teachers');
-                const allTeachers = teachers || [];
-                
-                if (allTeachers.length === 0) {
-                    container.innerHTML = `<div style="text-align:center;padding:24px;color:rgba(148,163,184,1);font-size:13px;">No staff members found. Please ensure teachers are added.</div>`;
-                    return;
-                }
-                
-                // Show all teachers with warning
-                renderTeacherCards(container, allTeachers, true);
+            if (allTeachers.length === 0) {
+                container.innerHTML = `<div style="text-align:center;padding:24px;color:rgba(148,163,184,1);font-size:13px;">No staff members found. Please ensure teachers are added.</div>`;
                 return;
             }
 
-            renderTeacherCards(container, branchTeachers, false);
-
-            console.log('[DEBUG] renderStaffListCards completed, rendered:', branchTeachers.length, 'teachers');
+            renderTeacherCards(container, allTeachers, true);
+            console.log('[DEBUG] renderStaffListCards completed, rendered:', allTeachers.length, 'teachers');
         }
 
         function renderTeacherCards(container, teachersList, isAllTeachers) {
