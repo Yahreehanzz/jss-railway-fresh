@@ -81829,86 +81829,18 @@ Govt. Polytechnic, Beelagi`;
             
             listContainer.innerHTML = cards;
         } else {
-            // Show sample data or loading message
-            const sampleStudents = [
-                { name: 'Aditya Sharma', usn: 'JSS23CS001', semester: 5, status: 'paid', total: 75000, paid: 75000, pending: 0 },
-                { name: 'Priya Reddy', usn: 'JSS23CS002', semester: 5, status: 'partial', total: 60000, paid: 30000, pending: 30000 },
-                { name: 'Rahul Kumar', usn: 'JSS23CS003', semester: 5, status: 'pending', total: 55000, paid: 0, pending: 55000 }
-            ];
-            
+            // Real data not available yet - show loading state
             if (countElement) {
-                countElement.innerHTML = `<i class="fas fa-info-circle" style="color: #999; margin-right: 6px;"></i>Loading data...`;
+                countElement.innerHTML = `<i class="fas fa-spinner fa-spin" style="color: #003366; margin-right: 6px;"></i>Loading students...`;
             }
             
-            const cards = sampleStudents.map((student, idx) => {
-                const statusColor = student.status === 'paid' ? { bg: '#dcfce7', text: '#15803d', border: '#86efac' } : 
-                                  student.status === 'partial' ? { bg: '#fef3c7', text: '#a16207', border: '#fcd34d' } : 
-                                  { bg: '#fee2e2', text: '#dc2626', border: '#fca5a5' };
-                
-                const statusText = student.status === 'paid' ? 'FULLY PAID' : 
-                                 student.status === 'partial' ? 'PARTIAL' : 'PENDING';
-                
-                const initials = student.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-                const colors = ['#fbbf24', '#1f2937', '#3b82f6', '#ec4899', '#8b5cf6'];
-                const avatarBg = colors[idx % colors.length];
-                
-                return `
-                    <div style="
-                        background: rgba(255, 255, 255, 0.6);
-                        border: 1px solid #f3f4f6;
-                        border-radius: 16px;
-                        padding: 14px 16px;
-                        display: flex;
-                        align-items: center;
-                        gap: 12px;
-                        opacity: 0.7;
-                    ">
-                        <div style="
-                            width: 40px;
-                            height: 40px;
-                            border-radius: 50%;
-                            background: ${avatarBg};
-                            border: 2px solid white;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            font-weight: 700;
-                            color: white;
-                            font-size: 12px;
-                            flex-shrink: 0;
-                        ">
-                            ${initials}
-                        </div>
-                        <div style="flex: 1; min-width: 0;">
-                            <h3 style="margin: 0 0 2px 0; font-size: 13px; font-weight: 600; color: #1f2937;">
-                                ${student.name}
-                            </h3>
-                            <p style="margin: 0; font-size: 11px; color: #6b7280;">
-                                ${student.usn} • Sem ${student.semester}
-                            </p>
-                        </div>
-                        <div style="text-align: right; flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
-                            <div style="
-                                display: inline-block;
-                                padding: 4px 10px;
-                                background: ${statusColor.bg};
-                                border: 1px solid ${statusColor.border};
-                                border-radius: 6px;
-                                font-size: 10px;
-                                font-weight: 700;
-                                color: ${statusColor.text};
-                            ">
-                                ${statusText}
-                            </div>
-                            <div style="font-size: 13px; font-weight: 700; color: #1f2937;">
-                                ₹${student.total.toLocaleString()}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            
-            listContainer.innerHTML = cards;
+            listContainer.innerHTML = `
+                <div style="text-align: center; padding: 60px 20px; color: #999;">
+                    <i class="fas fa-database" style="font-size: 48px; opacity: 0.5; margin-bottom: 16px; display: block;"></i>
+                    <p style="font-size: 14px; margin: 8px 0; font-weight: 500;">Loading student data from database...</p>
+                    <p style="font-size: 12px; margin: 4px 0; opacity: 0.7;">This may take a moment</p>
+                </div>
+            `;
         }
     }
     
@@ -81926,7 +81858,7 @@ Govt. Polytechnic, Beelagi`;
         data.forEach(student => {
             const status = student.status === 'paid' ? 'FULLY PAID' : 
                           student.status === 'partial' ? 'PARTIAL' : 'PENDING';
-            csv += `"${student.name}","${student.usn}","${student.semester}","${status}","?${Math.round(student.total).toLocaleString()}"\n`;
+            csv += `"${student.name}","${student.usn}","${student.semester}","${status}","Rs. ${Math.round(student.total).toLocaleString()}"\n`;
         });
         
         // Create blob and download
@@ -82077,7 +82009,7 @@ Govt. Polytechnic, Beelagi`;
                             font-weight: 800;
                             color: #003366;
                         ">
-                            ₹${fmt.format(course.amount || 0)}
+                            Rs. ${fmt.format(course.amount || 0)}
                         </div>
                         <div style="font-size:9px; color:#ccc;">/year</div>
                     </div>
@@ -82140,7 +82072,7 @@ Govt. Polytechnic, Beelagi`;
                     </div>
                     <div style="text-align: right; flex-shrink: 0;">
                         <div style="font-size:11px; color:#999; font-weight:500;">Course Fee</div>
-                        <div style="font-size: 20px; font-weight: 800; color: #003366;">₹${fmt.format(course.amount || 0)}</div>
+                        <div style="font-size: 20px; font-weight: 800; color: #003366;">Rs. ${fmt.format(course.amount || 0)}</div>
                         <div style="font-size:9px; color:#ccc;">/year</div>
                     </div>
                 `;
