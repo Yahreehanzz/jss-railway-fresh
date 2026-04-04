@@ -40917,8 +40917,9 @@ function switchTeacherTab(tabId) {
         if (tabId === 'dashboard' && typeof renderTeacherDashboard === 'function') {
             setTimeout(renderTeacherDashboard, 100);
         }
-        if (tabId === 'view' && typeof filterTeacherTable === 'function') {
-            filterTeacherTable();
+        if (tabId === 'view' && typeof renderTeacherCardsView === 'function') {
+            currentViewFilter = 'all';
+            renderTeacherCardsView();
         }
         if (tabId === 'manage' && typeof refreshTeacherManageData === 'function') {
             refreshTeacherManageData();
@@ -41391,6 +41392,18 @@ function restoreTeacherZonePhoto() {
             background: rgba(15, 22, 41, 0.4) !important;
             color: rgba(203, 213, 225, 1) !important;
         }
+
+        .filter-btn.active {
+            border-left-color: rgba(99, 102, 241, 1) !important;
+            border-left-width: 3px !important;
+            background: rgba(99, 102, 241, 0.08) !important;
+            color: rgba(224, 231, 255, 1) !important;
+        }
+
+        .filter-btn:hover {
+            background: rgba(15, 22, 41, 0.4) !important;
+            color: rgba(203, 213, 225, 1) !important;
+        }
     </style>
 
     <script>
@@ -41606,46 +41619,129 @@ function restoreTeacherZonePhoto() {
     </div>
   </div>
 
-  <!-- VIEW TEACHERS panel -->
-  <div class="tc-panel" id="tcp-view">
-    <div class="tc-inner">
-      <div class="tc-page-title">All Teachers</div>
-      <div class="tc-page-sub">Directory &nbsp;?&nbsp; Sortable &nbsp;?&nbsp; Searchable</div>
-      <div class="tc-card">
-        <div class="tc-heading"><div class="tc-heading-title"><i class="fas fa-filter"></i> Filter Staff</div></div>
-        <div class="search-filter-controls">
-          <div class="dash-search-wrap" id="teacherTableSearchWrap">
-            <button class="dash-search-pill" onclick="togglePillSearch('teacherTableSearchWrap')" aria-label="Search">
-              <i class="fas fa-search"></i><span class="dash-pill-label">Search</span>
-            </button>
-            <div class="dash-search-expanded">
-              <i class="dash-ei fas fa-search"></i>
-              <input id="searchTeacherTable" type="text" placeholder="Search by name or ID?" onkeyup="filterTeacherTable()" autocomplete="off"/>
+  <!-- VIEW TEACHERS panel - PROFESSIONAL GLASSMORPHISM DESIGN -->
+  <div class="tc-panel" id="tcp-view" style="background-color: #070B14; min-height:calc(100vh - 64px); overflow-y:auto; position:relative;">
+    <!-- Ambient Background Elements -->
+    <div class="bg-grid"></div>
+    <div class="glow-spot-1"></div>
+    <div class="glow-spot-2"></div>
+
+    <!-- Top Navigation Bar -->
+    <nav style="position: sticky; top: 0; z-index: 30; background: rgba(15, 22, 41, 0.6); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid rgba(113, 119, 144, 0.2); border-radius: 0;">
+        <div style="max-width: 100%; margin: 0 auto; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 40px; height: 40px; border-radius: 8px; background: linear-gradient(to bottom right, #6366f1, #10b981); display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-users-viewfinder" style="color: white; font-size: 20px;"></i>
+                </div>
+                <div>
+                    <h1 style="font-size: 14px; font-weight: 700; color: white; margin: 0; letter-spacing: 0.5px;">Teachers Portal</h1>
+                    <p style="font-size: 12px; color: rgba(100, 116, 139, 1); margin: 0; letter-spacing: 0.5px;">Directory & Management</p>
+                </div>
             </div>
-          </div>
-          <select id="filterTeacherSubjectTable" onchange="filterTeacherTable()">
-            <option value="all">All Subjects</option>
-            <option value="Computer Science">Computer Science</option>
-            <option value="Electronics">Electronics</option>
-            <option value="Mechanical">Mechanical</option>
-            <option value="Mathematics">Mathematics</option>
-            <option value="Physics">Physics</option>
-            <option value="Chemistry">Chemistry</option>
-          </select>
+            <button style="padding: 8px; border-radius: 8px; background: none; border: none; cursor: pointer;" onclick="alert('Logout functionality')">
+                <i class="fas fa-sign-out-alt" style="color: rgba(100, 116, 139, 1); font-size: 18px;"></i>
+            </button>
         </div>
-        <div class="table-container">
-          <table class="teacher-table">
-            <thead><tr>
-              <th onclick="sortTableTeachers(0)">Name</th>
-              <th onclick="sortTableTeachers(1)">ID</th>
-              <th onclick="sortTableTeachers(2)">Subjects</th>
-              <th onclick="sortTableTeachers(3)">Actions</th>
-            </tr></thead>
-            <tbody id="teacherTableBody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+    </nav>
+
+    <main style="max-width: 100%; margin: 0; padding: 32px 40px; min-height: 100vh; display: flex; flex-direction: column; gap: 40px; position: relative; z-index: 10;">
+        
+        <!-- Page Header -->
+        <header style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 12px; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: rgba(100, 116, 139, 1);">
+                <i class="fas fa-address-book" style="font-size: 14px; color: rgba(71, 85, 105, 1);"></i>
+                <span>Staff Directory</span>
+                <span style="color: rgba(71, 85, 105, 1);">&bull;</span>
+                <span style="color: rgba(129, 140, 248, 0.8);">View All Teachers</span>
+            </div>
+            <h1 style="font-size: 48px; font-weight: 900; color: #ffffff; letter-spacing: -1px; margin: 8px 0 0;">
+                Teachers <span style="background: linear-gradient(to right, #34d399, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Directory</span>
+            </h1>
+        </header>
+
+        <!-- Main Content Area with LEFT SIDEBAR -->
+        <section style="background: rgba(15, 22, 41, 0.6); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); border-radius: 24px; overflow: hidden; display: flex; flex-direction: row; height: auto;">
+            
+            <!-- LEFT SIDEBAR - Filter Options (220px) -->
+            <div style="width: 220px; padding: 24px 0; border-right: 1px solid rgba(255, 255, 255, 0.05); background: rgba(255, 255, 255, 0.01); display: flex; flex-direction: column; gap: 0;">
+                <button class="filter-btn active" onclick="setViewTeacherFilter('all')" style="padding: 16px 20px; border-left: 3px solid transparent; cursor: pointer; transition: all 0.3s ease; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 12px; color: rgba(148, 163, 184, 1); background: none; border: none; text-align: left; position: relative;">
+                    <i class="fas fa-list" style="font-size: 14px;"></i>
+                    <span>All Teachers</span>
+                </button>
+                <button class="filter-btn" onclick="setViewTeacherFilter('active')" style="padding: 16px 20px; border-left: 3px solid transparent; cursor: pointer; transition: all 0.3s ease; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 12px; color: rgba(148, 163, 184, 1); background: none; border: none; text-align: left; position: relative;">
+                    <i class="fas fa-check-circle" style="font-size: 14px;"></i>
+                    <span>Active Only</span>
+                </button>
+                <button class="filter-btn" onclick="setViewTeacherFilter('search')" style="padding: 16px 20px; border-left: 3px solid transparent; cursor: pointer; transition: all 0.3s ease; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 12px; color: rgba(148, 163, 184, 1); background: none; border: none; text-align: left; position: relative;">
+                    <i class="fas fa-search" style="font-size: 14px;"></i>
+                    <span>Search</span>
+                </button>
+            </div>
+
+            <!-- RIGHT CONTENT AREA -->
+            <div style="flex: 1; display: flex; flex-direction: column; padding: 40px;">
+                
+                <!-- Search & Filter Section -->
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 36px; gap: 20px;">
+                    <div style="display: flex; gap: 16px; flex: 1;">
+                        <div style="
+                            flex: 1;
+                            position: relative;
+                            display: flex;
+                            align-items: center;
+                            background: rgba(15, 22, 41, 0.5);
+                            border: 1px solid rgba(255, 255, 255, 0.08);
+                            border-radius: 12px;
+                            padding: 12px 16px;
+                            transition: all 0.3s ease;
+                        ">
+                            <i class="fas fa-search" style="color: rgba(100, 116, 139, 1); font-size: 13px; margin-right: 10px;"></i>
+                            <input id="searchTeacherTable" type="text" placeholder="Search by name or ID..." onkeyup="filterTeacherTable()" autocomplete="off" style="
+                                flex: 1;
+                                background: none;
+                                border: none;
+                                color: rgba(226, 232, 240, 1);
+                                font-size: 13px;
+                                outline: none;
+                            " />
+                        </div>
+                        <select id="filterTeacherSubjectTable" onchange="filterTeacherTable()" style="
+                            background: rgba(15, 22, 41, 0.5);
+                            border: 1px solid rgba(255, 255, 255, 0.08);
+                            color: rgba(226, 232, 240, 1);
+                            padding: 12px 14px;
+                            border-radius: 12px;
+                            font-size: 12px;
+                            cursor: pointer;
+                            transition: all 0.3s ease;
+                            font-weight: 600;
+                        ">
+                            <option value="all">All Subjects</option>
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Electronics">Electronics</option>
+                            <option value="Mechanical">Mechanical</option>
+                            <option value="Mathematics">Mathematics</option>
+                            <option value="Physics">Physics</option>
+                            <option value="Chemistry">Chemistry</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Teachers List Container -->
+                <div id="teacherListViewContainer" style="display: flex; flex-direction: column; gap: 16px;">
+                    <!-- Dynamic teacher cards render here -->
+                </div>
+
+                <!-- Empty State -->
+                <div id="empty-state-view" style="display: none; text-align: center; padding: 48px 20px;">
+                    <i class="fas fa-inbox" style="font-size: 48px; color: rgba(71, 85, 105, 1); margin-bottom: 16px;"></i>
+                    <p style="color: rgba(100, 116, 139, 1); font-size: 14px;">No teachers found. Try adjusting your filters.</p>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
   </div>
 
   <!-- FEE MANAGEMENT panel -->
@@ -62678,6 +62774,241 @@ function renderAttendance() {
             renderTeacherDashboard();
         }
 
+        // View Teachers Filter Functions
+        let currentViewFilter = 'all';
+
+        function setViewTeacherFilter(filterType) {
+            currentViewFilter = filterType;
+            
+            // Update active button
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.closest('.filter-btn').classList.add('active');
+            
+            // Re-render teachers
+            renderTeacherCardsView();
+        }
+
+        function renderTeacherCardsView() {
+            const container = document.getElementById('teacherListViewContainer');
+            const emptyState = document.getElementById('empty-state-view');
+            
+            if (!container) return;
+            
+            container.innerHTML = '';
+            let filteredTeachers = [...teachers];
+            
+            // Apply active filter
+            if (currentViewFilter === 'active') {
+                filteredTeachers = filteredTeachers.filter(t => t.status === 'active' || t.status === 'Active');
+            }
+            
+            // Apply search filter
+            const searchTerm = document.getElementById('searchTeacherTable').value.toLowerCase();
+            if (searchTerm) {
+                filteredTeachers = filteredTeachers.filter(t => 
+                    (t.name && t.name.toLowerCase().includes(searchTerm)) ||
+                    (String(t.id).toLowerCase().includes(searchTerm))
+                );
+            }
+            
+            // Apply subject filter
+            const subjectFilter = document.getElementById('filterTeacherSubjectTable').value;
+            if (subjectFilter !== 'all' && filteredTeachers.length > 0) {
+                filteredTeachers = filteredTeachers.filter(t =>
+                    t.subjects && t.subjects.includes(subjectFilter)
+                );
+            }
+            
+            if (filteredTeachers.length === 0) {
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            
+            filteredTeachers.forEach((teacher) => {
+                try {
+                    const initial = teacher.name.charAt(0).toUpperCase();
+                    const subjectsList = (teacher.subjects && teacher.subjects.length > 0) ? teacher.subjects.join(', ') : 'No subjects assigned';
+                    const teacherId = String(teacher.id || '');
+                    
+                    const card = document.createElement("div");
+                    card.style.cssText = `
+                        display: flex;
+                        flex-direction: row;
+                        align-items: center;
+                        justify-content: space-between;
+                        gap: 24px;
+                        padding: 24px;
+                        border-radius: 16px;
+                        background: rgba(15, 22, 41, 0.8);
+                        border: 1px solid rgba(255, 255, 255, 0.08);
+                        transition: all 0.3s ease;
+                        cursor: pointer;
+                        position: relative;
+                        overflow: hidden;
+                        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+                    `;
+
+                    card.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 16px; flex: 1; min-width: 0;">
+                            <div style="position: relative; flex-shrink: 0;">
+                                <div style="
+                                    width: 52px;
+                                    height: 52px;
+                                    border-radius: 50%;
+                                    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+                                    padding: 2px;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                ">
+                                    <div style="
+                                        width: 100%;
+                                        height: 100%;
+                                        border-radius: 50%;
+                                        background: #070B14;
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        color: white;
+                                        font-weight: 700;
+                                        font-size: 18px;
+                                    ">
+                                        ${initial}
+                                    </div>
+                                </div>
+                                <div style="
+                                    position: absolute;
+                                    bottom: 0;
+                                    right: 0;
+                                    width: 14px;
+                                    height: 14px;
+                                    border-radius: 50%;
+                                    background: #10b981;
+                                    border: 2px solid #070B14;
+                                    box-shadow: 0 0 6px rgba(16, 185, 129, 0.7);
+                                "></div>
+                            </div>
+
+                            <div style="display: flex; flex-direction: column; gap: 6px; min-width: 0; flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                    <h4 style="
+                                        margin: 0;
+                                        font-size: 15px;
+                                        font-weight: 700;
+                                        color: rgba(241, 245, 249, 1);
+                                        white-space: nowrap;
+                                        overflow: hidden;
+                                        text-overflow: ellipsis;
+                                    ">
+                                        ${teacher.name || 'Unknown'}
+                                    </h4>
+                                    <span style="
+                                        padding: 3px 9px;
+                                        background: rgba(99, 102, 241, 0.15);
+                                        color: rgba(129, 140, 248, 1);
+                                        border: 1px solid rgba(99, 102, 241, 0.3);
+                                        border-radius: 5px;
+                                        font-size: 9px;
+                                        font-weight: 700;
+                                        text-transform: uppercase;
+                                        display: flex;
+                                        align-items: center;
+                                        gap: 3px;
+                                        white-space: nowrap;
+                                        letter-spacing: 0.4px;
+                                    ">
+                                        <i class="fas fa-database" style="font-size: 8px;"></i>
+                                        Database
+                                    </span>
+                                </div>
+                                
+                                <p style="
+                                    margin: 0;
+                                    font-size: 12px;
+                                    font-weight: 500;
+                                    color: rgba(148, 163, 184, 1);
+                                    display: flex;
+                                    align-items: center;
+                                    flex-wrap: wrap;
+                                    gap: 8px;
+                                ">
+                                    <span style="
+                                        color: rgba(226, 232, 240, 0.9);
+                                        font-family: 'Courier New', monospace;
+                                        font-size: 10px;
+                                        font-weight: 600;
+                                        background: rgba(255, 255, 255, 0.08);
+                                        padding: 3px 7px;
+                                        border-radius: 3px;
+                                        white-space: nowrap;
+                                    ">ID: ${teacherId}</span>
+                                    <span style="color: rgba(113, 119, 144, 0.8);">&bull;</span>
+                                    <span style="color: rgba(148, 163, 184, 0.95);">${subjectsList.length > 30 ? subjectsList.substring(0, 30) + '...' : subjectsList}</span>
+                                    <span style="color: rgba(113, 119, 144, 0.8);">&bull;</span>
+                                    <span style="color: rgba(129, 140, 248, 0.85); font-weight: 600;">Teacher</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div style="
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                            flex-shrink: 0;
+                        ">
+                            <button onclick="event.stopPropagation(); openTeacherProfileModal('${teacherId.replace(/'/g, "\\'")}')" style="
+                                background: rgba(99, 102, 241, 0.12);
+                                border: 1px solid rgba(99, 102, 241, 0.25);
+                                color: rgba(129, 140, 248, 0.95);
+                                padding: 7px 14px;
+                                border-radius: 8px;
+                                font-size: 10px;
+                                font-weight: 700;
+                                cursor: pointer;
+                                transition: all 0.25s ease;
+                                display: flex;
+                                align-items: center;
+                                gap: 5px;
+                                text-transform: uppercase;
+                                letter-spacing: 0.5px;
+                                white-space: nowrap;
+                            " onmouseover="this.style.background='rgba(99, 102, 241, 0.25)'; this.style.borderColor='rgba(99, 102, 241, 0.4)';" onmouseout="this.style.background='rgba(99, 102, 241, 0.12)'; this.style.borderColor='rgba(99, 102, 241, 0.25)';">
+                                <i class="fas fa-eye" style="font-size: 9px;"></i>
+                                VIEW
+                            </button>
+                        </div>
+                    `;
+
+                    // Professional hover effect
+                    card.addEventListener('mouseenter', function() {
+                        this.style.borderColor = 'rgba(99, 102, 241, 0.3)';
+                        this.style.background = 'rgba(20, 28, 48, 0.9)';
+                        this.style.boxShadow = '0 8px 25px rgba(99, 102, 241, 0.15)';
+                    });
+                    
+                    card.addEventListener('mouseleave', function() {
+                        this.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+                        this.style.background = 'rgba(15, 22, 41, 0.8)';
+                        this.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.2)';
+                    });
+
+                    // Click to open profile
+                    card.addEventListener('click', function(e) {
+                        if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+                            return;
+                        }
+                        openTeacherProfileModal(teacherId, teacher.name);
+                    });
+
+                    container.appendChild(card);
+                } catch (error) {
+                    console.error('Error rendering teacher card:', error);
+                }
+            });
+        }
+
         let sortDirectionTeachers = {};
         function renderTeacherTable() {
             const body = document.getElementById("teacherTableBody");
@@ -62724,7 +63055,11 @@ function renderAttendance() {
         }
 
         function filterTeacherTable() {
-            renderTeacherTable();
+            if (typeof renderTeacherCardsView === 'function') {
+                renderTeacherCardsView();
+            } else {
+                renderTeacherTable();
+            }
         }
 
         function sortTableTeachers(column) {
