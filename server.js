@@ -300,6 +300,441 @@ app.post('/api/verify-otp', async (req, res) => {
 });
 
 // ============================================================
+// STUDENTS API ENDPOINTS
+// ============================================================
+
+// Initialize students table if not exists
+async function initStudentsTable() {
+    try {
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS students (
+                id SERIAL PRIMARY KEY,
+                usn VARCHAR(20) UNIQUE NOT NULL,
+                name VARCHAR(100) NOT NULL,
+                email VARCHAR(100),
+                phone VARCHAR(20),
+                dob DATE,
+                gender VARCHAR(10),
+                branch VARCHAR(50),
+                semester INTEGER,
+                batch_year INTEGER,
+                year VARCHAR(10),
+                stream VARCHAR(50),
+                college VARCHAR(100),
+                photo_url TEXT,
+                auth JSONB,
+                marks JSONB,
+                attendance JSONB,
+                created_at TIMESTAMP DEFAULT NOW(),
+                updated_at TIMESTAMP DEFAULT NOW()
+            )
+        `);
+        console.log('✅ Students table ready');
+    } catch (err) {
+        console.error('❌ Students table initialization error:', err.message);
+    }
+}
+
+// Initialize settings table for syncing app data
+async function initSettingsTable() {
+    try {
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS app_settings (
+                key VARCHAR(100) PRIMARY KEY,
+                value JSONB,
+                created_at TIMESTAMP DEFAULT NOW(),
+                updated_at TIMESTAMP DEFAULT NOW()
+            )
+        `);
+        console.log('✅ App settings table ready');
+    } catch (err) {
+        console.error('❌ App settings table initialization error:', err.message);
+    }
+}
+
+initStudentsTable();
+initSettingsTable();
+
+// GET all students
+app.get('/api/students', async (req, res) => {
+    try {
+        console.log('📖 GET /api/students');
+        const result = await pool.query('SELECT * FROM students ORDER BY name');
+        res.json({ success: true, data: result.rows, count: result.rows.length });
+    } catch (e) {
+        console.error('❌ GET /api/students ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// GET single student by USN
+app.get('/api/students/:usn', async (req, res) => {
+    try {
+        console.log('📖 GET /api/students/' + req.params.usn);
+        const result = await pool.query('SELECT * FROM students WHERE usn = $1', [req.params.usn]);
+        if (result.rows.length === 0) {
+            return res.status(404).json({ success: false, error: 'Student not found' });
+        }
+        res.json({ success: true, data: result.rows[0] });
+    } catch (e) {
+        console.error('❌ GET /api/students/:usn ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// POST - Add new student
+app.post('/api/students', async (req, res) => {
+    try {
+        console.log('📝 POST /api/students - Body:', req.body);
+        
+        const { 
+            usn, name, email, phone, dob, gender, branch, semester, 
+            batch_year, year, stream, college, photo_url, auth, marks, attendance 
+        } = req.body;
+        
+        if (!usn || !name) {
+            return res.status(400).json({ success: false, error: 'USN and name are required' });
+        }
+        
+        const query = `
+            INSERT INTO students 
+            (usn, name, email, phone, dob, gender, branch, semester, batch_year, year, stream, college, photo_url, auth, marks, attendance) 
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) 
+            RETURNING *
+        `;
+        
+        const values = [
+            usn.trim(),
+            name.trim(),
+            email || null,
+            phone || null,
+            dob || null,
+            gender || null,
+            branch || null,
+            semester || null,
+            batch_year || null,
+            year || null,
+            stream || null,
+            college || null,
+            photo_url || null,
+            auth || null,
+            marks || {},
+            attendance || {}
+        ];
+        
+        console.log('🔄 Running INSERT query...');
+        const result = await pool.query(query, values);
+        const savedStudent = result.rows[0];
+        
+        console.log('✅ Student saved! USN:', savedStudent.usn);
+        res.status(201).json({ 
+            success: true, 
+            data: savedStudent,
+            message: 'Student saved successfully'
+        });
+        
+    } catch (e) {
+        console.error('❌ POST /api/students ERROR:', e.message, e.code);
+        if (e.code === '23505') {
+            return res.status(409).json({ 
+                success: false, 
+                error: 'USN already exists'
+            });
+        }
+        res.status(500).json({ 
+            success: false, 
+            error: e.message,
+            code: e.code
+        });
+    }
+});
+
+// PUT - Update student
+app.put('/api/students/:usn', async (req, res) => {
+    try {
+        console.log('📝 PUT /api/students/' + req.params.usn);
+        const { 
+            name, email, phone, dob, gender, branch, semester, 
+            batch_year, year, stream, college, photo_url, auth, marks, attendance 
+        } = req.body;
+        
+        const query = `
+            UPDATE students 
+            SET name=$1, email=$2, phone=$3, dob=$4, gender=$5, branch=$6, semester=$7, batch_year=$8, 
+                year=$9, stream=$10, college=$11, photo_url=$12, auth=$13, marks=$14, attendance=$15, updated_at=NOW()
+            WHERE usn=$16 
+            RETURNING *
+        `;
+        
+        const result = await pool.query(query, [
+            name || null, email || null, phone || null, dob || null, gender || null, 
+            branch || null, semester || null, batch_year || null, year || null, 
+            stream || null, college || null, photo_url || null, auth || null, 
+            marks || {}, attendance || {}, req.params.usn
+        ]);
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ success: false, error: 'Student not found' });
+        }
+        
+        console.log('✅ Student updated! USN:', req.params.usn);
+        res.json({ success: true, data: result.rows[0] });
+    } catch (e) {
+        console.error('❌ PUT /api/students ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// DELETE - Remove student
+app.delete('/api/students/:usn', async (req, res) => {
+    try {
+        console.log('🗑️  DELETE /api/students/' + req.params.usn);
+        await pool.query('DELETE FROM students WHERE usn=$1', [req.params.usn]);
+        res.json({ success: true, message: 'Student deleted' });
+    } catch (e) {
+        console.error('❌ DELETE /api/students ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// ============================================================
+// SETTINGS API ENDPOINTS (for syncing app data)
+// ============================================================
+
+// GET setting by key
+app.get('/api/settings/:key', async (req, res) => {
+    try {
+        console.log('📖 GET /api/settings/' + req.params.key);
+        const result = await pool.query('SELECT value FROM app_settings WHERE key = $1', [req.params.key]);
+        
+        if (result.rows.length === 0) {
+            return res.json({ success: false, data: null });
+        }
+        
+        res.json({ success: true, data: result.rows[0].value });
+    } catch (e) {
+        console.error('❌ GET /api/settings ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// PUT setting by key (create or update)
+app.put('/api/settings/:key', async (req, res) => {
+    try {
+        console.log('💾 PUT /api/settings/' + req.params.key);
+        const { value } = req.body;
+        
+        const result = await pool.query(
+            `INSERT INTO app_settings (key, value) VALUES ($1, $2) 
+             ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW() 
+             RETURNING *`,
+            [req.params.key, typeof value === 'string' ? value : JSON.stringify(value)]
+        );
+        
+        console.log('✅ Setting saved! Key:', req.params.key);
+        res.json({ success: true, data: result.rows[0] });
+    } catch (e) {
+        console.error('❌ PUT /api/settings ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// ============================================================
+// MAINTENANCE ENDPOINTS (for fixing data issues)
+// ============================================================
+
+// SIMPLE - Populate years and return all students
+app.get('/api/students/fix/populate-years', async (req, res) => {
+    try {
+        console.log('🔧 GET /api/students/fix/populate-years - Populating missing years...');
+        
+        // Step 1: Assign by semester if available
+        await pool.query(`
+            UPDATE students 
+            SET year = 
+                CASE 
+                    WHEN semester = 1 OR semester = 2 THEN '1st Year'
+                    WHEN semester = 3 OR semester = 4 THEN '2nd Year'
+                    WHEN semester = 5 OR semester = 6 THEN '3rd Year'
+                    ELSE NULL
+                END
+            WHERE (year IS NULL OR year = '') AND semester IS NOT NULL
+        `);
+        
+        // Step 2: For remaining students with no year, assign by distribution
+        const remaining = await pool.query(`SELECT COUNT(*) as ct FROM students WHERE year IS NULL OR year = ''`);
+        const remainCount = remaining.rows[0].ct;
+        
+        if (remainCount > 0) {
+            console.log(`  - ${remainCount} students still need years, assigning evenly...`);
+            
+            // Get the IDs of students needing years
+            const ids = await pool.query(`SELECT id FROM students WHERE year IS NULL OR year = '' ORDER BY id`);
+            const perGroup = Math.ceil(ids.rows.length / 3);
+            
+            for (let i = 0; i < ids.rows.length; i++) {
+                let yr = '3rd Year';
+                if (i < perGroup) yr = '1st Year';
+                else if (i < perGroup * 2) yr = '2nd Year';
+                
+                await pool.query(`UPDATE students SET year = $1 WHERE id = $2`, [yr, ids.rows[i].id]);
+            }
+        }
+        
+        // Get all students with their year info
+        const result = await pool.query('SELECT * FROM students ORDER BY name');
+        
+        // Calculate distribution
+        const dist = { '1st Year': 0, '2nd Year': 0, '3rd Year': 0, other: 0 };
+        result.rows.forEach(s => {
+            if (s.year === '1st Year') dist['1st Year']++;
+            else if (s.year === '2nd Year') dist['2nd Year']++;
+            else if (s.year === '3rd Year') dist['3rd Year']++;
+            else dist.other++;
+        });
+        
+        console.log('✅ Years populated:', dist);
+        res.json({ 
+            success: true, 
+            data: result.rows,
+            distribution: dist,
+            total: result.rows.length
+        });
+    } catch (e) {
+        console.error('❌ Populate years ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// Backward compat endpoint
+app.post('/api/maintenance/populate-years', async (req, res) => {
+    try {
+        // Step 1: Assign by semester
+        await pool.query(`
+            UPDATE students 
+            SET year = 
+                CASE 
+                    WHEN semester = 1 OR semester = 2 THEN '1st Year'
+                    WHEN semester = 3 OR semester = 4 THEN '2nd Year'
+                    WHEN semester = 5 OR semester = 6 THEN '3rd Year'
+                    ELSE NULL
+                END
+            WHERE (year IS NULL OR year = '') AND semester IS NOT NULL
+        `);
+        
+        // Step 2: Assign remaining by distribution
+        const remaining = await pool.query(`SELECT COUNT(*) as ct FROM students WHERE year IS NULL OR year = ''`);
+        const ct = remaining.rows[0].ct;
+        
+        if (ct > 0) {
+            const ids = await pool.query(`SELECT id FROM students WHERE year IS NULL OR year = '' ORDER BY id`);
+            const perG = Math.ceil(ids.rows.length / 3);
+            
+            for (let i = 0; i < ids.rows.length; i++) {
+                const yr = i < perG ? '1st Year' : (i < perG * 2 ? '2nd Year' : '3rd Year');
+                await pool.query(`UPDATE students SET year = $1 WHERE id = $2`, [yr, ids.rows[i].id]);
+            }
+        }
+        
+        const result = await pool.query(`
+            SELECT year, COUNT(*) as count FROM students WHERE year IS NOT NULL AND year != '' GROUP BY year
+        `);
+        
+        const dist = {};
+        result.rows.forEach(row => { dist[row.year] = row.count; });
+        
+        res.json({ 
+            success: true, 
+            distribution: dist,
+            updated: true
+        });
+    } catch (e) {
+        console.error('❌ POST populate-years ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// Get year distribution statistics
+app.get('/api/students/stats/year-distribution', async (req, res) => {
+    try {
+        console.log('📊 GET /api/students/stats/year-distribution');
+        
+        const result = await pool.query(`
+            SELECT 
+                year, 
+                COUNT(*) as count,
+                branch
+            FROM students
+            WHERE year IS NOT NULL AND year != ''
+            GROUP BY year, branch
+            ORDER BY 
+                CASE 
+                    WHEN year = '1st Year' THEN 1
+                    WHEN year = '2nd Year' THEN 2
+                    WHEN year = '3rd Year' THEN 3
+                    ELSE 4
+                END,
+                branch
+        `);
+        
+        const totalByYear = await pool.query(`
+            SELECT year, COUNT(*) as count FROM students 
+            WHERE year IS NOT NULL AND year != ''
+            GROUP BY year
+            ORDER BY 
+                CASE 
+                    WHEN year = '1st Year' THEN 1
+                    WHEN year = '2nd Year' THEN 2
+                    WHEN year = '3rd Year' THEN 3
+                    ELSE 4
+                END
+        `);
+        
+        const total = totalByYear.rows.reduce((sum, row) => sum + row.count, 0);
+        const missingYears = await pool.query(`SELECT COUNT(*) as count FROM students WHERE year IS NULL OR year = ''`);
+        
+        res.json({ 
+            success: true, 
+            byBranch: result.rows,
+            byYear: totalByYear.rows,
+            total: total,
+            missingYears: missingYears.rows[0].count,
+            allStudentsCount: await pool.query(`SELECT COUNT(*) as count FROM students`).then(r => r.rows[0].count)
+        });
+    } catch (e) {
+        console.error('❌ GET year-distribution ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// Debug endpoint - show first few students
+app.get('/api/debug/students-sample', async (req, res) => {
+    try {
+        console.log('🔍 GET /api/debug/students-sample');
+        
+        const result = await pool.query(`
+            SELECT id, usn, name, year, semester, batch_year, branch 
+            FROM students 
+            LIMIT 10
+        `);
+        
+        const yearCounts = await pool.query(`
+            SELECT year, COUNT(*) as count FROM students 
+            GROUP BY year
+        `);
+        
+        res.json({ 
+            success: true,
+            sample: result.rows,
+            yearCounts: yearCounts.rows
+        });
+    } catch (e) {
+        console.error('❌ GET debug/students-sample ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// ============================================================
 // STATIC FILES & SPA FALLBACK (AFTER ALL API ROUTES!)
 // ============================================================
 
