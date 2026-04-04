@@ -62490,6 +62490,15 @@ function renderAttendance() {
                         this.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.2)';
                     });
 
+                    // Click handler - open modal with animation when card is clicked
+                    card.addEventListener('click', function(e) {
+                        // Don't trigger if clicking on buttons
+                        if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+                            return;
+                        }
+                        openTeacherProfileModal(teacherId, t.name);
+                    });
+
                     container.appendChild(card);
                     console.log('[DEBUG] Card appended for teacher:', t.name);
                 } catch (itemError) {
