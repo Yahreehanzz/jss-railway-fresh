@@ -38294,9 +38294,6 @@ Easily access and review students' academic performance here. This section provi
 <div class="dashboard-pie-chart-card">
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
   <h3 style="margin: 0;">Student Distribution by Year</h3>
-  <button onclick="refreshDashboardData()" style="padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">
-    <i class="fas fa-sync-alt"></i> Refresh Data
-  </button>
 </div>
 <div class="chart-toggle-container">
 <div class="chart-toggle" id="chartToggleTrack">
@@ -54988,28 +54985,6 @@ function restoreTeacherZonePhoto() {
 
 
         // --- Student Dashboard Functions ---
-        async function refreshDashboardData() {
-            try {
-                // Call the fix endpoint to populate years and get students
-                const res = await fetch(`${API_BASE}/students/fix/populate-years`);
-                const data = await res.json();
-                
-                if (data.success) {
-                    students = data.data;
-                    localStorage.setItem('students', JSON.stringify(students));
-                    
-                    // Update UI with counts
-                    document.getElementById('year1Count').textContent = data.distribution['1st Year'] || 0;
-                    document.getElementById('year2Count').textContent = data.distribution['2nd Year'] || 0;
-                    document.getElementById('year3Count').textContent = data.distribution['3rd Year'] || 0;
-                    
-                    alert('✅ Data refreshed! Years populated.');
-                    renderDashboard();
-                }
-            } catch (err) {
-                console.error('Error:', err);
-            }
-        }
         
         async function renderDashboard() {
             // Load fresh students from API
