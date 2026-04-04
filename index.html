@@ -68787,7 +68787,6 @@ function saveApplicationSettings() {
 
         async function loadStudentsData() {
     try {
-        // ALWAYS fetch fresh data from Railway instead of using localStorage cache
         console.log('Loading fresh students from Railway API...');
         const response = await fetch(`${API_BASE}/students`, {
             method: 'GET',
@@ -68800,24 +68799,9 @@ function saveApplicationSettings() {
                 students = result.data;
                 console.log(`✓ Loaded ${students.length} students from Railway`);
                 
-                // Check if years are populated
+                // Check years population
                 const withYears = students.filter(s => s.year && s.year !== '').length;
-                console.log(`  - Students with year: ${withYears}/${students.length}`);
-                
-                // If no years, auto-populate from the fix endpoint
-                if (withYears === 0 && students.length > 0) {
-                    console.log('  - No year data. Calling fix endpoint...');
-                    try {
-                        const fixRes = await fetch(`${API_BASE}/students/fix/populate-years`);
-                        const fixData = await fixRes.json();
-                        if (fixData.success) {
-                            students = fixData.data;
-                            console.log(`  - ✓ Years populated: `, fixData.distribution);
-                        }
-                    } catch (fixErr) {
-                        console.warn('  - Could not auto-populate:', fixErr.message);
-                    }
-                }
+                console.log(`  ✓ Students with year data: ${withYears}/${students.length}`);
                 
                 localStorage.setItem('students', JSON.stringify(students));
                 return;

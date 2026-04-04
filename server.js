@@ -359,6 +359,39 @@ initSettingsTable();
 app.get('/api/students', async (req, res) => {
     try {
         console.log('📖 GET /api/students');
+        
+        // Auto-populate missing years BEFORE returning
+        // Step 1: Assign by semester if available
+        await pool.query(`
+            UPDATE students 
+            SET year = 
+                CASE 
+                    WHEN semester = 1 OR semester = 2 THEN '1st Year'
+                    WHEN semester = 3 OR semester = 4 THEN '2nd Year'
+                    WHEN semester = 5 OR semester = 6 THEN '3rd Year'
+                    ELSE NULL
+                END
+            WHERE (year IS NULL OR year = '') AND semester IS NOT NULL
+        `);
+        
+        // Step 2: For remaining students with no year, assign by distribution
+        const remaining = await pool.query(`SELECT COUNT(*) as ct FROM students WHERE year IS NULL OR year = ''`);
+        const remainCount = remaining.rows[0].ct;
+        
+        if (remainCount > 0) {
+            const ids = await pool.query(`SELECT id FROM students WHERE year IS NULL OR year = '' ORDER BY id`);
+            const perGroup = Math.ceil(ids.rows.length / 3);
+            
+            for (let i = 0; i < ids.rows.length; i++) {
+                let yr = '3rd Year';
+                if (i < perGroup) yr = '1st Year';
+                else if (i < perGroup * 2) yr = '2nd Year';
+                
+                await pool.query(`UPDATE students SET year = $1 WHERE id = $2`, [yr, ids.rows[i].id]);
+            }
+        }
+        
+        // Now fetch all students with years populated
         const result = await pool.query('SELECT * FROM students ORDER BY name');
         res.json({ success: true, data: result.rows, count: result.rows.length });
     } catch (e) {
