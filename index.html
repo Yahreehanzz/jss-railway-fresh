@@ -81684,6 +81684,8 @@ Govt. Polytechnic, Beelagi`;
         // Populate data
         if (type === 'college') {
             setTimeout(() => populateCollegeFeeList(), 100);
+        } else if (type === 'general') {
+            setTimeout(() => populateGeneralFeeList(), 100);
         }
         
         console.log('? Professional modal created');
@@ -81852,6 +81854,168 @@ Govt. Polytechnic, Beelagi`;
         a.click();
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
+    }
+
+    // Populate General Fee Courses List in Modal
+    async function populateGeneralFeeList() {
+        const listContainer = document.getElementById('general-fee-list');
+        const countElement = document.getElementById('general-students-count');
+        if (!listContainer) return;
+
+        try {
+            // Determine API endpoint
+            const _API = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+                ? `http://localhost:${window.location.port || 3000}/api`
+                : `${window.location.protocol}//${window.location.host}/api`;
+            
+            const response = await fetch(_API + '/settings/general_fee_courses');
+            let courses = [];
+            
+            if (response.ok) {
+                const data = await response.json();
+                courses = Array.isArray(data.data) ? data.data : [];
+            } else {
+                const cached = localStorage.getItem('fmGeneralFee_courses');
+                courses = cached ? JSON.parse(cached) : [];
+            }
+            
+            if (!courses || courses.length === 0) {
+                if (countElement) {
+                    countElement.innerHTML = '<i class="fas fa-info-circle" style="color: #999; margin-right: 6px;"></i>No Courses Available';
+                }
+                listContainer.innerHTML = `
+                    <div style="text-align:center; padding:40px 20px; color:#999;">
+                        <div style="font-size:48px; margin-bottom:12px;">💰</div>
+                        <h3 style="margin:0 0 8px 0; font-size:16px; color:#666;">No Courses Uploaded</h3>
+                        <p style="margin:0; font-size:13px;">No general fee courses have been uploaded yet</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Update count
+            if (countElement) {
+                countElement.innerHTML = `<i class="fas fa-check-circle" style="color: #0066cc; margin-right: 6px;"></i>${courses.length} Course${courses.length !== 1 ? 's' : ''} Found`;
+            }
+            
+            // Clear loading state and build course cards
+            listContainer.innerHTML = '';
+            const fmt = new Intl.NumberFormat('en-IN');
+            
+            courses.forEach((course, idx) => {
+                const semSuffix = ['','st','nd','rd','th','th','th'];
+                const semLabel = course.semester ? `${course.semester}${semSuffix[course.semester] || 'th'} Semester` : 'General';
+                
+                const card = document.createElement('div');
+                card.style.cssText = `
+                    background: rgba(255, 255, 255, 0.6);
+                    border: 1px solid #e5e7eb;
+                    border-radius: 16px;
+                    padding: 16px;
+                    display: flex;
+                    align-items: center;
+                    gap: 14px;
+                    cursor: pointer;
+                    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+                    animation: fadeInUp 0.4s ease-out ${idx * 0.08}s both;
+                `;
+                
+                card.onmouseover = function() {
+                    this.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
+                    this.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+                    this.style.transform = 'translateY(-2px)';
+                };
+                
+                card.onmouseout = function() {
+                    this.style.backgroundColor = 'rgba(255, 255, 255, 0.6)';
+                    this.style.boxShadow = 'none';
+                    this.style.transform = 'translateY(0)';
+                };
+                
+                card.innerHTML = `
+                    <!-- Icon Circle -->
+                    <div style="
+                        width: 50px;
+                        height: 50px;
+                        border-radius: 50%;
+                        background: linear-gradient(135deg, #003366, #0066cc);
+                        border: 2px solid white;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: white;
+                        font-size: 20px;
+                        flex-shrink: 0;
+                        box-shadow: 0 2px 8px rgba(0, 51, 102, 0.2);
+                    ">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    
+                    <!-- Course Info -->
+                    <div style="flex: 1; min-width: 0;">
+                        <h3 style="
+                            margin: 0 0 4px 0;
+                            font-size: 14px;
+                            font-weight: 600;
+                            color: #1f2937;
+                            text-overflow: ellipsis;
+                            overflow: hidden;
+                            white-space: nowrap;
+                        ">
+                            ${course.name || 'General Course'}
+                        </h3>
+                        <p style="
+                            margin: 0 0 4px 0;
+                            font-size: 11px;
+                            color: #6b7280;
+                            text-overflow: ellipsis;
+                            overflow: hidden;
+                            white-space: nowrap;
+                        ">
+                            ${course.about || 'No description available'}
+                        </p>
+                        <span style="display:inline-block; background:#f0f4ff; color:#003366; padding:3px 8px; border-radius:4px; font-size:10px; font-weight:600;">
+                            <i class="fas fa-layer-group"></i> ${semLabel}
+                        </span>
+                    </div>
+                    
+                    <!-- Amount -->
+                    <div style="
+                        text-align: right;
+                        flex-shrink: 0;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: flex-end;
+                        gap: 4px;
+                    ">
+                        <div style="font-size:11px; color:#999; font-weight:500;">Course Fee</div>
+                        <div style="
+                            font-size: 20px;
+                            font-weight: 800;
+                            color: #003366;
+                        ">
+                            ₹${fmt.format(course.amount || 0)}
+                        </div>
+                        <div style="font-size:9px; color:#ccc;">/year</div>
+                    </div>
+                `;
+                
+                listContainer.appendChild(card);
+            });
+            
+        } catch (error) {
+            console.error('Error loading general fee courses:', error);
+            if (countElement) {
+                countElement.innerHTML = '<i class="fas fa-exclamation-circle" style="color: #d32f2f; margin-right: 6px;"></i>Error Loading';
+            }
+            listContainer.innerHTML = `
+                <div style="text-align:center; padding:40px 20px; color:#d32f2f;">
+                    <i class="fas fa-exclamation-circle" style="font-size:32px;"></i>
+                    <p style="margin-top:12px; font-weight:500;">Error loading courses</p>
+                    <p style="font-size:12px; color:#999;">Please refresh the page and try again</p>
+                </div>
+            `;
+        }
     }
     
     // Simple handler for college student card clicks
