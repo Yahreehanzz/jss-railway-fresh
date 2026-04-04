@@ -771,14 +771,65 @@ app.get('/api/debug/students-sample', async (req, res) => {
             GROUP BY year
         `);
         
+        // Check if there are any NULL years
+        const nullCount = await pool.query(`SELECT COUNT(*) as ct FROM students WHERE year IS NULL OR year = ''`);
+        
         res.json({ 
             success: true,
             sample: result.rows,
-            yearCounts: yearCounts.rows
+            yearCounts: yearCounts.rows,
+            nullYearsCount: nullCount.rows[0].ct,
+            totalStudents: (await pool.query('SELECT COUNT(*) as ct FROM students')).rows[0].ct
         });
     } catch (e) {
         console.error('❌ GET debug/students-sample ERROR:', e.message);
         res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// Force populate years endpoint - for emergencies
+app.get('/api/debug/force-populate', async (req, res) => {
+    try {
+        console.log('🔴 FORCE POPULATE - Running year assignment...');
+        
+        // Get all students with semester
+        const students = await pool.query(`SELECT id, semester FROM students WHERE semester IS NOT NULL ORDER BY id`);
+        console.log(`  Found ${students.rows.length} students with semester values`);
+        
+        let count1st = 0, count2nd = 0, count3rd = 0;
+        
+        // Assign years based on semester
+        for (const student of students.rows) {
+            let yr = '3rd Year';
+            if (student.semester <= 2) {
+                yr = '1st Year';
+                count1st++;
+            } else if (student.semester <= 4) {
+                yr = '2nd Year';
+                count2nd++;
+            } else {
+                yr = '3rd Year';
+                count3rd++;
+            }
+            
+            await pool.query(`UPDATE students SET year = $1 WHERE id = $2`, [yr, student.id]);
+        }
+        
+        console.log(`  ✓ Assigned: 1st=${count1st}, 2nd=${count2nd}, 3rd=${count3rd}`);
+        
+        // Verify
+        const verify = await pool.query(`
+            SELECT year, COUNT(*) as ct FROM students GROUP BY year
+        `);
+        
+        res.json({ 
+            success: true,
+            assigned: { '1st Year': count1st, '2nd Year': count2nd, '3rd Year': count3rd },
+            verified: verify.rows 
+        });
+    } catch (e) {
+        console.error('❌ FORCE POPULATE ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message, stack: e.stack });
     }
 });
 
