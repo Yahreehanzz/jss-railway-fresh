@@ -44126,6 +44126,29 @@ function restoreTeacherZonePhoto() {
     to { opacity: 1; }
 }
 
+@keyframes fadeOutModal {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes slideInPopup {
+    from { transform: translateY(30px) scale(0.95); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+@keyframes slideOutPopup {
+    from { transform: translateY(0) scale(1); opacity: 1; }
+    to { transform: translateY(30px) scale(0.95); opacity: 0; }
+}
+
+#teacherProfileOverlay.fade-out {
+    animation: fadeOutModal 0.4s ease-out forwards !important;
+}
+
+#teacherProfileOverlay.fade-out .prof-popup-container {
+    animation: slideOutPopup 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
+}
+
 .prof-popup-container {
     background: white;
     border-radius: 1.5rem;
@@ -44137,11 +44160,6 @@ function restoreTeacherZonePhoto() {
     overflow: hidden;
     display: flex;
     animation: slideInPopup 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-@keyframes slideInPopup {
-    from { transform: translateY(30px) scale(0.95); opacity: 0; }
-    to { transform: translateY(0) scale(1); opacity: 1; }
 }
 
 /* Left Sidebar */
@@ -63538,11 +63556,18 @@ function renderAttendance() {
                     }
                 } catch (e) { console.warn('Subjects:', e); }
 
-                // Show modal
+                // Show modal with fade-in animation
                 try {
                     const overlay = document.getElementById("teacherProfileOverlay");
-                    if (overlay) overlay.classList.remove("hidden");
-                    else console.error('Overlay not found');
+                    if (overlay) {
+                        // Remove any fade-out class first
+                        overlay.classList.remove("hidden", "fade-out");
+                        // Trigger reflow to ensure animation plays
+                        overlay.offsetHeight;
+                        hideLoader();
+                    } else {
+                        console.error('Overlay not found');
+                    }
                 } catch (e) { console.error('Modal show:', e); }
                 
                 // Reset to personal tab
@@ -63633,7 +63658,16 @@ function renderAttendance() {
         }
 
         function closeTeacherProfile() {
-            document.getElementById("teacherProfileOverlay").classList.add("hidden");
+            const overlay = document.getElementById("teacherProfileOverlay");
+            if (overlay) {
+                // Add fade-out animation
+                overlay.classList.add("fade-out");
+                // Wait for animation to complete, then hide
+                setTimeout(() => {
+                    overlay.classList.add("hidden");
+                    overlay.classList.remove("fade-out");
+                }, 400);
+            }
             activeTeacherId = null;
             adminProfileEditMode = false;
             // Reset to view mode
