@@ -78973,7 +78973,7 @@ function openStudentFeeModal(student) {
 
 function updateFacultyFeeStats(students = facultyFeeData) {
     const totalStudents = students.length;
-    const pendingCount = students.filter(s => s.status === 'pending').length;
+    const pendingCount = students.filter(s => s.status === 'pending' || s.status === 'partial').length;
     const paidCount = students.filter(s => s.status === 'paid').length;
     const totalAmount = students.reduce((sum, s) => sum + s.pending, 0);
     
