@@ -36387,7 +36387,7 @@ body.dark-mode .fmcb-change-btn { color: #a5b4fc; border-color: rgba(165,180,252
 
 </style>
 </head>
-<body>
+?0<body>
 
 <!-- -- OFFLINE SCREEN -- -->
 <div id="offlineScreen" style="display:none; position:fixed; inset:0; z-index:99999; background:#0a0f1e; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; align-items:center; justify-content:center; flex-direction:column;">
@@ -39626,7 +39626,7 @@ Easily access and review students' academic performance here. This section provi
                   <i class="fas fa-rupee-sign"></i>
               </div>
               <div class="fee-stat-content">
-                  <h3 id="total-pending-amount">?0</h3>
+                  <h3 id="total-pending-amount">0</h3>
                   <p>Total Pending Amount</p>
               </div>
           </div>
@@ -81560,6 +81560,26 @@ Govt. Polytechnic, Beelagi`;
                 .fee-management-modal.active .fee-modal-content {
                     transform: scale(1);
                 }
+                @keyframes slideDownMenu {
+                    from {
+                        opacity: 0;
+                        transform: translateY(-8px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+                @keyframes fadeInUp {
+                    from {
+                        opacity: 0;
+                        transform: translateY(12px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
             `;
             document.head.appendChild(style);
         }
@@ -81639,27 +81659,87 @@ Govt. Polytechnic, Beelagi`;
                 </div>
             </div>
 
-            <div style="background: rgba(255,255,255,0.4); padding: 12px 24px; flex-shrink: 0; border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center;">
+            <div style="background: rgba(255,255,255,0.4); padding: 12px 24px; flex-shrink: 0; border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; gap: 12px;">
                 <span id="${type}-students-count" style="font-size: 13px; color: #6b7280; font-weight: 500;">Loading...</span>
-                <button onclick="exportFeeData('${type}')" style="
-                    background: transparent;
-                    border: 1px solid rgba(0,0,0,0.2);
-                    padding: 6px 14px;
-                    border-radius: 6px;
-                    font-size: 12px;
-                    font-weight: 600;
-                    color: #374151;
-                    cursor: pointer;
-                    display: flex;
-                    align-items: center;
-                    gap: 6px;
-                    transition: all 0.2s ease;
-                "
-                onmouseover="this.style.background='rgba(0,0,0,0.05)'; this.style.borderColor='rgba(0,0,0,0.3)';"
-                onmouseout="this.style.background='transparent'; this.style.borderColor='rgba(0,0,0,0.2)';">
-                    <i class="fas fa-download" style="font-size: 11px;"></i>
-                    Export
-                </button>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <!-- Semester Filter Pill -->
+                    <div style="position: relative;">
+                        <button onclick="toggleSemesterFilter('${type}')" style="
+                            background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(79,70,229,0.1));
+                            border: 1.5px solid rgba(79,70,229,0.3);
+                            padding: 8px 16px;
+                            border-radius: 20px;
+                            font-size: 12px;
+                            font-weight: 600;
+                            color: #4f46e5;
+                            cursor: pointer;
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+                            backdrop-filter: blur(10px);
+                        "
+                        id="semesterFilterBtn-${type}"
+                        onmouseover="this.style.background='linear-gradient(135deg, rgba(99,102,241,0.2), rgba(79,70,229,0.2))'; this.style.boxShadow='0 4px 12px rgba(79,70,229,0.15)';"
+                        onmouseout="this.style.background='linear-gradient(135deg, rgba(99,102,241,0.1), rgba(79,70,229,0.1))'; this.style.boxShadow='none';">
+                            <i class="fas fa-layer-group" style="font-size: 11px;"></i>
+                            <span id="semesterLabel-${type}">All Semesters</span>
+                            <i class="fas fa-chevron-down" style="font-size: 9px; transition: transform 0.3s ease;" id="semesterChevron-${type}"></i>
+                        </button>
+                        <!-- Semester Dropdown -->
+                        <div id="semesterDropdown-${type}" style="
+                            position: absolute;
+                            top: 100%;
+                            left: 0;
+                            background: white;
+                            border: 1px solid rgba(79,70,229,0.2);
+                            border-radius: 12px;
+                            box-shadow: 0 8px 24px rgba(79,70,229,0.15);
+                            margin-top: 8px;
+                            min-width: 180px;
+                            z-index: 1000;
+                            display: none;
+                            overflow: hidden;
+                            animation: slideDownMenu 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+                            backdrop-filter: blur(10px);
+                        " style="display: none;">
+                            <div onclick="filterBySemester('${type}', 'all')" style="
+                                padding: 10px 16px;
+                                cursor: pointer;
+                                transition: all 0.2s;
+                                color: #1f2937;
+                                font-size: 12px;
+                                font-weight: 500;
+                                border-bottom: 1px solid rgba(79,70,229,0.1);
+                            "
+                            onmouseover="this.style.background='rgba(79,70,229,0.1)'; this.style.paddingLeft='20px';"
+                            onmouseout="this.style.background='transparent'; this.style.paddingLeft='16px';">
+                                <i class="fas fa-th" style="color: #4f46e5; margin-right: 8px; width: 12px;"></i>All Semesters
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Export Button Pill -->
+                    <button onclick="exportFeeData('${type}')" style="
+                        background: linear-gradient(135deg, rgba(34,197,94,0.1), rgba(22,163,74,0.1));
+                        border: 1.5px solid rgba(34,197,94,0.3);
+                        padding: 8px 16px;
+                        border-radius: 20px;
+                        font-size: 12px;
+                        font-weight: 600;
+                        color: #22c55e;
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+                        backdrop-filter: blur(10px);
+                    "
+                    onmouseover="this.style.background='linear-gradient(135deg, rgba(34,197,94,0.2), rgba(22,163,74,0.2))'; this.style.boxShadow='0 4px 12px rgba(34,197,94,0.15)';"
+                    onmouseout="this.style.background='linear-gradient(135deg, rgba(34,197,94,0.1), rgba(22,163,74,0.1))'; this.style.boxShadow='none';">
+                        <i class="fas fa-download" style="font-size: 11px;"></i>
+                        Export
+                    </button>
+                </div>
             </div>
             
             <div style="padding: 24px; overflow-y: auto; flex: 1;">
@@ -81909,6 +81989,210 @@ Govt. Polytechnic, Beelagi`;
             }).join('');
             
             listContainer.innerHTML = cards;
+        }
+    }
+    
+    // Toggle Semester Filter Dropdown
+    function toggleSemesterFilter(type) {
+        const dropdown = document.getElementById('semesterDropdown-' + type);
+        const chevron = document.getElementById('semesterChevron-' + type);
+        
+        if (!dropdown) return;
+        
+        const isHidden = dropdown.style.display === 'none';
+        
+        if (isHidden) {
+            dropdown.style.display = 'block';
+            chevron.style.transform = 'rotate(180deg)';
+            
+            // Generate semester options dynamically from data
+            const semesters = new Set();
+            if (facultyFeeData && facultyFeeData.length > 0) {
+                facultyFeeData.forEach(student => {
+                    if (student.semester) semesters.add(student.semester);
+                });
+            }
+            
+            let semesterHTML = `
+                <div onclick="filterBySemester('${type}', 'all')" style="
+                    padding: 10px 16px;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    color: #1f2937;
+                    font-size: 12px;
+                    font-weight: 500;
+                    border-bottom: 1px solid rgba(79,70,229,0.1);
+                "
+                onmouseover="this.style.background='rgba(79,70,229,0.1)'; this.style.paddingLeft='20px';"
+                onmouseout="this.style.background='transparent'; this.style.paddingLeft='16px';">
+                    <i class="fas fa-th" style="color: #4f46e5; margin-right: 8px; width: 12px;"></i>All Semesters
+                </div>
+            `;
+            
+            Array.from(semesters).sort((a, b) => a - b).forEach(sem => {
+                const semLabel = ['','st','nd','rd','th','th','th'];
+                semesterHTML += `
+                    <div onclick="filterBySemester('${type}', ${sem})" style="
+                        padding: 10px 16px;
+                        cursor: pointer;
+                        transition: all 0.2s;
+                        color: #1f2937;
+                        font-size: 12px;
+                        font-weight: 500;
+                    "
+                    onmouseover="this.style.background='rgba(79,70,229,0.1)'; this.style.paddingLeft='20px';"
+                    onmouseout="this.style.background='transparent'; this.style.paddingLeft='16px';">
+                        <i class="fas fa-layer-group" style="color: #4f46e5; margin-right: 8px; width: 12px;"></i>Semester ${sem}${semLabel[sem] || 'th'}
+                    </div>
+                `;
+            });
+            
+            dropdown.innerHTML = semesterHTML;
+        } else {
+            dropdown.style.display = 'none';
+            chevron.style.transform = 'rotate(0deg)';
+        }
+    }
+    
+    // Filter by Semester
+    function filterBySemester(type, semester) {
+        const dropdown = document.getElementById('semesterDropdown-' + type);
+        const label = document.getElementById('semesterLabel-' + type);
+        const chevron = document.getElementById('semesterChevron-' + type);
+        const listContainer = document.getElementById(type + '-fee-list');
+        
+        if (!listContainer) return;
+        
+        // Update label
+        let filterLabel = 'All Semesters';
+        if (semester !== 'all') {
+            const semLabel = ['','st','nd','rd','th','th','th'];
+            filterLabel = `Semester ${semester}${semLabel[semester] || 'th'}`;
+        }
+        if (label) label.textContent = filterLabel;
+        
+        // Filter and display data
+        let filteredData = facultyFeeData || [];
+        if (semester !== 'all') {
+            filteredData = filteredData.filter(s => s.semester == semester);
+        }
+        
+        if (filteredData.length === 0) {
+            listContainer.innerHTML = `
+                <div style="text-align: center; padding: 60px 20px; color: #999;">
+                    <div style="font-size: 48px; margin-bottom: 12px;">📋</div>
+                    <p style="font-size: 14px; margin: 8px 0; font-weight: 500;">No students in ${filterLabel}</p>
+                </div>
+            `;
+        } else {
+            const cards = filteredData.map((student, idx) => {
+                const statusColor = student.status === 'paid' ? { bg: '#dcfce7', text: '#15803d', border: '#86efac' } : 
+                                  student.status === 'partial' ? { bg: '#fef3c7', text: '#a16207', border: '#fcd34d' } : 
+                                  { bg: '#fee2e2', text: '#dc2626', border: '#fca5a5' };
+                
+                const statusText = student.status === 'paid' ? 'FULLY PAID' : 
+                                 student.status === 'partial' ? 'PARTIAL' : 'PENDING';
+                
+                const initials = student.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+                const colors = ['#fbbf24', '#1f2937', '#3b82f6', '#ec4899', '#8b5cf6'];
+                const avatarBg = colors[idx % colors.length];
+                
+                return `
+                    <div style="
+                        background: rgba(255, 255, 255, 0.6);
+                        border: 1px solid #f3f4f6;
+                        border-radius: 16px;
+                        padding: 14px 16px;
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        cursor: pointer;
+                        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+                        animation: fadeInUp 0.4s ease-out ${idx * 0.08}s both;
+                    "
+                    onmouseover="this.style.backgroundColor='rgba(255, 255, 255, 1)'; this.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.1)';"
+                    onmouseout="this.style.backgroundColor='rgba(255, 255, 255, 0.6)'; this.style.boxShadow='none';">
+                        <div style="
+                            width: 40px;
+                            height: 40px;
+                            border-radius: 50%;
+                            background: ${avatarBg};
+                            border: 2px solid white;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-weight: 700;
+                            color: white;
+                            font-size: 12px;
+                            flex-shrink: 0;
+                            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+                        ">
+                            ${initials}
+                        </div>
+                        <div style="flex: 1; min-width: 0;">
+                            <h3 style="
+                                margin: 0 0 2px 0;
+                                font-size: 13px;
+                                font-weight: 600;
+                                color: #1f2937;
+                                text-overflow: ellipsis;
+                                overflow: hidden;
+                                white-space: nowrap;
+                            ">
+                                ${student.name}
+                            </h3>
+                            <p style="
+                                margin: 0;
+                                font-size: 11px;
+                                color: #6b7280;
+                                text-overflow: ellipsis;
+                                overflow: hidden;
+                                white-space: nowrap;
+                            ">
+                                ${student.usn} • Sem ${student.semester}
+                            </p>
+                        </div>
+                        <div style="
+                            text-align: right;
+                            flex-shrink: 0;
+                            display: flex;
+                            flex-direction: column;
+                            align-items: flex-end;
+                            gap: 4px;
+                        ">
+                            <div style="
+                                display: inline-block;
+                                padding: 4px 10px;
+                                background: ${statusColor.bg};
+                                border: 1px solid ${statusColor.border};
+                                border-radius: 6px;
+                                font-size: 10px;
+                                font-weight: 700;
+                                color: ${statusColor.text};
+                                white-space: nowrap;
+                                letter-spacing: 0.5px;
+                            ">
+                                ${statusText}
+                            </div>
+                            <div style="
+                                font-size: 13px;
+                                font-weight: 700;
+                                color: ${student.total === 0 ? '#d1d5db' : '#1f2937'};
+                            ">
+                                ?${Math.round(student.total).toLocaleString()}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            listContainer.innerHTML = cards;
+        }
+        
+        // Close dropdown
+        if (dropdown) {
+            dropdown.style.display = 'none';
+            chevron.style.transform = 'rotate(0deg)';
         }
     }
     
