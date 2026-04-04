@@ -40181,16 +40181,16 @@ Easily access and review students' academic performance here. This section provi
           <p class="fm-sf-form-title"><i class="fas fa-plus"></i> Record New Payment</p>
           <div class="fm-sf-form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px; padding: 14px; background: rgba(99, 102, 241, 0.08); border-radius: 8px;">
             <div>
-              <label style="font-size: 11px; color: #8b92a7; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px; font-weight: 600;">Total Fee (?)</label>
+              <label style="font-size: 11px; color: #8b92a7; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px; font-weight: 600;">Total Fee (Rs)</label>
               <input type="number" id="fmPayTotalInput" style="width: 100%; padding: 10px 12px; border: 2px solid #667eea; border-radius: 6px; font-size: 16px; font-weight: 700; color: #667eea; background: rgba(102, 126, 234, 0.05); outline: none; transition: all 0.2s;" placeholder="0" min="0" oninput="fmUpdatePendingBalance()">
             </div>
             <div>
-              <label style="font-size: 11px; color: #8b92a7; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px; font-weight: 600;">Paid Amount (?)</label>
+              <label style="font-size: 11px; color: #8b92a7; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px; font-weight: 600;">Paid Amount (Rs)</label>
               <input type="number" id="fmPayPaidInput" style="width: 100%; padding: 10px 12px; border: 2px solid #003366; border-radius: 6px; font-size: 16px; font-weight: 700; color: #003366; background: rgba(16, 185, 129, 0.05); outline: none; transition: all 0.2s;" placeholder="0" min="0" oninput="fmUpdatePendingBalance()">
             </div>
             <div>
-              <label style="font-size: 11px; color: #8b92a7; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px; font-weight: 600;">Pending Balance (?)</label>
-              <div id="fmPayPendingInput" style="width: 100%; padding: 10px 12px; border: 2px solid #ef4444; border-radius: 6px; font-size: 16px; font-weight: 700; color: #ef4444; background: rgba(239, 68, 68, 0.05); display: flex; align-items: center; justify-content: center;">?0</div>
+              <label style="font-size: 11px; color: #8b92a7; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px; font-weight: 600;">Pending Balance (Rs)</label>
+              <div id="fmPayPendingInput" style="width: 100%; padding: 10px 12px; border: 2px solid #ef4444; border-radius: 6px; font-size: 16px; font-weight: 700; color: #ef4444; background: rgba(239, 68, 68, 0.05); display: flex; align-items: center; justify-content: center;">Rs. 0</div>
             </div>
           </div>
           <div class="fm-sf-form-row">
@@ -40254,7 +40254,7 @@ Easily access and review students' academic performance here. This section provi
           <input class="fm-input" id="fmCourseNameInput" type="text" placeholder="e.g. Computer Science Engineering" autocomplete="off"/>
         </div>
         <div class="fm-field">
-          <label class="fm-label"><i class="fas fa-rupee-sign"></i> Amount (?)</label>
+          <label class="fm-label"><i class="fas fa-rupee-sign"></i> Amount (Rs)</label>
           <input class="fm-input" id="fmAmountInput" type="number" placeholder="e.g. 25000" min="0" autocomplete="off"/>
         </div>
         <div class="fm-field">
@@ -40432,32 +40432,32 @@ Easily access and review students' academic performance here. This section provi
                 <div class="fee-items">
                     <div class="fee-item">
                         <span>Tuition Fee:</span>
-                        <span id="modal-tuition-fee" class="fee-amount">?25,000</span>
+                        <span id="modal-tuition-fee" class="fee-amount">Rs. 25,000</span>
                         <input type="number" id="edit-tuition-fee" class="fee-edit-input" style="display: none;" placeholder="25000">
                     </div>
                     <div class="fee-item">
                         <span>Exam Fee:</span>
-                        <span id="modal-exam-fee" class="fee-amount">?2,000</span>
+                        <span id="modal-exam-fee" class="fee-amount">Rs. 2,000</span>
                         <input type="number" id="edit-exam-fee" class="fee-edit-input" style="display: none;" placeholder="2000">
                     </div>
                     <div class="fee-item">
                         <span>Library Fee:</span>
-                        <span id="modal-library-fee" class="fee-amount">?1,000</span>
+                        <span id="modal-library-fee" class="fee-amount">Rs. 1,000</span>
                         <input type="number" id="edit-library-fee" class="fee-edit-input" style="display: none;" placeholder="1000">
                     </div>
                     <div class="fee-item">
                         <span>Lab Fee:</span>
-                        <span id="modal-lab-fee" class="fee-amount">?3,000</span>
+                        <span id="modal-lab-fee" class="fee-amount">Rs. 3,000</span>
                         <input type="number" id="edit-lab-fee" class="fee-edit-input" style="display: none;" placeholder="3000">
                     </div>
                     <div class="fee-item">
                         <span>Sports Fee:</span>
-                        <span id="modal-sports-fee" class="fee-amount">?500</span>
+                        <span id="modal-sports-fee" class="fee-amount">Rs. 500</span>
                         <input type="number" id="edit-sports-fee" class="fee-edit-input" style="display: none;" placeholder="500">
                     </div>
                     <div class="fee-item">
                         <span>Development Fee:</span>
-                        <span id="modal-development-fee" class="fee-amount">?1,500</span>
+                        <span id="modal-development-fee" class="fee-amount">Rs. 1,500</span>
                         <input type="number" id="edit-development-fee" class="fee-edit-input" style="display: none;" placeholder="1500">
                     </div>
                 </div>
@@ -40466,7 +40466,7 @@ Easily access and review students' academic performance here. This section provi
                     <div class="fee-total-item">
                         <span><strong>Total Amount:</strong></span>
                         <div class="amount-edit-container">
-                            <span id="modal-total-amount" class="fee-amount"><strong>?33,000</strong></span>
+                            <span id="modal-total-amount" class="fee-amount"><strong>Rs. 33,000</strong></span>
                             <input type="number" id="edit-total-amount" class="fee-edit-input" style="display: none;" placeholder="33000">
                             <button id="edit-total-btn" class="btn-edit-tiny" onclick="toggleAmountEdit('total')" style="display: none;">
                                 <i class="fas fa-edit"></i>
@@ -40476,7 +40476,7 @@ Easily access and review students' academic performance here. This section provi
                     <div class="fee-total-item">
                         <span><strong>Paid Amount:</strong></span>
                         <div class="amount-edit-container">
-                            <span id="modal-paid-amount" class="fee-amount"><strong>?15,000</strong></span>
+                            <span id="modal-paid-amount" class="fee-amount"><strong>Rs. 15,000</strong></span>
                             <input type="number" id="edit-paid-amount" class="fee-edit-input" style="display: none;" placeholder="15000">
                             <button id="edit-paid-btn" class="btn-edit-tiny" onclick="toggleAmountEdit('paid')" style="display: none;">
                                 <i class="fas fa-edit"></i>
@@ -40485,7 +40485,7 @@ Easily access and review students' academic performance here. This section provi
                     </div>
                     <div class="fee-total-item pending-amount">
                         <span><strong>Pending Amount:</strong></span>
-                        <span id="modal-pending-amount"><strong>?18,000</strong></span>
+                        <span id="modal-pending-amount"><strong>Rs. 18,000</strong></span>
                     </div>
                 </div>
             </div>
@@ -80960,23 +80960,23 @@ Govt. Polytechnic, Beelagi`;
                 <div class="fee-breakdown">
                     <div class="fee-item">
                         <span class="fee-label">Tuition Fee</span>
-                        <span class="fee-amount">?25,000</span>
+                        <span class="fee-amount">Rs. 25,000</span>
                     </div>
                     <div class="fee-item">
                         <span class="fee-label">Exam Fee</span>
-                        <span class="fee-amount">?2,000</span>
+                        <span class="fee-amount">Rs. 2,000</span>
                     </div>
                     <div class="fee-item">
                         <span class="fee-label">Library Fee</span>
-                        <span class="fee-amount">?1,000</span>
+                        <span class="fee-amount">Rs. 1,000</span>
                     </div>
                     <div class="fee-item">
                         <span class="fee-label">Lab Fee</span>
-                        <span class="fee-amount">?3,000</span>
+                        <span class="fee-amount">Rs. 3,000</span>
                     </div>
                     <div class="fee-item">
                         <span class="fee-label">Sports Fee</span>
-                        <span class="fee-amount">?500</span>
+                        <span class="fee-amount">Rs. 500</span>
                     </div>
                     <div class="fee-item">
                         <span class="fee-label">Development Fee</span>
