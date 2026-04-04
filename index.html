@@ -41811,7 +41811,7 @@ function restoreTeacherZonePhoto() {
         </div>
         <div style="background:linear-gradient(135deg,#43e97b,#38f9d7); color:#fff; padding:18px; border-radius:12px; box-shadow:0 4px 15px rgba(67,233,123,0.3);">
           <div style="font-size:12px; font-weight:600; opacity:0.85; margin-bottom:8px;">💰 TOTAL AMOUNT</div>
-          <div style="font-size:24px; font-weight:800; letter-spacing:-1px;" id="fmTotalAmount">?0</div>
+          <div style="font-size:24px; font-weight:800; letter-spacing:-1px;" id="fmTotalAmount">₹0</div>
           <div style="font-size:11px; opacity:0.7; margin-top:6px;">Total dues</div>
         </div>
       </div>
@@ -78982,7 +78982,7 @@ function updateFacultyFeeStats(students = facultyFeeData) {
         const el = document.getElementById(elementId);
         if (el) {
             el.style.transition = 'all 0.3s ease';
-            el.textContent = isAmount ? '?' + newValue.toLocaleString('en-IN', {maximumFractionDigits: 0}) : newValue;
+            el.textContent = isAmount ? '₹' + newValue.toLocaleString('en-IN', {maximumFractionDigits: 0}) : newValue;
         }
     };
     
@@ -78991,7 +78991,8 @@ function updateFacultyFeeStats(students = facultyFeeData) {
     updateValue('fmPaidCount', paidCount);
     updateValue('fmTotalAmount', totalAmount, true);
     
-    console.log(`?? Stats Updated: ${totalStudents} students | ${pendingCount} pending | ${paidCount} paid | ?${totalAmount}`);
+    console.log(`📊 Stats Updated: ${totalStudents} students | ${pendingCount} pending | ${paidCount} paid | ₹${totalAmount}`);
+    console.log('📊 Stats calculation:', { totalStudents, pendingCount, paidCount, totalAmount, studentCount: students.length });
 }
 
 function sendReminderToStudent(usn, name, pendingAmount) {
