@@ -55002,6 +55002,16 @@ function restoreTeacherZonePhoto() {
                     year3: 0
                 };
                 
+                // Debug: Show first student with year info
+                if (filteredByBranchStudents.length > 0) {
+                    console.log('🔍 First student:', {
+                        name: filteredByBranchStudents[0].name,
+                        year: filteredByBranchStudents[0].year,
+                        semester: filteredByBranchStudents[0].semester,
+                        branch: filteredByBranchStudents[0].branch
+                    });
+                }
+                
                 filteredByBranchStudents.forEach(s => {
                     if (s.year === '1st Year') counts.year1++;
                     else if (s.year === '2nd Year') counts.year2++;
@@ -55009,6 +55019,7 @@ function restoreTeacherZonePhoto() {
                 });
                 
                 console.log('[Dashboard] Total:', counts.total, 'Y1:', counts.year1, 'Y2:', counts.year2, 'Y3:', counts.year3);
+                console.log('📊 All students year values:', filteredByBranchStudents.map(s => ({ name: s.name, year: s.year, semester: s.semester })).slice(0, 5));
                 
                 document.getElementById("totalStudentsCount").textContent = counts.total;
                 document.getElementById("year1Count").textContent = counts.year1;

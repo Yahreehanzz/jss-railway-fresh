@@ -361,8 +361,12 @@ app.get('/api/students', async (req, res) => {
         console.log('📖 GET /api/students');
         
         // Auto-populate missing years BEFORE returning
-        // Step 1: Assign by semester if available
-        await pool.query(`
+        // Step 1: Check how many students have missing years
+        const checkBefore = await pool.query(`SELECT COUNT(*) as ct FROM students WHERE year IS NULL OR year = ''`);
+        console.log(`  - Students missing years BEFORE populate: ${checkBefore.rows[0].ct}`);
+        
+        // Step 1a: Assign by semester if available
+        const updateResult1 = await pool.query(`
             UPDATE students 
             SET year = 
                 CASE 
@@ -373,10 +377,12 @@ app.get('/api/students', async (req, res) => {
                 END
             WHERE (year IS NULL OR year = '') AND semester IS NOT NULL
         `);
+        console.log(`  - Updated ${updateResult1.rowCount} students by semester`);
         
         // Step 2: For remaining students with no year, assign by distribution
         const remaining = await pool.query(`SELECT COUNT(*) as ct FROM students WHERE year IS NULL OR year = ''`);
         const remainCount = remaining.rows[0].ct;
+        console.log(`  - Students still missing years: ${remainCount}`);
         
         if (remainCount > 0) {
             const ids = await pool.query(`SELECT id FROM students WHERE year IS NULL OR year = '' ORDER BY id`);
@@ -389,10 +395,19 @@ app.get('/api/students', async (req, res) => {
                 
                 await pool.query(`UPDATE students SET year = $1 WHERE id = $2`, [yr, ids.rows[i].id]);
             }
+            console.log(`  - Distributed ${ids.rows.length} students evenly: ${perGroup} to each year`);
         }
+        
+        // Check after population
+        const checkAfter = await pool.query(`
+            SELECT year, COUNT(*) as ct FROM students WHERE year IS NOT NULL AND year != '' GROUP BY year
+        `);
+        console.log(`  - Year distribution AFTER populate:`, checkAfter.rows);
         
         // Now fetch all students with years populated
         const result = await pool.query('SELECT * FROM students ORDER BY name');
+        console.log(`  - Returning ${result.rows.length} students`);
+        
         res.json({ success: true, data: result.rows, count: result.rows.length });
     } catch (e) {
         console.error('❌ GET /api/students ERROR:', e.message);
