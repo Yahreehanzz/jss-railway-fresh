@@ -51842,27 +51842,86 @@ function restoreTeacherZonePhoto() {
                     return;
                 }
                 
-                // For now, we verify password locally by encoding with btoa (same as backend)
-                // In production, this should be verified on the server for security
-                const encodedPassword = btoa(password);
+                // Verify password with backend
+                const response = await fetch(`${window.API_BASE}/verify-faculty-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: window.selectedFacultyUserId,
+                        password: password
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (!data.success) {
+                    errorEl.textContent = 'Invalid password. Please try again.';
+                    errorEl.style.display = 'block';
+                    return;
+                }
+                
+                // Password verified! Now check if first-time setup is needed
+                const setupCheckResponse = await fetch(`${window.API_BASE}/check-first-setup/${window.selectedFacultyUserId}`);
+                const setupCheckData = await setupCheckResponse.json();
                 
                 // Store the faculty user info in sessionStorage
+                const encodedPassword = btoa(password);
                 sessionStorage.setItem('userRole', 'teacher');
                 sessionStorage.setItem('facultyUserId', window.selectedFacultyUserId);
                 sessionStorage.setItem('facultyUsername', window.selectedFacultyUsername);
                 sessionStorage.setItem('facultyPassword', encodedPassword);
                 
-                // Hide modal and show 2FA
-                document.getElementById('roleSelectionOverlay').classList.add('hidden');
-                
-                setTimeout(() => {
-                    show2FAModal();
-                }, 300);
+                // Navigate based on setup status
+                if (setupCheckData.success && !setupCheckData.is_setup_complete) {
+                    // First-time login - show setup flow
+                    window.setupData = {};
+                    showFirstTimeSetupFlow();
+                } else {
+                    // Normal login - show 2FA
+                    document.getElementById('roleSelectionOverlay').classList.add('hidden');
+                    
+                    setTimeout(() => {
+                        show2FAModal();
+                    }, 300);
+                }
             } catch (e) {
                 console.error('Error verifying password:', e);
-                document.getElementById('facultyUserPasswordError').textContent = 'Error verifying password';
+                document.getElementById('facultyUserPasswordError').textContent = 'Error verifying password. Please try again.';
                 document.getElementById('facultyUserPasswordError').style.display = 'block';
             }
+        }
+
+        function showFirstTimeSetupFlow() {
+            const facultyUserPasswordPanel = document.getElementById('facultyUserPasswordPanel');
+            const setupModal = document.getElementById('firstTimeSetupModal');
+            
+            if (!facultyUserPasswordPanel || !setupModal) return;
+            
+            // Reset setup screens
+            document.getElementById('setupCurrentPassword').value = '';
+            document.getElementById('setupNewPassword').value = '';
+            document.getElementById('setupConfirmPassword').value = '';
+            document.getElementById('setupGmail').value = '';
+            document.getElementById('setupOTP').value = '';
+            document.getElementById('setupOtpContainer').style.display = 'none';
+            document.getElementById('setupVerifyOtpBtn').style.display = 'none';
+            
+            // Animate password panel out
+            facultyUserPasswordPanel.style.opacity = '0';
+            facultyUserPasswordPanel.style.transform = 'translateY(-20px)';
+            
+            setTimeout(() => {
+                facultyUserPasswordPanel.style.display = 'none';
+                setupModal.style.display = 'block';
+                
+                // Animate setup modal in
+                setTimeout(() => {
+                    setupModal.style.opacity = '1';
+                    setupModal.style.transform = 'translateY(0)';
+                    // Show welcome screen
+                    showSetupScreen('setupWelcomeScreen');
+                }, 50);
+            }, 400);
         }
 
         // ===== FIRST-TIME SETUP FLOW FUNCTIONS =====
