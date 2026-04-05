@@ -201,6 +201,33 @@ app.delete('/api/teachers/:id', async (req, res) => {
     }
 });
 
+// DEBUG - Get single teacher to verify photo
+app.get('/api/teacher/:id', async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT id, name, email, phone, subject, department, employee_id, 
+                   photo_url, designation, gender, date_of_joining, qualification, 
+                   experience, created_at, updated_at 
+            FROM teachers 
+            WHERE id = $1 OR employee_id = $1
+            LIMIT 1
+        `, [req.params.id]);
+        
+        if (result.rows.length === 0) {
+            return res.json({ success: false, error: 'Teacher not found' });
+        }
+        
+        const teacher = result.rows[0];
+        const photoInfo = teacher.photo_url ? `YES - ${teacher.photo_url.length} bytes` : 'NO';
+        console.log(`📸 Teacher ${teacher.name}: Photo = ${photoInfo}`);
+        
+        res.json({ success: true, data: teacher });
+    } catch (e) {
+        console.error('❌ GET /api/teacher/:id ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
 // DEBUG - Verify photos are stored
 app.get('/api/verify-photos', async (req, res) => {
     try {

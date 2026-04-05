@@ -63261,11 +63261,11 @@ function renderAttendance() {
             }
             
             isLoadingTeachers = true;
+            const baseUrl = window.API_BASE || 'https://jss-railway-fresh-production.up.railway.app/api';
             const endpoints = [
-                'https://jss-railway.up.railway.app/api/teachers',
-                'https://jss-railway.up.railway.app/teachers',
-                '/api/teachers',
-                '/teachers'
+                `${baseUrl}/teachers`,
+                `https://jss-railway-fresh-production.up.railway.app/api/teachers`,
+                '/api/teachers'
             ];
             
             let attempts = 0;
@@ -63330,11 +63330,11 @@ function renderAttendance() {
             btn.disabled = true;
             btn.style.opacity = '0.6';
             
+            const baseUrl = window.API_BASE || 'https://jss-railway-fresh-production.up.railway.app/api';
             const endpoints = [
-                'https://jss-railway.up.railway.app/api/teachers',
-                'https://jss-railway.up.railway.app/teachers',
-                '/api/teachers',
-                '/teachers'
+                `${baseUrl}/teachers`,
+                `https://jss-railway-fresh-production.up.railway.app/api/teachers`,
+                '/api/teachers'
             ];
             
             console.log('[REFRESH] Refreshing teacher data...');
@@ -63526,14 +63526,19 @@ function renderAttendance() {
         }
 
         function fetchTeachersAndRender(container) {
-            const API_BASE = window.API_BASE || 'https://jss-railway.up.railway.app';
-            fetch(`${API_BASE}/api/teachers`)
+            const API_BASE = window.API_BASE || 'https://jss-railway-fresh-production.up.railway.app/api';
+            fetch(`${API_BASE}/teachers`)
                 .then(r => r.json())
                 .then(data => {
                     if (data.success && data.data && Array.isArray(data.data)) {
                         teachers = data.data;
                         localStorage.setItem('teachers', JSON.stringify(teachers));
                         console.log('[DEBUG] Teachers loaded from API, count:', teachers.length);
+                        
+                        // Log photo info
+                        const withPhotos = teachers.filter(t => t.photo_url).length;
+                        console.log('[DEBUG] Teachers with photos:', withPhotos);
+                        
                         renderStaffListCards(container);
                     } else {
                         throw new Error('Invalid API response');
@@ -63980,7 +63985,7 @@ function renderAttendance() {
             
             console.log('💾 Saving teacher to database:', teacherData);
             
-            fetch(`${window.API_BASE}/api/teachers`, {
+            fetch(`${window.API_BASE}/teachers`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(teacherData)
