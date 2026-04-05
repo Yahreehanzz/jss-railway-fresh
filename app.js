@@ -57,6 +57,19 @@ pool.query(`
     )
 `).then(() => console.log('✅ Teachers table ready')).catch(e => console.error('⚠️ Teachers table error:', e.message));
 
+// Initialize faculty user credentials table if not exists
+pool.query(`
+    CREATE TABLE IF NOT EXISTS faculty_user_credentials (
+        id SERIAL PRIMARY KEY,
+        teacher_id INTEGER NOT NULL REFERENCES teachers(id) ON DELETE CASCADE,
+        username VARCHAR(100) NOT NULL,
+        password_hash VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW(),
+        UNIQUE(teacher_id, username)
+    )
+`).then(() => console.log('✅ Faculty User Credentials table ready')).catch(e => console.error('⚠️ Faculty credentials table error:', e.message));
+
 // ============================================================
 // API Routes
 // ============================================================
@@ -205,6 +218,147 @@ app.delete('/api/teachers/:id', async (req, res) => {
         res.json({ success: true, message: 'Teacher deleted' });
     } catch (e) {
         console.error('❌ DELETE /api/teachers ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// ============================================================
+// FACULTY USER CREDENTIALS API ENDPOINTS (Real-time sync)
+// ============================================================
+
+// Get all faculty user credentials for a teacher
+app.get('/api/faculty-users/:teacher_id', async (req, res) => {
+    try {
+        console.log('📖 GET /api/faculty-users/' + req.params.teacher_id);
+        const result = await pool.query(
+            `SELECT id, teacher_id, username, created_at, updated_at 
+             FROM faculty_user_credentials 
+             WHERE teacher_id = $1 
+             ORDER BY created_at DESC`,
+            [req.params.teacher_id]
+        );
+        res.json({ success: true, data: result.rows });
+    } catch (e) {
+        console.error('❌ GET /api/faculty-users ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// Get all active faculty users (for user selector)
+app.get('/api/faculty-users', async (req, res) => {
+    try {
+        console.log('📖 GET /api/faculty-users (all active)');
+        const result = await pool.query(`
+            SELECT 
+                fuc.id,
+                fuc.teacher_id,
+                fuc.username,
+                t.name as teacher_name,
+                t.designation,
+                fuc.created_at,
+                fuc.updated_at
+            FROM faculty_user_credentials fuc
+            JOIN teachers t ON fuc.teacher_id = t.id
+            ORDER BY fuc.created_at DESC
+        `);
+        res.json({ success: true, data: result.rows });
+    } catch (e) {
+        console.error('❌ GET /api/faculty-users ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// Create new faculty user credential
+app.post('/api/faculty-users', async (req, res) => {
+    try {
+        const { teacher_id, username, password } = req.body;
+        
+        if (!teacher_id || !username || !password) {
+            return res.status(400).json({ success: false, error: 'teacher_id, username, and password are required' });
+        }
+        
+        // Encode password using btoa (same as frontend)
+        const password_hash = Buffer.from(password).toString('base64');
+        
+        console.log('📝 POST /api/faculty-users - Creating user:', username);
+        const result = await pool.query(
+            `INSERT INTO faculty_user_credentials (teacher_id, username, password_hash)
+             VALUES ($1, $2, $3)
+             RETURNING id, teacher_id, username, created_at`,
+            [teacher_id, username, password_hash]
+        );
+        
+        res.status(201).json({ 
+            success: true, 
+            data: result.rows[0],
+            message: 'Faculty user created successfully'
+        });
+    } catch (e) {
+        if (e.code === '23505') {
+            return res.status(409).json({ success: false, error: 'Username already exists for this teacher' });
+        }
+        console.error('❌ POST /api/faculty-users ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// Update faculty user password
+app.put('/api/faculty-users/:id', async (req, res) => {
+    try {
+        const { password } = req.body;
+        
+        if (!password) {
+            return res.status(400).json({ success: false, error: 'password is required' });
+        }
+        
+        const password_hash = Buffer.from(password).toString('base64');
+        
+        console.log('🔄 PUT /api/faculty-users/' + req.params.id);
+        const result = await pool.query(
+            `UPDATE faculty_user_credentials 
+             SET password_hash = $1, updated_at = NOW()
+             WHERE id = $2
+             RETURNING id, teacher_id, username, updated_at`,
+            [password_hash, req.params.id]
+        );
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ success: false, error: 'Faculty user not found' });
+        }
+        
+        res.json({ 
+            success: true, 
+            data: result.rows[0],
+            message: 'Password updated successfully'
+        });
+    } catch (e) {
+        console.error('❌ PUT /api/faculty-users ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// Delete faculty user
+app.delete('/api/faculty-users/:id', async (req, res) => {
+    try {
+        console.log('🗑️  DELETE /api/faculty-users/' + req.params.id);
+        const result = await pool.query(
+            `DELETE FROM faculty_user_credentials 
+             WHERE id = $1
+             RETURNING id, username`,
+            [req.params.id]
+        );
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ success: false, error: 'Faculty user not found' });
+        }
+        
+        res.json({ 
+            success: true, 
+            message: 'Faculty user deleted successfully',
+            data: result.rows[0]
+        });
+    } catch (e) {
+        console.error('❌ DELETE /api/faculty-users ERROR:', e.message);
         res.status(500).json({ success: false, error: e.message });
     }
 });

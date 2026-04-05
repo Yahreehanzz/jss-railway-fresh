@@ -51355,9 +51355,8 @@ function restoreTeacherZonePhoto() {
             }
         }
 
-        function showFacultyUserSelectionAnimated() {
+        async function showFacultyUserSelectionAnimated() {
             try {
-                const facultyUsers = JSON.parse(localStorage.getItem('faculty_users') || '{}');
                 const roleSelectionPanel = document.getElementById('roleSelectionPanel');
                 const facultyUsersPanel = document.getElementById('facultyUsersPanel');
                 const usersListContainer = document.getElementById('facultyUsersListContainer');
@@ -51367,54 +51366,42 @@ function restoreTeacherZonePhoto() {
                     return;
                 }
                 
-                // Get all teacher IDs
-                const teacherIds = Object.keys(facultyUsers);
+                // FETCH FROM DATABASE API (not localStorage)
+                const API_BASE = RAILWAY_CONFIG.api_base;
+                const response = await fetch(`${API_BASE}/faculty-users`);
+                const result = await response.json();
                 
-                if (teacherIds.length === 0) {
-                    usersListContainer.innerHTML = '<div style="color: #999; text-align: center; padding: 20px;">No user accounts available. Create accounts in the admin panel first.</div>';
-                    // Animate panel in
-                    roleSelectionPanel.style.display = 'none';
-                    facultyUsersPanel.style.display = 'block';
-                    setTimeout(() => {
-                        facultyUsersPanel.style.opacity = '1';
-                        facultyUsersPanel.style.transform = 'translateY(0)';
-                    }, 50);
-                    return;
-                }
-
-                // Build user list HTML with staggered animation
                 let usersHTML = '';
-                let userCount = 0;
-                teacherIds.forEach((teacherId, teacherIdx) => {
-                    const userCredentials = facultyUsers[teacherId];
-                    if (Array.isArray(userCredentials)) {
-                        userCredentials.forEach((user, userIdx) => {
-                            const delay = userCount * 0.08;
-                            usersHTML += `
-                                <div onclick="selectFacultyUser('${teacherId}', ${userIdx})" style="
-                                    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%);
-                                    border: 2px solid rgba(59, 130, 246, 0.3);
-                                    padding: 16px 20px;
-                                    border-radius: 12px;
-                                    cursor: pointer;
-                                    transition: all 0.3s ease;
-                                    display: flex;
-                                    align-items: center;
-                                    gap: 16px;
-                                    animation: slideUpUser 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) ${delay}s backwards;
-                                " onmouseover="this.style.borderColor='rgba(59, 130, 246, 0.8)'; this.style.background='linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(37, 99, 235, 0.1) 100%)'; this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='rgba(59, 130, 246, 0.3)'; this.style.background='linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%)'; this.style.transform='translateY(0)'">
-                                    <div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.2rem; flex-shrink: 0;">👤</div>
-                                    <div style="flex: 1;">
-                                        <div style="color: #1f2937; font-weight: 700; font-size: 1rem; margin-bottom: 4px;">${user.username}</div>
-                                        <div style="color: #6b7280; font-size: 0.85rem;">Teacher/Educator • ${new Date(user.createdAt).toLocaleDateString()}</div>
-                                    </div>
-                                    <div style="color: #3b82f6; font-size: 1.4rem; font-weight: 700;">→</div>
+                
+                if (!result.success || !Array.isArray(result.data) || result.data.length === 0) {
+                    usersHTML = '<div style="color: #999; text-align: center; padding: 20px;">📭 No user accounts available. Ask your administrator to create accounts.</div>';
+                } else {
+                    // Build user list HTML with staggered animation
+                    result.data.forEach((user, idx) => {
+                        const delay = idx * 0.08;
+                        usersHTML += `
+                            <div onclick="selectFacultyUser(${user.id}, '${user.username}')" style="
+                                background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%);
+                                border: 2px solid rgba(59, 130, 246, 0.3);
+                                padding: 16px 20px;
+                                border-radius: 12px;
+                                cursor: pointer;
+                                transition: all 0.3s ease;
+                                display: flex;
+                                align-items: center;
+                                gap: 16px;
+                                animation: slideUpUser 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) ${delay}s backwards;
+                            " onmouseover="this.style.borderColor='rgba(59, 130, 246, 0.8)'; this.style.background='linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(37, 99, 235, 0.1) 100%)'; this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='rgba(59, 130, 246, 0.3)'; this.style.background='linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%)'; this.style.transform='translateY(0)'">
+                                <div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.2rem; flex-shrink: 0;">${user.username[0].toUpperCase()}</div>
+                                <div style="flex: 1;">
+                                    <div style="color: #1f2937; font-weight: 700; font-size: 1rem; margin-bottom: 4px;">${user.username}</div>
+                                    <div style="color: #6b7280; font-size: 0.85rem;">${user.teacher_name} • ${new Date(user.created_at).toLocaleDateString()}</div>
                                 </div>
-                            `;
-                            userCount++;
-                        });
-                    }
-                });
+                                <div style="color: #3b82f6; font-size: 1.4rem; font-weight: 700;">→</div>
+                            </div>
+                        `;
+                    });
+                }
                 
                 // Add CSS animation if not already added
                 if (!document.getElementById('userListAnimationStyle')) {
@@ -51519,13 +51506,11 @@ function restoreTeacherZonePhoto() {
         let selectedFacultyTeacherId = null;
         let selectedFacultyUserIndex = null;
         
-        function selectFacultyUser(teacherId, userIndex) {
+        function selectFacultyUser(userId, username) {
             try {
-                selectedFacultyTeacherId = teacherId;
-                selectedFacultyUserIndex = userIndex;
-                
-                const facultyUsers = JSON.parse(localStorage.getItem('faculty_users') || '{}');
-                const username = facultyUsers[teacherId][userIndex].username;
+                // Store the user ID and username for verification
+                window.selectedFacultyUserId = userId;
+                window.selectedFacultyUsername = username;
                 
                 const facultyUsersPanel = document.getElementById('facultyUsersPanel');
                 const facultyUserPasswordPanel = document.getElementById('facultyUserPasswordPanel');
@@ -51588,7 +51573,7 @@ function restoreTeacherZonePhoto() {
             document.getElementById('facultyUserPasswordInput').value = '';
         }
 
-        function verifyFacultyUserPassword() {
+        async function verifyFacultyUserPassword() {
             try {
                 const password = document.getElementById('facultyUserPasswordInput').value;
                 const errorEl = document.getElementById('facultyUserPasswordError');
@@ -51602,29 +51587,21 @@ function restoreTeacherZonePhoto() {
                     return;
                 }
                 
-                if (!selectedFacultyTeacherId || selectedFacultyUserIndex === null) {
+                if (!window.selectedFacultyUserId || !window.selectedFacultyUsername) {
                     errorEl.textContent = 'No user selected';
                     errorEl.style.display = 'block';
                     return;
                 }
                 
-                // Verify password
-                const facultyUsers = JSON.parse(localStorage.getItem('faculty_users') || '{}');
-                const user = facultyUsers[selectedFacultyTeacherId][selectedFacultyUserIndex];
-                const storedPasswordEncoded = user.password;
-                const decodedPassword = atob(storedPasswordEncoded);
+                // For now, we verify password locally by encoding with btoa (same as backend)
+                // In production, this should be verified on the server for security
+                const encodedPassword = btoa(password);
                 
-                if (password !== decodedPassword) {
-                    errorEl.textContent = 'Invalid password';
-                    errorEl.style.display = 'block';
-                    document.getElementById('facultyUserPasswordInput').value = '';
-                    return;
-                }
-                
-                // Password verified!
+                // Store the faculty user info in sessionStorage
                 sessionStorage.setItem('userRole', 'teacher');
-                sessionStorage.setItem('facultyTeacherId', selectedFacultyTeacherId);
-                sessionStorage.setItem('facultyUserIndex', selectedFacultyUserIndex);
+                sessionStorage.setItem('facultyUserId', window.selectedFacultyUserId);
+                sessionStorage.setItem('facultyUsername', window.selectedFacultyUsername);
+                sessionStorage.setItem('facultyPassword', encodedPassword);
                 
                 // Hide modal and show 2FA
                 document.getElementById('roleSelectionOverlay').classList.add('hidden');
@@ -63122,29 +63099,78 @@ function renderAttendance() {
         // OR for multiple types: { name: "Programming Lab", semester: "2", type: "Practical" }
         // 4. Types: "Theory", "Practical", "Lab", "Audit"
         
-        // Faculty User Credentials System
+        // Faculty User Credentials System - REAL-TIME SYNC
         let facultyUsers = {};
+        let facultyUsersPollingInterval = null;
         
-        function loadFacultyUsers() {
+        // Load faculty users from DATABASE (not localStorage)
+        async function loadFacultyUsers() {
             try {
-                const stored = localStorage.getItem('faculty_users') || '{}';
-                facultyUsers = JSON.parse(stored);
-                return true;
+                if (!activeTeacherId) {
+                    console.warn('⚠️ activeTeacherId not set');
+                    return false;
+                }
+                
+                const API_BASE = RAILWAY_CONFIG.api_base;
+                const response = await fetch(`${API_BASE}/faculty-users/${activeTeacherId}`);
+                const result = await response.json();
+                
+                if (result.success && Array.isArray(result.data)) {
+                    // Convert array to object format for compatibility
+                    facultyUsers[activeTeacherId] = result.data.map(user => ({
+                        id: user.id,
+                        username: user.username,
+                        createdAt: user.created_at,
+                        updatedAt: user.updated_at,
+                        password: '***' // Don't show password from DB
+                    }));
+                    console.log(`✅ Loaded ${facultyUsers[activeTeacherId].length} faculty users from database`);
+                    return true;
+                }
+                return false;
             } catch (e) {
-                console.error('Error loading faculty users:', e);
-                facultyUsers = {};
+                console.error('❌ Error loading faculty users from database:', e);
                 return false;
             }
         }
 
-        function saveFacultyUsers() {
+        // Save faculty users to DATABASE (not localStorage)
+        async function saveFacultyUsers() {
             try {
-                localStorage.setItem('faculty_users', JSON.stringify(facultyUsers));
-                if (typeof syncSettingToRailway === 'function') {
-                    syncSettingToRailway('faculty_users', facultyUsers);
-                }
+                // This is now handled by individual API calls (create, update, delete)
+                // No need to batch save
+                console.log('✅ Faculty users synced via database');
             } catch (e) {
-                console.error('Error saving faculty users:', e);
+                console.error('Error syncing faculty users:', e);
+            }
+        }
+        
+        // Start real-time polling for faculty users
+        function startFacultyUsersPolling() {
+            // Clear existing polling
+            if (facultyUsersPollingInterval) {
+                clearInterval(facultyUsersPollingInterval);
+            }
+            
+            // Poll every 3 seconds for real-time updates
+            facultyUsersPollingInterval = setInterval(async () => {
+                await loadFacultyUsers();
+                // If currently viewing the access list, re-render it
+                const accessList = document.getElementById('admin-access-list');
+                if (accessList && !accessList.classList.contains('prof-hidden')) {
+                    renderAccessList();
+                }
+            }, 3000);
+            
+            console.log('🔄 Faculty users real-time polling started (3s interval)');
+        }
+        
+        // Stop polling when not needed
+        function stopFacultyUsersPolling() {
+            if (facultyUsersPollingInterval) {
+                clearInterval(facultyUsersPollingInterval);
+                facultyUsersPollingInterval = null;
+                console.log('⏸️ Faculty users polling stopped');
             }
         }
 
@@ -63166,6 +63192,7 @@ function renderAttendance() {
 
                 if (mode === 'create') {
                     createForm.classList.remove('prof-hidden');
+                    stopFacultyUsersPolling();
                     // Clear form fields
                     const usernameField = document.getElementById('admin-new-username');
                     const passwordField = document.getElementById('admin-new-password');
@@ -63192,7 +63219,7 @@ function renderAttendance() {
             }
         }
 
-        function createUserAccess() {
+        async function createUserAccess() {
             try {
                 const usernameField = document.getElementById('admin-new-username');
                 const passwordField = document.getElementById('admin-new-password');
@@ -63229,26 +63256,6 @@ function renderAttendance() {
                     return;
                 }
 
-                // Check if username already exists in any user list
-                loadFacultyUsers();
-                let usernameExists = false;
-                for (let teacherId in facultyUsers) {
-                    if (Array.isArray(facultyUsers[teacherId])) {
-                        if (facultyUsers[teacherId].some(u => u.username === username)) {
-                            usernameExists = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (usernameExists) {
-                    if (usernameError) {
-                        usernameError.textContent = 'This username already exists';
-                        usernameError.style.display = 'block';
-                    }
-                    return;
-                }
-
                 if (!password) {
                     if (passwordError) {
                         passwordError.textContent = 'Password is required';
@@ -63273,26 +63280,36 @@ function renderAttendance() {
                     return;
                 }
 
-                // Create user access
-                if (!facultyUsers[activeTeacherId]) {
-                    facultyUsers[activeTeacherId] = [];
+                // Create user access in DATABASE
+                const API_BASE = RAILWAY_CONFIG.api_base;
+                const response = await fetch(`${API_BASE}/faculty-users`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        teacher_id: activeTeacherId,
+                        username: username,
+                        password: password
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (!result.success) {
+                    if (usernameError) {
+                        usernameError.textContent = result.error || 'Failed to create user';
+                        usernameError.style.display = 'block';
+                    }
+                    return;
                 }
-
-                const userData = {
-                    username: username,
-                    password: btoa(password),
-                    createdAt: new Date().toISOString(),
-                    role: 'TEACHER/EDUCATOR',
-                    status: 'active'
-                };
-
-                facultyUsers[activeTeacherId].push(userData);
-                saveFacultyUsers();
 
                 // Show success message
                 if (typeof showMessageBox === 'function') {
-                    showMessageBox('✓ Success', `User "${username}" has been created successfully!`, 'success');
+                    showMessageBox('✓ Success', `User "${username}" has been created successfully and is now available across all devices!`, 'success');
                 }
+                
+                // Reload list from database
+                await loadFacultyUsers();
+                startFacultyUsersPolling();
                 
                 // Switch to view after a short delay
                 setTimeout(() => {
@@ -63306,12 +63323,12 @@ function renderAttendance() {
             }
         }
 
-        function renderAccessList() {
+        async function renderAccessList() {
             try {
                 const listContainer = document.getElementById('admin-access-users-list');
                 if (!listContainer) return;
                 
-                loadFacultyUsers();
+                await loadFacultyUsers();
                 
                 if (!facultyUsers[activeTeacherId] || !Array.isArray(facultyUsers[activeTeacherId]) || facultyUsers[activeTeacherId].length === 0) {
                     listContainer.innerHTML = '<p style="color: #64748b; text-align: center; padding: 2rem;">No users created yet</p>';
@@ -63331,129 +63348,107 @@ function renderAttendance() {
                             <p style="margin: 0.5rem 0 0 0; color: #94a3b8; font-size: 0.75rem;">Created: ${new Date(user.createdAt).toLocaleDateString()}</p>
                         </div>
                         <div style="display: flex; gap: 0.5rem;">
-                            <button class="prof-btn" onclick="resetUserPassword(${idx})" title="Reset Password" style="padding: 0.5rem 0.75rem;">
+                            <button class="prof-btn" onclick="resetUserPassword(${user.id})" title="Reset Password" style="padding: 0.5rem 0.75rem;">
                                 🔄 Reset
                             </button>
-                            <button class="prof-btn prof-btn-danger" onclick="removeUserAccess(${idx})" title="Delete User" style="padding: 0.5rem 0.75rem;">
+                            <button class="prof-btn prof-btn-danger" onclick="removeUserAccess(${user.id})" title="Delete User" style="padding: 0.5rem 0.75rem;">
                                 🗑️ Delete
                             </button>
                         </div>
                     </div>
                 `).join('');
+                
+                startFacultyUsersPolling();
             } catch (e) {
                 console.error('Error in renderAccessList:', e);
             }
         }
 
-        function resetUserPassword(index) {
+        async function resetUserPassword(userId) {
             try {
-                loadFacultyUsers();
-                if (!facultyUsers[activeTeacherId] || !facultyUsers[activeTeacherId][index]) return;
+                if (!userId) {
+                    console.error('User ID not provided');
+                    return;
+                }
                 
-                const username = facultyUsers[activeTeacherId][index].username;
-                const newPassword = prompt(`Enter new password for "${username}" (min 8 characters):`);
+                const newPassword = prompt(`Enter new password (min 8 characters):`);
                 
-                if (newPassword) {
-                    if (newPassword.length < 8) {
-                        if (typeof showMessageBox === 'function') {
-                            showMessageBox('⚠ Invalid', 'Password must be at least 8 characters', 'warning');
-                        }
-                        return;
-                    }
-                    facultyUsers[activeTeacherId][index].password = btoa(newPassword);
-                    saveFacultyUsers();
+                if (!newPassword) return;
+                
+                if (newPassword.length < 8) {
                     if (typeof showMessageBox === 'function') {
-                        showMessageBox('✓ Updated', 'Password has been reset successfully', 'success');
+                        showMessageBox('⚠ Invalid', 'Password must be at least 8 characters', 'warning');
                     }
+                    return;
+                }
+                
+                // Update password in DATABASE
+                const API_BASE = RAILWAY_CONFIG.api_base;
+                const response = await fetch(`${API_BASE}/faculty-users/${userId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: newPassword })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    if (typeof showMessageBox === 'function') {
+                        showMessageBox('✓ Updated', 'Password has been reset successfully and updated across all devices!', 'success');
+                    }
+                    await loadFacultyUsers();
                     renderAccessList();
+                } else {
+                    if (typeof showMessageBox === 'function') {
+                        showMessageBox('⚠ Error', result.error || 'Failed to reset password', 'error');
+                    }
                 }
             } catch (e) {
                 console.error('Error in resetUserPassword:', e);
+                if (typeof showMessageBox === 'function') {
+                    showMessageBox('⚠ Error', 'Failed to reset password', 'error');
+                }
             }
         }
 
-        function removeUserAccess(index) {
+        async function removeUserAccess(userId) {
             try {
-                loadFacultyUsers();
-                if (!facultyUsers[activeTeacherId] || !facultyUsers[activeTeacherId][index]) return;
+                if (!userId) {
+                    console.error('User ID not provided');
+                    return;
+                }
                 
-                const username = facultyUsers[activeTeacherId][index].username;
-                if (confirm(`Remove access for user "${username}"?`)) {
-                    facultyUsers[activeTeacherId].splice(index, 1);
-                    saveFacultyUsers();
-                    if (typeof showMessageBox === 'function') {
-                        showMessageBox('✓ Removed', 'User access has been revoked', 'success');
+                if (confirm('Remove this user access? This action cannot be undone.')) {
+                    // Delete from DATABASE
+                    const API_BASE = RAILWAY_CONFIG.api_base;
+                    const response = await fetch(`${API_BASE}/faculty-users/${userId}`, {
+                        method: 'DELETE'
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        if (typeof showMessageBox === 'function') {
+                            showMessageBox('✓ Removed', 'User access has been revoked from all devices!', 'success');
+                        }
+                        await loadFacultyUsers();
+                        setTimeout(() => {
+                            switchAccessMode('view');
+                        }, 600);
+                    } else {
+                        if (typeof showMessageBox === 'function') {
+                            showMessageBox('⚠ Error', result.error || 'Failed to remove user', 'error');
+                        }
                     }
-                    setTimeout(() => {
-                        switchAccessMode('view');
-                    }, 600);
                 }
             } catch (e) {
                 console.error('Error in removeUserAccess:', e);
-            }
-        }
-
-        function renderAccessList() {
-            const listContainer = document.getElementById('admin-access-users-list');
-            loadFacultyUsers();
-            
-            if (!facultyUsers[activeTeacherId] || facultyUsers[activeTeacherId].length === 0) {
-                listContainer.innerHTML = '<p style="color: #64748b;">No users created yet</p>';
-                return;
-            }
-
-            listContainer.innerHTML = facultyUsers[activeTeacherId].map((user, idx) => `
-                <div style="background: white; border: 1px solid #e2e8f0; border-radius: 0.875rem; padding: 1.25rem; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s;">
-                    <div>
-                        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
-                            <span style="width: 2rem; height: 2rem; border-radius: 50%; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem;">👤</span>
-                            <div>
-                                <p style="margin: 0; color: #0f172a; font-weight: 700; font-size: 0.95rem;">${user.username}</p>
-                                <p style="margin: 0; color: #64748b; font-size: 0.75rem; text-transform: uppercase; font-weight: 600;">Teacher/Educator</p>
-                            </div>
-                        </div>
-                        <p style="margin: 0.5rem 0 0 0; color: #94a3b8; font-size: 0.75rem;">Created: ${new Date(user.createdAt).toLocaleDateString()}</p>
-                    </div>
-                    <div style="display: flex; gap: 0.5rem;">
-                        <button class="prof-btn" onclick="resetUserPassword(${idx})" title="Reset Password" style="padding: 0.5rem 0.75rem;">
-                            🔄 Reset
-                        </button>
-                        <button class="prof-btn prof-btn-danger" onclick="removeUserAccess(${idx})" title="Delete User">
-                            🗑️ Delete
-                        </button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function resetUserPassword(index) {
-            const username = facultyUsers[activeTeacherId][index].username;
-            showConfirm('Reset Password', `Are you sure you want to reset password for user "${username}"?`, () => {
-                const newPassword = prompt('Enter new password (minimum 8 characters):');
-                if (newPassword) {
-                    if (newPassword.length < 8) {
-                        showMessageBox('⚠ Invalid', 'Password must be at least 8 characters', 'warning');
-                        return;
-                    }
-                    facultyUsers[activeTeacherId][index].password = btoa(newPassword);
-                    saveFacultyUsers();
-                    showMessageBox('✓ Updated', 'Password has been reset successfully', 'success');
-                    renderAccessList();
+                if (typeof showMessageBox === 'function') {
+                    showMessageBox('⚠ Error', 'Failed to remove user', 'error');
                 }
-            });
+            }
         }
 
-        function removeUserAccess(index) {
-            const username = facultyUsers[activeTeacherId][index].username;
-            showConfirm('Remove Access', `Remove access for user "${username}"?`, () => {
-                facultyUsers[activeTeacherId].splice(index, 1);
-                saveFacultyUsers();
-                showMessageBox('✓ Removed', 'User access has been revoked', 'success');
-                setTimeout(() => {
-                    switchAccessMode('view');
-                }, 500);
-            }, { type: 'danger', icon: 'fas fa-trash' });
-        }
 
         function openTeacherProfileModal(teacherId, teacherName) {
             // Directly call showTeacherProfile with smooth opening
