@@ -38423,11 +38423,11 @@ Easily access and review students' academic performance here. This section provi
 </div>
 
 <!-- Notes Modal -->
-<div class="hidden overlay-base" id="notesOverlay" onclick="if(event.target===this)closeNotesModal()">
-    <div class="modern-dialog notes-modal" id="notesModal" style="width: 90%; max-width: 600px;">
+<div class="hidden overlay-base" id="notesOverlay">
+    <div class="modern-dialog notes-modal" id="notesModal" style="width: 90%; max-width: 600px;" onclick="event.stopPropagation();">
         <div class="notes-header">
             <h3 class="modern-dialog-title">📝 My Notes</h3>
-            <button class="notes-close-btn" onclick="closeNotesModal()" style="background: none; border: none; cursor: pointer; font-size: 24px; color: rgba(255,255,255,0.6);">
+            <button class="notes-close-btn" onclick="event.stopPropagation(); closeNotesModal();" style="background: none; border: none; cursor: pointer; font-size: 24px; color: rgba(255,255,255,0.6);">
                 <i class="fas fa-times"></i>
             </button>
         </div>
@@ -38442,10 +38442,10 @@ Easily access and review students' academic performance here. This section provi
             </div>
         </div>
         <div class="notes-footer">
-            <button class="notes-btn-add" onclick="addNote()">
+            <button class="notes-btn-add" onclick="event.stopPropagation(); addNote();">
                 <i class="fas fa-plus"></i> Add Note
             </button>
-            <button class="notes-btn-clear" onclick="clearAllNotes()">
+            <button class="notes-btn-clear" onclick="event.stopPropagation(); clearAllNotes();">
                 <i class="fas fa-trash-alt"></i> Clear All
             </button>
         </div>
@@ -53600,12 +53600,27 @@ function restoreTeacherZonePhoto() {
         // ===== NOTES MODAL FUNCTIONS =====
         function openNotesModal() {
             const notesOverlay = document.getElementById('notesOverlay');
+            const notesModal = document.getElementById('notesModal');
             notesOverlay.classList.remove('hidden');
+            notesOverlay.style.display = 'flex';
+            notesOverlay.style.zIndex = '999999';
             loadNotes();
+            
+            // Prevent overlay click from closing modal immediately
+            setTimeout(() => {
+                notesOverlay.onclick = function(e) {
+                    if (e.target === this) {
+                        closeNotesModal();
+                    }
+                };
+            }, 100);
         }
 
         function closeNotesModal() {
-            document.getElementById('notesOverlay').classList.add('hidden');
+            const notesOverlay = document.getElementById('notesOverlay');
+            notesOverlay.classList.add('hidden');
+            notesOverlay.style.display = 'none';
+            notesOverlay.onclick = null;
         }
 
         function addNote() {
