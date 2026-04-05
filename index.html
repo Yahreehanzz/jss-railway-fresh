@@ -81299,9 +81299,9 @@ Govt. Polytechnic, Beelagi`;
         const pendingAmount = totalFee - paidAmount;
         
         // Update totals
-        document.getElementById('modal-total-amount').textContent = `?${totalFee.toLocaleString()}`;
-        document.getElementById('modal-paid-amount').textContent = `?${paidAmount.toLocaleString()}`;
-        document.getElementById('modal-pending-amount').textContent = `?${pendingAmount.toLocaleString()}`;
+        document.getElementById('modal-total-amount').textContent = `₹${totalFee.toLocaleString()}`;
+        document.getElementById('modal-paid-amount').textContent = `₹${paidAmount.toLocaleString()}`;
+        document.getElementById('modal-pending-amount').textContent = `₹${pendingAmount.toLocaleString()}`;
         
         // Update status badge based on payment
         const statusBadge = document.getElementById('modal-fee-status');
@@ -82069,7 +82069,7 @@ Govt. Polytechnic, Beelagi`;
             amountElement.textContent = `?${newFees[type].toLocaleString()}`;
         });
         
-        document.getElementById('modal-total-amount').innerHTML = `<strong>?${manualTotal.toLocaleString()}</strong>`;
+        document.getElementById('modal-total-amount').innerHTML = `<strong>₹${manualTotal.toLocaleString()}</strong>`;
         document.getElementById('modal-paid-amount').innerHTML = `<strong>?${newPaidAmount.toLocaleString()}</strong>`;
         document.getElementById('modal-pending-amount').innerHTML = `<strong>?${newPendingAmount.toLocaleString()}</strong>`;
         
@@ -86494,9 +86494,9 @@ document.addEventListener('input', function(e) {
         document.getElementById('fmSfRecordsTable').style.display = 'none';
         document.getElementById('fmSfEmptyRecords').style.display = 'none';
         document.getElementById('fmSfLoader').style.display       = '';
-        document.getElementById('fmSfTotal').textContent   = '??';
-        document.getElementById('fmSfPaid').textContent    = '??';
-        document.getElementById('fmSfPending').textContent = '??';
+        document.getElementById('fmSfTotal').textContent   = '₹-';
+        document.getElementById('fmSfPaid').textContent    = '₹-';
+        document.getElementById('fmSfPending').textContent = '₹-';
         document.getElementById('fmSfProgressBar').style.width = '0%';
         const _pl = document.getElementById('fmSfProgressLabel');
         if (_pl) _pl.textContent = '0% paid';
@@ -86554,9 +86554,9 @@ document.addEventListener('input', function(e) {
             const pendingAmt = Math.max(0, totalAmt - paidAmt);
             const pct = totalAmt > 0 ? Math.round((paidAmt / totalAmt) * 100) : 0;
 
-            document.getElementById('fmSfTotal').textContent   = '?' + fmt.format(totalAmt);
-            document.getElementById('fmSfPaid').textContent    = '?' + fmt.format(paidAmt);
-            document.getElementById('fmSfPending').textContent = '?' + fmt.format(pendingAmt);
+            document.getElementById('fmSfTotal').textContent   = '₹' + fmt.format(totalAmt);
+            document.getElementById('fmSfPaid').textContent    = '₹' + fmt.format(paidAmt);
+            document.getElementById('fmSfPending').textContent = '₹' + fmt.format(pendingAmt);
             document.getElementById('fmSfProgressBar').style.width = pct + '%';
             const progLbl = document.getElementById('fmSfProgressLabel');
             if (progLbl) progLbl.textContent = pct + '%';
