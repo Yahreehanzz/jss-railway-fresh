@@ -9437,65 +9437,81 @@ document.addEventListener('DOMContentLoaded', function() {
             pointer-events: none;
         }
 
-        /* Professional Distribution Toggle */
-        .dist-toggle-container {
+        /* Professional Distribution Toggle Switch */
+        .dist-toggle-switch {
             display: inline-flex;
             align-items: center;
-        }
-
-        .dist-toggle-track {
-            display: flex;
-            gap: 2px;
-            background: #f3f4f6;
-            padding: 4px;
-            border-radius: 12px;
-            position: relative;
-            align-items: center;
-        }
-
-        .dist-toggle-pill {
-            position: absolute;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0, 51, 102, 0.12);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 0;
-            left: 4px;
-            top: 4px;
-            bottom: 4px;
-        }
-
-        .dist-toggle-btn {
-            padding: 8px 14px;
-            border: none;
-            background: transparent;
-            color: #6b7280;
-            font-size: 12px;
-            font-weight: 600;
-            border-radius: 8px;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            align-items: center;
-            gap: 5px;
+            user-select: none;
+        }
+
+        .dist-toggle-switch input {
+            display: none;
+        }
+
+        .dist-toggle-slider {
             position: relative;
-            z-index: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100px;
+            height: 40px;
+            background: #e5e7eb;
+            border-radius: 20px;
+            padding: 2px;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+        }
+
+        .dist-toggle-switch input:checked + .dist-toggle-slider {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .dist-toggle-slider::before {
+            content: '';
+            position: absolute;
+            width: 36px;
+            height: 36px;
+            background: white;
+            border-radius: 50%;
+            left: 2px;
+            top: 2px;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .dist-toggle-switch input:checked + .dist-toggle-slider::before {
+            left: calc(100% - 38px);
+        }
+
+        .dist-toggle-label-year,
+        .dist-toggle-label-semester {
+            position: relative;
+            z-index: 2;
+            font-size: 11px;
+            font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.4px;
-            white-space: nowrap;
+            width: 45px;
+            text-align: center;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .dist-toggle-btn:hover:not(.active) {
-            color: #374151;
+        .dist-toggle-label-year {
+            color: #6b7280;
         }
 
-        .dist-toggle-btn.active {
-            color: #003366;
-            font-weight: 700;
+        .dist-toggle-label-semester {
+            color: #d1d5db;
         }
 
-        .dist-toggle-btn i {
-            font-size: 12px;
+        .dist-toggle-switch input:checked + .dist-toggle-slider .dist-toggle-label-year {
+            color: #d1d5db;
+        }
+
+        .dist-toggle-switch input:checked + .dist-toggle-slider .dist-toggle-label-semester {
+            color: white;
         }
 
         .dashboard-pie-chart-card {
@@ -38720,20 +38736,16 @@ Easily access and review students' academic performance here. This section provi
 </div>
 <div class="dashboard-main-grid">
 <div class="dashboard-left">
-<!-- Distribution View Toggle -->
+<!-- Distribution View Toggle Switch -->
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
   <h4 style="margin: 0; font-size: 13px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">Distribution</h4>
-  <div class="dist-toggle-container" id="distToggleContainer">
-    <div class="dist-toggle-track">
-      <div class="dist-toggle-pill" id="distTogglePill"></div>
-      <button class="dist-toggle-btn active" data-view="year" onclick="switchDashboardViewProfessional(this, 'year')">
-        <i class="fas fa-layer-group"></i> Year
-      </button>
-      <button class="dist-toggle-btn" data-view="semester" onclick="switchDashboardViewProfessional(this, 'semester')">
-        <i class="fas fa-book"></i> Semester
-      </button>
-    </div>
-  </div>
+  <label class="dist-toggle-switch" id="distToggleSwitch">
+    <input type="checkbox" id="distToggleCheckbox" onchange="toggleDistributionView(this)">
+    <span class="dist-toggle-slider">
+      <span class="dist-toggle-label-year">Year</span>
+      <span class="dist-toggle-label-semester">Sem</span>
+    </span>
+  </label>
 </div>
 
 <!-- Year View Cards -->
@@ -56121,7 +56133,6 @@ function restoreTeacherZonePhoto() {
                 setTimeout(() => renderStudentList(), 10);
                 setTimeout(() => renderStudentYearChart(), 20);
                 setTimeout(() => renderSemesterProgress(), 30);
-                setTimeout(() => initDistributionTogglePill(), 40);
             });
         }
 
@@ -56698,81 +56709,41 @@ function restoreTeacherZonePhoto() {
             });
         });
 
-        // Switch between Year and Semester dashboard views with professional toggle
-        function switchDashboardViewProfessional(btn, view) {
+        // Smooth professional toggle distribution view
+        function toggleDistributionView(checkbox) {
             const yearContainer = document.getElementById('yearStatsContainer');
             const semContainer = document.getElementById('semStatsContainer');
-            const track = document.querySelector('.dist-toggle-track');
-            const pill = document.getElementById('distTogglePill');
-            const buttons = document.querySelectorAll('.dist-toggle-btn');
+            const isChecked = checkbox.checked;
             
-            // Update active button state
-            buttons.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            
-            // Animate pill position
-            if (pill && track) {
-                const trackRect = track.getBoundingClientRect();
-                const btnRect = btn.getBoundingClientRect();
-                const pillLeft = btnRect.left - trackRect.left;
-                const pillWidth = btnRect.width;
+            if (isChecked) {
+                // Show semester view
+                yearContainer.style.opacity = '0';
+                yearContainer.style.pointerEvents = 'none';
                 
-                pill.style.left = pillLeft + 'px';
-                pill.style.width = pillWidth + 'px';
-            }
-            
-            if (view === 'year') {
-                // Switch to year view
-                if (semContainer) {
-                    semContainer.style.opacity = '0';
-                    semContainer.style.pointerEvents = 'none';
-                    setTimeout(() => {
-                        semContainer.style.display = 'none';
-                    }, 300);
-                }
-                
-                if (yearContainer) {
-                    yearContainer.style.display = 'grid';
-                    setTimeout(() => {
-                        yearContainer.style.opacity = '1';
-                        yearContainer.style.pointerEvents = 'auto';
-                    }, 10);
-                }
-                
-            } else if (view === 'semester') {
-                // Switch to semester view
-                if (yearContainer) {
-                    yearContainer.style.opacity = '0';
-                    yearContainer.style.pointerEvents = 'none';
-                    setTimeout(() => {
-                        yearContainer.style.display = 'none';
-                    }, 300);
-                }
-                
-                if (semContainer) {
+                setTimeout(() => {
+                    yearContainer.style.display = 'none';
                     semContainer.style.display = 'grid';
-                    setTimeout(() => {
-                        semContainer.style.opacity = '1';
-                        semContainer.style.pointerEvents = 'auto';
-                    }, 10);
-                }
-            }
-        }
-
-        // Initialize distribution toggle pill on dashboard load
-        function initDistributionTogglePill() {
-            setTimeout(() => {
-                const pill = document.getElementById('distTogglePill');
-                const track = document.querySelector('.dist-toggle-track');
-                const activeBtn = track?.querySelector('.dist-toggle-btn.active');
+                }, 175); // Mid-animation switch
                 
-                if (pill && track && activeBtn) {
-                    const trackRect = track.getBoundingClientRect();
-                    const btnRect = activeBtn.getBoundingClientRect();
-                    pill.style.left = (btnRect.left - trackRect.left) + 'px';
-                    pill.style.width = btnRect.width + 'px';
-                }
-            }, 100);
+                setTimeout(() => {
+                    semContainer.style.opacity = '1';
+                    semContainer.style.pointerEvents = 'auto';
+                }, 200);
+            } else {
+                // Show year view
+                semContainer.style.opacity = '0';
+                semContainer.style.pointerEvents = 'none';
+                
+                setTimeout(() => {
+                    semContainer.style.display = 'none';
+                    yearContainer.style.display = 'grid';
+                }, 175);
+                
+                setTimeout(() => {
+                    yearContainer.style.opacity = '1';
+                    yearContainer.style.pointerEvents = 'auto';
+                }, 200);
+            }
         }
 
         async function renderStudentList() {
