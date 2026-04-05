@@ -63573,7 +63573,9 @@ function renderAttendance() {
                                     display: flex;
                                     align-items: center;
                                     justify-content: center;
+                                    overflow: hidden;
                                 ">
+                                    ${t.photo_url ? `<img src="${t.photo_url}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"/>` : `
                                     <div style="
                                         width: 100%;
                                         height: 100%;
@@ -63588,6 +63590,7 @@ function renderAttendance() {
                                     ">
                                         ${initial}
                                     </div>
+                                    `}
                                 </div>
                                 <!-- Status Indicator -->
                                 <div style="
@@ -63927,7 +63930,8 @@ function renderAttendance() {
                 gender: genderValue || null,
                 date_of_joining: teacher.joining || null,
                 qualification: teacher.qualification || null,
-                experience: null
+                experience: null,
+                photo_url: teacher.photo || null  // ✅ INCLUDE PHOTO URL (BASE64 or null)
             };
             
             console.log('💾 Saving teacher to database:', teacherData);
