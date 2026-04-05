@@ -4576,6 +4576,195 @@ document.addEventListener('DOMContentLoaded', function() {
         .sidebar-lock-btn:hover i { transform: rotate(-12deg) scale(1.12); }
         .sidebar.collapsed .sidebar-lock-btn span { opacity:0; width:0; overflow:hidden; }
 
+        /* Notes button in sidebar */
+        .sidebar-notes-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            background: linear-gradient(135deg, rgba(255,193,7,0.08), rgba(255,152,0,0.06));
+            border: 1px solid rgba(255,193,7,0.15);
+            border-radius: 10px;
+            padding: 9px 14px;
+            color: rgba(255,193,7,0.75);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.22s ease;
+            margin-bottom: 10px;
+            font-family: inherit;
+            letter-spacing: 0.2px;
+        }
+        .sidebar-notes-btn:hover {
+            background: linear-gradient(135deg, rgba(255,193,7,0.15), rgba(255,152,0,0.12));
+            border-color: rgba(255,193,7,0.35);
+            color: rgba(255,193,7,1);
+            transform: translateX(2px);
+        }
+        .sidebar-notes-btn i {
+            font-size: 13px;
+            width: 17px;
+            transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        .sidebar-notes-btn:hover i { transform: rotate(15deg) scale(1.15); }
+        .sidebar.collapsed .sidebar-notes-btn span { opacity:0; width:0; overflow:hidden; }
+
+        /* ===== NOTES MODAL STYLING ===== */
+        .notes-modal {
+            background: linear-gradient(135deg, rgba(30,30,45,0.95) 0%, rgba(25,35,50,0.95) 100%);
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            max-height: 80vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .notes-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .notes-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .notes-input-section {
+            margin-bottom: 24px;
+        }
+
+        .notes-input {
+            width: 100%;
+            height: 120px;
+            padding: 12px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            color: rgba(255,255,255,0.9);
+            font-family: inherit;
+            font-size: 14px;
+            resize: none;
+            transition: all 0.3s ease;
+        }
+
+        .notes-input:focus {
+            outline: none;
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(255,193,7,0.3);
+            box-shadow: 0 0 12px rgba(255,193,7,0.1);
+        }
+
+        .notes-char-count {
+            font-size: 12px;
+            color: rgba(255,255,255,0.5);
+            margin-top: 6px;
+            text-align: right;
+        }
+
+        .notes-list-section {
+            margin-top: 20px;
+        }
+
+        .notes-subtitle {
+            font-size: 12px;
+            color: rgba(255,255,255,0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 12px;
+            margin: 0 0 12px 0;
+            font-weight: 600;
+        }
+
+        .notes-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .note-item {
+            background: rgba(255,193,7,0.06);
+            border: 1px solid rgba(255,193,7,0.15);
+            border-radius: 6px;
+            padding: 10px 12px;
+            color: rgba(255,255,255,0.85);
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: slideInUp 0.3s ease;
+        }
+
+        .note-item-text {
+            flex: 1;
+            word-break: break-word;
+        }
+
+        .note-item-delete {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: rgba(255,100,100,0.7);
+            font-size: 11px;
+            padding: 4px 8px;
+            transition: all 0.2s ease;
+        }
+
+        .note-item-delete:hover {
+            color: rgba(255,100,100,1);
+        }
+
+        .notes-footer {
+            display: flex;
+            gap: 10px;
+            padding: 16px 20px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .notes-btn-add,
+        .notes-btn-clear {
+            flex: 1;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .notes-btn-add {
+            background: linear-gradient(135deg, rgba(255,193,7,0.9), rgba(255,152,0,0.8));
+            color: rgba(0,0,0,0.9);
+        }
+
+        .notes-btn-add:hover {
+            background: linear-gradient(135deg, rgba(255,193,7,1), rgba(255,152,0,0.9));
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(255,193,7,0.3);
+        }
+
+        .notes-btn-clear {
+            background: rgba(255,100,100,0.15);
+            color: rgba(255,100,100,0.9);
+            border: 1px solid rgba(255,100,100,0.2);
+        }
+
+        .notes-btn-clear:hover {
+            background: rgba(255,100,100,0.25);
+            color: rgba(255,100,100,1);
+        }
+
         /* ===== LOCK SCREEN LOGOUT CONFIRM MODAL ===== */
         #lsLogoutOverlay {
             position: fixed;
@@ -38233,6 +38422,36 @@ Easily access and review students' academic performance here. This section provi
     </div>
 </div>
 
+<!-- Notes Modal -->
+<div class="hidden overlay-base" id="notesOverlay" onclick="if(event.target===this)closeNotesModal()">
+    <div class="modern-dialog notes-modal" id="notesModal" style="width: 90%; max-width: 600px;">
+        <div class="notes-header">
+            <h3 class="modern-dialog-title">📝 My Notes</h3>
+            <button class="notes-close-btn" onclick="closeNotesModal()" style="background: none; border: none; cursor: pointer; font-size: 24px; color: rgba(255,255,255,0.6);">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="notes-container">
+            <div class="notes-input-section">
+                <textarea id="noteInput" class="notes-input" placeholder="Write your note here..." maxlength="500"></textarea>
+                <div class="notes-char-count"><span id="charCount">0</span>/500</div>
+            </div>
+            <div class="notes-list-section">
+                <h4 class="notes-subtitle">Recent Notes</h4>
+                <div id="notesList" class="notes-list"></div>
+            </div>
+        </div>
+        <div class="notes-footer">
+            <button class="notes-btn-add" onclick="addNote()">
+                <i class="fas fa-plus"></i> Add Note
+            </button>
+            <button class="notes-btn-clear" onclick="clearAllNotes()">
+                <i class="fas fa-trash-alt"></i> Clear All
+            </button>
+        </div>
+    </div>
+</div>
+
 <!-- Faculty User Selection Modal -->
 <div class="hidden overlay-base" id="facultyUserSelectionOverlay" style="z-index:999998;">
     <div class="role-password-modal" id="facultyUserSelectionModal">
@@ -38379,6 +38598,10 @@ Easily access and review students' academic performance here. This section provi
 <button class="sidebar-lock-btn" onclick="lockScreen()" title="Lock Screen">
   <i class="fas fa-lock"></i>
   <span>Lock Screen</span>
+</button>
+<button class="sidebar-notes-btn" onclick="openNotesModal()" title="Add Notes">
+  <i class="fas fa-sticky-note"></i>
+  <span>Notes</span>
 </button>
 <button class="sidebar-collapse-btn" onclick="toggleSidebar()">
 <i class="fas fa-chevron-left"></i>
@@ -53373,6 +53596,104 @@ function restoreTeacherZonePhoto() {
         function closeUserOptionsPopup() {
             document.getElementById('userOptionsOverlay').classList.add('hidden');
         }
+
+        // ===== NOTES MODAL FUNCTIONS =====
+        function openNotesModal() {
+            const notesOverlay = document.getElementById('notesOverlay');
+            notesOverlay.classList.remove('hidden');
+            loadNotes();
+        }
+
+        function closeNotesModal() {
+            document.getElementById('notesOverlay').classList.add('hidden');
+        }
+
+        function addNote() {
+            const noteInput = document.getElementById('noteInput');
+            const noteText = noteInput.value.trim();
+            
+            if (!noteText) {
+                alert('Please write a note before adding');
+                return;
+            }
+            
+            // Get existing notes from localStorage
+            let notes = JSON.parse(localStorage.getItem('userNotes')) || [];
+            
+            // Add new note with timestamp
+            const newNote = {
+                id: Date.now(),
+                text: noteText,
+                timestamp: new Date().toLocaleString()
+            };
+            
+            notes.unshift(newNote); // Add to beginning
+            
+            // Keep only last 20 notes
+            if (notes.length > 20) {
+                notes = notes.slice(0, 20);
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('userNotes', JSON.stringify(notes));
+            
+            // Clear input
+            noteInput.value = '';
+            document.getElementById('charCount').textContent = '0';
+            
+            // Reload notes display
+            loadNotes();
+            
+            // Show success feedback
+            showMessageBox('✓ Note Added', 'Your note has been saved successfully!', 'success');
+        }
+
+        function deleteNote(noteId) {
+            let notes = JSON.parse(localStorage.getItem('userNotes')) || [];
+            notes = notes.filter(note => note.id !== noteId);
+            localStorage.setItem('userNotes', JSON.stringify(notes));
+            loadNotes();
+        }
+
+        function clearAllNotes() {
+            if (confirm('Are you sure you want to delete all notes? This cannot be undone.')) {
+                localStorage.removeItem('userNotes');
+                loadNotes();
+                showMessageBox('✓ Cleared', 'All notes have been deleted.', 'success');
+            }
+        }
+
+        function loadNotes() {
+            const notesList = document.getElementById('notesList');
+            const notes = JSON.parse(localStorage.getItem('userNotes')) || [];
+            
+            if (notes.length === 0) {
+                notesList.innerHTML = '<div style="text-align: center; color: rgba(255,255,255,0.4); padding: 20px; font-size: 12px;">No notes yet. Create one to get started!</div>';
+                return;
+            }
+            
+            notesList.innerHTML = notes.map(note => `
+                <div class="note-item">
+                    <div>
+                        <div class="note-item-text">${note.text}</div>
+                        <div style="font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 4px;">${note.timestamp}</div>
+                    </div>
+                    <button class="note-item-delete" onclick="deleteNote(${note.id})" title="Delete">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Update character count
+        document.addEventListener('DOMContentLoaded', function() {
+            const noteInput = document.getElementById('noteInput');
+            if (noteInput) {
+                noteInput.addEventListener('input', function() {
+                    document.getElementById('charCount').textContent = this.value.length;
+                });
+            }
+        });
 
         // Close menu when clicking anywhere outside
         document.addEventListener('click', function(e) {
