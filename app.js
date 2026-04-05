@@ -74,6 +74,35 @@ pool.query(`
     )
 `).then(() => console.log('✅ Faculty User Credentials table ready')).catch(e => console.error('⚠️ Faculty credentials table error:', e.message));
 
+// Initialize notes table if not exists
+pool.query(`
+    CREATE TABLE IF NOT EXISTS faculty_notes (
+        id SERIAL PRIMARY KEY,
+        teacher_id INTEGER NOT NULL REFERENCES teachers(id) ON DELETE CASCADE,
+        note_text TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+    )
+`).then(() => console.log('✅ Faculty Notes table ready')).catch(e => console.error('⚠️ Faculty notes table error:', e.message));
+
+// Initialize payments table if not exists (for tracking live payments)
+pool.query(`
+    CREATE TABLE IF NOT EXISTS student_payments (
+        id SERIAL PRIMARY KEY,
+        usn VARCHAR(20) NOT NULL,
+        student_id INTEGER REFERENCES students(id) ON DELETE CASCADE,
+        amount DECIMAL(10,2) NOT NULL,
+        payment_date TIMESTAMP DEFAULT NOW(),
+        payment_method VARCHAR(50),
+        installment_number INTEGER,
+        semester VARCHAR(20),
+        status VARCHAR(20) DEFAULT 'completed',
+        notes TEXT,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+    )
+`).then(() => console.log('✅ Student Payments table ready')).catch(e => console.error('⚠️ Student payments table error:', e.message));
+
 // ============================================================
 // API Routes
 // ============================================================
@@ -552,6 +581,198 @@ app.post('/api/complete-first-setup', async (req, res) => {
         });
     } catch (e) {
         console.error('❌ POST /api/complete-first-setup ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// ============================================================
+// NOTES API ENDPOINTS
+// ============================================================
+
+// Save a note to database
+app.post('/api/save-note', async (req, res) => {
+    try {
+        const { teacherId, noteText } = req.body;
+        
+        if (!teacherId || !noteText || noteText.trim().length === 0) {
+            return res.status(400).json({ success: false, error: 'teacherId and noteText required' });
+        }
+        
+        const result = await pool.query(
+            `INSERT INTO faculty_notes (teacher_id, note_text) 
+             VALUES ($1, $2) 
+             RETURNING id, teacher_id, note_text, created_at`,
+            [teacherId, noteText.trim()]
+        );
+        
+        console.log('✓ Note saved:', result.rows[0]);
+        res.json({ success: true, data: result.rows[0] });
+    } catch (e) {
+        console.error('❌ POST /api/save-note ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// Get all notes for a teacher
+app.get('/api/notes/:teacherId', async (req, res) => {
+    try {
+        const { teacherId } = req.params;
+        const result = await pool.query(
+            `SELECT id, teacher_id, note_text, created_at FROM faculty_notes 
+             WHERE teacher_id = $1 
+             ORDER BY created_at DESC 
+             LIMIT 20`,
+            [teacherId]
+        );
+        
+        console.log(`✓ Retrieved ${result.rows.length} notes for teacher ${teacherId}`);
+        res.json({ success: true, data: result.rows });
+    } catch (e) {
+        console.error('❌ GET /api/notes ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// Delete a note
+app.delete('/api/notes/:noteId', async (req, res) => {
+    try {
+        const { noteId } = req.params;
+        const result = await pool.query(
+            `DELETE FROM faculty_notes WHERE id = $1 RETURNING id`,
+            [noteId]
+        );
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ success: false, error: 'Note not found' });
+        }
+        
+        console.log('✓ Note deleted:', noteId);
+        res.json({ success: true, message: 'Note deleted' });
+    } catch (e) {
+        console.error('❌ DELETE /api/notes ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// ============================================================
+// PAYMENT API ENDPOINTS
+// ============================================================
+
+// Save payment to database
+app.post('/api/save-payment', async (req, res) => {
+    try {
+        const { usn, studentId, amount, paymentMethod, installmentNumber, semester, notes } = req.body;
+        
+        if (!usn || !amount) {
+            return res.status(400).json({ success: false, error: 'USN and amount required' });
+        }
+        
+        const result = await pool.query(
+            `INSERT INTO student_payments (usn, student_id, amount, payment_method, installment_number, semester, notes, status) 
+             VALUES ($1, $2, $3, $4, $5, $6, $7, 'completed') 
+             RETURNING id, usn, amount, payment_date, status`,
+            [usn, studentId || null, amount, paymentMethod || 'online', installmentNumber || null, semester || null, notes || null]
+        );
+        
+        console.log('✓ Payment saved:', result.rows[0]);
+        res.json({ success: true, data: result.rows[0] });
+    } catch (e) {
+        console.error('❌ POST /api/save-payment ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// Get payment history for a student
+app.get('/api/payment-history/:usn', async (req, res) => {
+    try {
+        const { usn } = req.params;
+        const result = await pool.query(
+            `SELECT id, usn, amount, payment_date, payment_method, installment_number, semester, status 
+             FROM student_payments 
+             WHERE usn = $1 
+             ORDER BY payment_date DESC`,
+            [usn]
+        );
+        
+        console.log(`✓ Retrieved ${result.rows.length} payments for USN ${usn}`);
+        res.json({ success: true, data: result.rows });
+    } catch (e) {
+        console.error('❌ GET /api/payment-history ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// ============================================================
+// FILE UPLOAD API ENDPOINTS
+// ============================================================
+
+// Save file upload record
+app.post('/api/save-upload', async (req, res) => {
+    try {
+        const { usn, fileName, fileType, fileSize, fileData } = req.body;
+        
+        if (!usn || !fileName || !fileData) {
+            return res.status(400).json({ success: false, error: 'USN, fileName, and fileData required' });
+        }
+        
+        // Create documents table if not exists
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS documents (
+                id SERIAL PRIMARY KEY,
+                usn VARCHAR(20) NOT NULL,
+                file_name VARCHAR(255) NOT NULL,
+                file_type VARCHAR(50),
+                file_size INTEGER,
+                file_data TEXT,
+                uploaded_at TIMESTAMP DEFAULT NOW()
+            )
+        `);
+        
+        const result = await pool.query(
+            `INSERT INTO documents (usn, file_name, file_type, file_size, file_data) 
+             VALUES ($1, $2, $3, $4, $5) 
+             RETURNING id, usn, file_name, uploaded_at`,
+            [usn, fileName, fileType || null, fileSize || null, fileData]
+        );
+        
+        console.log('✓ File uploaded:', result.rows[0]);
+        res.json({ success: true, data: result.rows[0] });
+    } catch (e) {
+        console.error('❌ POST /api/save-upload ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// Get uploaded files for a student
+app.get('/api/uploads/:usn', async (req, res) => {
+    try {
+        const { usn } = req.params;
+        
+        // Create table if not exists
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS documents (
+                id SERIAL PRIMARY KEY,
+                usn VARCHAR(20) NOT NULL,
+                file_name VARCHAR(255) NOT NULL,
+                file_type VARCHAR(50),
+                file_size INTEGER,
+                file_data TEXT,
+                uploaded_at TIMESTAMP DEFAULT NOW()
+            )
+        `);
+        
+        const result = await pool.query(
+            `SELECT id, usn, file_name, file_type, file_size, uploaded_at 
+             FROM documents 
+             WHERE usn = $1 
+             ORDER BY uploaded_at DESC`,
+            [usn]
+        );
+        
+        console.log(`✓ Retrieved ${result.rows.length} uploads for USN ${usn}`);
+        res.json({ success: true, data: result.rows });
+    } catch (e) {
+        console.error('❌ GET /api/uploads ERROR:', e.message);
         res.status(500).json({ success: false, error: e.message });
     }
 });

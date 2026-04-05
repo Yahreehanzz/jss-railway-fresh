@@ -53632,72 +53632,121 @@ function restoreTeacherZonePhoto() {
                 return;
             }
             
-            // Get existing notes from localStorage
-            let notes = JSON.parse(localStorage.getItem('userNotes')) || [];
+            // Get teacher ID from session or window variable
+            const teacherId = window.selectedFacultyUserId || sessionStorage.getItem('facultyUserId');
             
-            // Add new note with timestamp
-            const newNote = {
-                id: Date.now(),
-                text: noteText,
-                timestamp: new Date().toLocaleString()
-            };
-            
-            notes.unshift(newNote); // Add to beginning
-            
-            // Keep only last 20 notes
-            if (notes.length > 20) {
-                notes = notes.slice(0, 20);
+            if (!teacherId) {
+                alert('Teacher ID not found. Please login again.');
+                return;
             }
             
-            // Save to localStorage
-            localStorage.setItem('userNotes', JSON.stringify(notes));
-            
-            // Clear input
-            noteInput.value = '';
-            document.getElementById('charCount').textContent = '0';
-            
-            // Reload notes display
-            loadNotes();
-            
-            // Show success feedback
-            showMessageBox('✓ Note Added', 'Your note has been saved successfully!', 'success');
+            // Save to database via API
+            fetch(`${window.API_BASE}/save-note`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ teacherId, noteText })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    // Clear input
+                    noteInput.value = '';
+                    document.getElementById('charCount').textContent = '0';
+                    
+                    // Reload notes display
+                    loadNotes();
+                    
+                    // Show success feedback
+                    showMessageBox('✓ Note Added', 'Your note has been saved to database!', 'success');
+                    console.log('✓ Note saved to database');
+                } else {
+                    alert('Error saving note: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(err => {
+                console.error('❌ Error saving note:', err);
+                alert('Error saving note. Please try again.');
+            });
         }
 
         function deleteNote(noteId) {
-            let notes = JSON.parse(localStorage.getItem('userNotes')) || [];
-            notes = notes.filter(note => note.id !== noteId);
-            localStorage.setItem('userNotes', JSON.stringify(notes));
-            loadNotes();
+            if (!confirm('Delete this note?')) return;
+            
+            fetch(`${window.API_BASE}/notes/${noteId}`, { method: 'DELETE' })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    loadNotes();
+                    console.log('✓ Note deleted');
+                } else {
+                    alert('Error deleting note');
+                }
+            })
+            .catch(err => console.error('❌ Error deleting note:', err));
         }
 
         function clearAllNotes() {
             if (confirm('Are you sure you want to delete all notes? This cannot be undone.')) {
-                localStorage.removeItem('userNotes');
-                loadNotes();
-                showMessageBox('✓ Cleared', 'All notes have been deleted.', 'success');
+                const teacherId = window.selectedFacultyUserId || sessionStorage.getItem('facultyUserId');
+                
+                if (!teacherId) {
+                    alert('Teacher ID not found');
+                    return;
+                }
+                
+                // Load notes and delete each one
+                fetch(`${window.API_BASE}/notes/${teacherId}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success && data.data.length > 0) {
+                        Promise.all(data.data.map(note => 
+                            fetch(`${window.API_BASE}/notes/${note.id}`, { method: 'DELETE' })
+                        )).then(() => {
+                            loadNotes();
+                            showMessageBox('✓ Cleared', 'All notes have been deleted.', 'success');
+                        });
+                    } else {
+                        loadNotes();
+                    }
+                })
+                .catch(err => console.error('❌ Error clearing notes:', err));
             }
         }
 
         function loadNotes() {
             const notesList = document.getElementById('notesList');
-            const notes = JSON.parse(localStorage.getItem('userNotes')) || [];
+            const teacherId = window.selectedFacultyUserId || sessionStorage.getItem('facultyUserId');
             
-            if (notes.length === 0) {
-                notesList.innerHTML = '<div style="text-align: center; color: rgba(255,255,255,0.4); padding: 20px; font-size: 12px;">No notes yet. Create one to get started!</div>';
+            if (!teacherId) {
+                notesList.innerHTML = '<div style="text-align: center; color: rgba(255,255,255,0.4); padding: 20px; font-size: 12px;">Please login to see your notes.</div>';
                 return;
             }
             
-            notesList.innerHTML = notes.map(note => `
-                <div class="note-item">
-                    <div>
-                        <div class="note-item-text">${note.text}</div>
-                        <div style="font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 4px;">${note.timestamp}</div>
+            // Load from database via API
+            fetch(`${window.API_BASE}/notes/${teacherId}`)
+            .then(r => r.json())
+            .then(data => {
+                if (!data.success || !data.data || data.data.length === 0) {
+                    notesList.innerHTML = '<div style="text-align: center; color: rgba(255,255,255,0.4); padding: 20px; font-size: 12px;">No notes yet. Create one to get started!</div>';
+                    return;
+                }
+                
+                notesList.innerHTML = data.data.map(note => `
+                    <div class="note-item">
+                        <div>
+                            <div class="note-item-text">${note.note_text}</div>
+                            <div style="font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 4px;">${new Date(note.created_at).toLocaleString()}</div>
+                        </div>
+                        <button class="note-item-delete" onclick="deleteNote(${note.id})" title="Delete">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
                     </div>
-                    <button class="note-item-delete" onclick="deleteNote(${note.id})" title="Delete">
-                        <i class="fas fa-trash-alt"></i>
-                    </button>
-                </div>
-            `).join('');
+                `).join('');
+            })
+            .catch(err => {
+                console.error('❌ Error loading notes:', err);
+                notesList.innerHTML = '<div style="text-align: center; color: rgba(255,100,100,0.6); padding: 20px; font-size: 12px;">Error loading notes. Make sure you\'re logged in.</div>';
+            });
         }
 
         // Update character count
