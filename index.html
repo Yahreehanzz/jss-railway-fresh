@@ -86554,6 +86554,20 @@ document.addEventListener('input', function(e) {
             const pendingAmt = Math.max(0, totalAmt - paidAmt);
             const pct = totalAmt > 0 ? Math.round((paidAmt / totalAmt) * 100) : 0;
 
+            // If no fees marked, show professional "No fees marked" message
+            if (totalAmt === 0) {
+                document.getElementById('fmSfTotal').textContent   = '-';
+                document.getElementById('fmSfPaid').textContent    = '-';
+                document.getElementById('fmSfPending').textContent = '-';
+                document.getElementById('fmSfProgressBar').style.width = '0%';
+                const progLbl = document.getElementById('fmSfProgressLabel');
+                if (progLbl) progLbl.textContent = '0%';
+                
+                document.getElementById('fmSfEmptyRecords').style.display = '';
+                document.getElementById('fmSfEmptyRecords').innerHTML = '<i class="fas fa-inbox" style="font-size:32px; color:#d1d5db; margin-bottom:12px;"></i><p style="color:#6b7280; font-size:14px; margin:0;">No fees marked professionally for this student</p><p style="color:#9ca3af; font-size:12px; margin:8px 0 0 0;">Fees can be uploaded from the Fee Management section</p>';
+                return;
+            }
+
             document.getElementById('fmSfTotal').textContent   = '₹' + fmt.format(totalAmt);
             document.getElementById('fmSfPaid').textContent    = '₹' + fmt.format(paidAmt);
             document.getElementById('fmSfPending').textContent = '₹' + fmt.format(pendingAmt);
@@ -86569,13 +86583,9 @@ document.addEventListener('input', function(e) {
             fmUpdatePendingBalance();
 
             const history = studentFeeData.history || [];
-            if (totalAmt === 0 || history.length === 0) {
+            if (history.length === 0) {
                 document.getElementById('fmSfEmptyRecords').style.display = '';
-                if (totalAmt === 0) {
-                    document.getElementById('fmSfEmptyRecords').innerHTML = '<i class="fas fa-inbox"></i><p>?? No fees uploaded yet for this student</p>';
-                } else {
-                    document.getElementById('fmSfEmptyRecords').innerHTML = '<i class="fas fa-receipt"></i><p>No payment history yet. Full amount due: ?' + fmt.format(totalAmt) + '</p>';
-                }
+                document.getElementById('fmSfEmptyRecords').innerHTML = '<i class="fas fa-receipt" style="font-size:32px; color:#d1d5db; margin-bottom:12px;"></i><p style="color:#6b7280; font-size:14px; margin:0;">No payment history recorded yet</p><p style="color:#9ca3af; font-size:12px; margin:8px 0 0 0;">Total due: ₹' + fmt.format(totalAmt) + '</p>';
                 return;
             }
 

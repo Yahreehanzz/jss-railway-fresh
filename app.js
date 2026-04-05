@@ -133,6 +133,24 @@ pool.query(`
     )
 `).then(() => console.log('✅ Student Payments table ready')).catch(e => console.error('⚠️ Student payments table error:', e.message));
 
+// Initialize student fees table if not exists
+pool.query(`
+    CREATE TABLE IF NOT EXISTS student_fees (
+        id SERIAL PRIMARY KEY,
+        usn VARCHAR(20) NOT NULL,
+        student_id INTEGER REFERENCES students(id) ON DELETE CASCADE,
+        semester INTEGER,
+        total_fee DECIMAL(10,2),
+        paid_fee DECIMAL(10,2) DEFAULT 0,
+        pending_fee DECIMAL(10,2),
+        status VARCHAR(20) DEFAULT 'pending',
+        uploaded_by VARCHAR(100),
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW(),
+        UNIQUE(usn, semester)
+    )
+`).then(() => console.log('✅ Student Fees table ready')).catch(e => console.error('⚠️ Student fees table error:', e.message));
+
 // ============================================================
 // API Routes
 // ============================================================
@@ -849,6 +867,130 @@ app.post('/api/students', async (req, res) => {
         res.json({ success: true, data: r.rows[0] });
     } catch (e) {
         if (e.code === '23505') return res.status(409).json({ success: false, error: 'USN already exists' });
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// ============================================================
+// STUDENT FEES API ENDPOINTS
+// ============================================================
+
+// POST - Save/Update student fees
+app.post('/api/fees', async (req, res) => {
+    try {
+        const { usn, semester, total_fee, paid_fee, status, uploaded_by } = req.body;
+        
+        if (!usn || !semester || total_fee === undefined) {
+            return res.status(400).json({ success: false, error: 'USN, semester, and total_fee are required' });
+        }
+        
+        const pending_fee = Math.max(0, parseFloat(total_fee) - parseFloat(paid_fee || 0));
+        
+        const result = await pool.query(
+            `INSERT INTO student_fees (usn, semester, total_fee, paid_fee, pending_fee, status, uploaded_by)
+             VALUES ($1, $2, $3, $4, $5, $6, $7)
+             ON CONFLICT (usn, semester) DO UPDATE SET
+             total_fee = $3, paid_fee = $4, pending_fee = $5, status = $6, uploaded_by = $7, updated_at = NOW()
+             RETURNING *`,
+            [usn, semester, total_fee, paid_fee || 0, pending_fee, status || 'pending', uploaded_by || 'admin']
+        );
+        
+        console.log(`✅ Fee saved for USN ${usn}, Semester ${semester}`);
+        res.json({ success: true, data: result.rows[0] });
+    } catch (e) {
+        console.error('❌ POST /api/fees ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// GET - Retrieve all fees or for specific student
+app.get('/api/fees/:usn', async (req, res) => {
+    try {
+        const { usn } = req.params;
+        const result = await pool.query(
+            `SELECT * FROM student_fees WHERE usn = $1 ORDER BY semester ASC`,
+            [usn]
+        );
+        
+        res.json({ success: true, data: result.rows });
+    } catch (e) {
+        console.error('❌ GET /api/fees ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// GET - Get all student fees (for fee management dashboard)
+app.get('/api/settings/fees_data', async (req, res) => {
+    try {
+        const result = await pool.query(
+            `SELECT usn, semester, total_fee as total, paid_fee as paid, pending_fee as pending, status 
+             FROM student_fees 
+             ORDER BY usn ASC, semester ASC`
+        );
+        
+        // Convert array to key mapping (usn as key)
+        const feesData = {};
+        result.rows.forEach(row => {
+            if (!feesData[row.usn]) {
+                feesData[row.usn] = {
+                    total: 0,
+                    paid: 0,
+                    semesters: []
+                };
+            }
+            const total = parseFloat(row.total) || 0;
+            const paid = parseFloat(row.paid) || 0;
+            feesData[row.usn].total += total;
+            feesData[row.usn].paid += paid;
+            feesData[row.usn].semesters.push({
+                semester: row.semester,
+                total,
+                paid,
+                pending: row.pending,
+                status: row.status
+            });
+        });
+        
+        res.json({ success: true, data: feesData });
+    } catch (e) {
+        console.error('❌ GET /api/settings/fees_data ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// PUT - Update paid amount for a fee
+app.put('/api/fees/:usn/:semester', async (req, res) => {
+    try {
+        const { usn, semester } = req.params;
+        const { paid_fee } = req.body;
+        
+        // Get current total
+        const current = await pool.query(
+            `SELECT total_fee FROM student_fees WHERE usn = $1 AND semester = $2`,
+            [usn, semester]
+        );
+        
+        if (!current.rows.length) {
+            return res.status(404).json({ success: false, error: 'Fee record not found' });
+        }
+        
+        const total_fee = parseFloat(current.rows[0].total_fee);
+        const paid_amount = parseFloat(paid_fee);
+        const pending_fee = Math.max(0, total_fee - paid_amount);
+        const status = paid_amount >= total_fee ? 'paid' : (paid_amount > 0 ? 'partial' : 'pending');
+        
+        const result = await pool.query(
+            `UPDATE student_fees 
+             SET paid_fee = $1, pending_fee = $2, status = $3, updated_at = NOW()
+             WHERE usn = $4 AND semester = $5
+             RETURNING *`,
+            [paid_amount, pending_fee, status, usn, semester]
+        );
+        
+        console.log(`✅ Updated paid amount for ${usn}, Semester ${semester}`);
+        res.json({ success: true, data: result.rows[0] });
+    } catch (e) {
+        console.error('❌ PUT /api/fees ERROR:', e.message);
         res.status(500).json({ success: false, error: e.message });
     }
 });
