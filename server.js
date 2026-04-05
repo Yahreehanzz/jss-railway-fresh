@@ -82,7 +82,7 @@ app.get('/api/health', (req, res) => {
 // GET all teachers (with all columns)
 app.get('/api/teachers', async (req, res) => {
     try {
-        console.log('📖 GET /api/teachers');
+        console.group('📖 GET /api/teachers - FETCHING ALL TEACHERS');
         const result = await pool.query(`
             SELECT id, name, email, phone, subject, department, employee_id, 
                    photo_url, designation, gender, date_of_joining, qualification, 
@@ -90,14 +90,33 @@ app.get('/api/teachers', async (req, res) => {
             FROM teachers 
             ORDER BY name
         `);
-        console.log(`✅ Retrieved ${result.rows.length} teachers`);
+        console.log(`✅ Retrieved ${result.rows.length} teachers from database`);
         
-        // Log first teacher's photo status
+        // Log photo status for each teacher
+        let teachersWithPhotos = 0;
+        let totalPhotoBytes = 0;
+        
+        result.rows.forEach((teacher, idx) => {
+            if (teacher.photo_url) {
+                teachersWithPhotos++;
+                totalPhotoBytes += teacher.photo_url.length;
+            }
+        });
+        
+        console.log(`📸 Teachers with photos: ${teachersWithPhotos} out of ${result.rows.length}`);
+        console.log(`📊 Total photo data: ${totalPhotoBytes} bytes`);
+        
+        // Log first teacher details
         if (result.rows.length > 0) {
-            const firstTeacher = result.rows[0];
-            const photoLength = firstTeacher.photo_url ? firstTeacher.photo_url.length : 0;
-            console.log(`📸 First teacher photo stored: ${photoLength > 0 ? 'YES (' + photoLength + ' bytes)' : 'NO'}`);
+            const first = result.rows[0];
+            console.log(`First teacher: "${first.name}" (ID: ${first.id})`);
+            console.log(`  - Has photo: ${!!first.photo_url}`);
+            if (first.photo_url) {
+                console.log(`  - Photo size: ${first.photo_url.length} bytes`);
+                console.log(`  - Photo preview: ${first.photo_url.substring(0, 50)}...`);
+            }
         }
+        console.groupEnd();
         
         res.json({ success: true, data: result.rows, count: result.rows.length });
     } catch (e) {
@@ -109,9 +128,22 @@ app.get('/api/teachers', async (req, res) => {
 // POST - Add new teacher
 app.post('/api/teachers', async (req, res) => {
     try {
-        console.log('📝 POST /api/teachers - Body keys:', Object.keys(req.body));
+        console.group('📥 POST /api/teachers - INCOMING REQUEST');
+        console.log('Body keys:', Object.keys(req.body));
+        console.log('Request headers:', req.headers);
         
         const { name, email, phone, subject, department, employee_id, designation, gender, date_of_joining, qualification, experience, photo_url } = req.body;
+        
+        console.log('Extracted fields:');
+        console.log('  - name:', name);
+        console.log('  - employee_id:', employee_id);
+        console.log('  - photo_url provided:', !!photo_url);
+        console.log('  - photo_url type:', typeof photo_url);
+        if (photo_url) {
+            console.log('  - photo_url length:', photo_url.length, 'bytes');
+            console.log('  - photo_url starts with:', photo_url.substring(0, 50) + '...');
+        }
+        console.groupEnd();
         
         if (!name || !employee_id) {
             return res.status(400).json({ success: false, error: 'Name and employee_id are required' });
@@ -128,7 +160,7 @@ app.post('/api/teachers', async (req, res) => {
             INSERT INTO teachers 
             (name, email, phone, subject, department, employee_id, designation, gender, date_of_joining, qualification, experience, photo_url) 
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) 
-            RETURNING id, name, employee_id, photo_url
+            RETURNING *
         `;
         
         const values = [
@@ -146,12 +178,17 @@ app.post('/api/teachers', async (req, res) => {
             photo_url || null
         ];
         
-        console.log('🔄 Running INSERT query...');
+        console.log('🔄 Running INSERT query with values...');
         const result = await pool.query(query, values);
         const savedTeacher = result.rows[0];
         
-        console.log('✅ Teacher saved! ID:', savedTeacher.id);
-        console.log('📸 Photo stored:', savedTeacher.photo_url ? 'YES (' + savedTeacher.photo_url.length + ' bytes)' : 'NO');
+        console.group('✅ INSERTION SUCCESSFUL');
+        console.log('Teacher saved! ID:', savedTeacher.id);
+        console.log('Teacher name:', savedTeacher.name);
+        console.log('Photo_url in saved record:', !!savedTeacher.photo_url);
+        console.log('Photo size in saved record:', savedTeacher.photo_url ? savedTeacher.photo_url.length + ' bytes' : 'NULL');
+        console.log('All columns in response:', Object.keys(savedTeacher));
+        console.groupEnd();
         
         res.status(201).json({ 
             success: true, 

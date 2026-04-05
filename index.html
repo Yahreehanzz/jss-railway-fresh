@@ -63861,6 +63861,20 @@ function renderAttendance() {
                 ? (photoImg.dataset.compressedPhoto || photoImg.src) 
                 : null;
 
+            console.group('📸 PHOTO EXTRACTION IN addTeacher()');
+            console.log('Pre-photo img element exists:', !!photoImg);
+            console.log('Pre-photo display visibility:', photoImg?.style.display);
+            console.log('Photo data from dataset:', !!photoImg?.dataset.compressedPhoto);
+            console.log('Photo photo from src:', !!photoImg?.src);
+            console.log('Final compressedPhoto value exists:', !!compressedPhoto);
+            if (compressedPhoto) {
+                console.log('Photo size extracted:', compressedPhoto.length + ' bytes');
+                console.log('Photo data URI starts with:', compressedPhoto.substring(0, 50) + '...');
+            } else {
+                console.warn('⚠️ NO PHOTO - will use default avatar');
+            }
+            console.groupEnd();
+
             if (!name || !id) {
                 hideLoader();
                 showMessageBox('Input Error', "Please fill in Teacher Name and Teacher ID.");
@@ -63886,6 +63900,15 @@ function renderAttendance() {
                 branch: selectedBranch
             };
             
+            console.group('✅ newTeacher OBJECT CREATED');
+            console.log('Name:', newTeacher.name);
+            console.log('ID:', newTeacher.id);
+            console.log('Subjects:', newTeacher.subjects);
+            console.log('Photo property exists:', !!newTeacher.photo);
+            console.log('Photo size:', newTeacher.photo?.length || 0, 'bytes');
+            console.log('Using default avatar:', newTeacher.photo === defaultTeacherAvatar);
+            console.log('Full object keys:', Object.keys(newTeacher));
+            console.groupEnd();
             finalizeAddTeacher(newTeacher);
         }
 
@@ -63983,7 +64006,14 @@ function renderAttendance() {
                 photo_url: teacher.photo || null  // ✅ INCLUDE PHOTO URL (BASE64 or null)
             };
             
-            console.log('💾 Saving teacher to database:', teacherData);
+            console.group('💾 SAVING TEACHER TO DATABASE');
+            console.log('Teacher Name:', teacherData.name);
+            console.log('Employee ID:', teacherData.employee_id);
+            console.log('Photo URL provided:', !!teacherData.photo_url);
+            console.log('Photo size in payload:', teacherData.photo_url ? teacherData.photo_url.length + ' bytes' : 'NO PHOTO');
+            console.log('API Endpoint:', window.API_BASE + '/teachers');
+            console.log('Full payload:', teacherData);
+            console.groupEnd();
             
             fetch(`${window.API_BASE}/teachers`, {
                 method: 'POST',
@@ -63991,10 +64021,22 @@ function renderAttendance() {
                 body: JSON.stringify(teacherData)
             })
             .then(res => {
-                console.log('📡 API Response status:', res.status);
+                console.log('📡 API Response status:', res.status, '- Success:', res.ok);
                 return res.json();
             })
             .then(data => {
+                console.group('📥 DATABASE RESPONSE');
+                console.log('Success flag:', data.success);
+                console.log('Response data:', data.data);
+                console.log('Teacher from DB - ID:', data.data?.id);
+                console.log('Teacher from DB - Name:', data.data?.name);
+                if (data.data?.photo_url) {
+                    console.log('✅ Photo stored in database:', data.data.photo_url.length + ' bytes');
+                } else {
+                    console.warn('⚠️ Photo NOT in database response!');
+                }
+                console.groupEnd();
+                
                 if (data.success) {
                     console.log('✅ Teacher saved to database! ID:', data.data.id);
                     console.log('📸 Photo in database:', data.data.photo_url ? 'YES (' + data.data.photo_url.length + ' bytes)' : 'NO');
