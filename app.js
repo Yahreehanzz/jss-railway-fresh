@@ -64,6 +64,10 @@ pool.query(`
         teacher_id INTEGER NOT NULL REFERENCES teachers(id) ON DELETE CASCADE,
         username VARCHAR(100) NOT NULL,
         password_hash VARCHAR(255) NOT NULL,
+        gmail VARCHAR(100),
+        is_setup_complete BOOLEAN DEFAULT FALSE,
+        otp_code VARCHAR(6),
+        otp_sent_at TIMESTAMP,
         created_at TIMESTAMP DEFAULT NOW(),
         updated_at TIMESTAMP DEFAULT NOW(),
         UNIQUE(teacher_id, username)
@@ -359,6 +363,168 @@ app.delete('/api/faculty-users/:id', async (req, res) => {
         });
     } catch (e) {
         console.error('❌ DELETE /api/faculty-users ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// ============================================================
+// FIRST-TIME SETUP ENDPOINTS
+// ============================================================
+
+// Check if user needs first-time setup
+app.get('/api/check-first-setup/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const result = await pool.query(
+            `SELECT id, is_setup_complete FROM faculty_user_credentials WHERE id = $1`,
+            [userId]
+        );
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
+        
+        res.json({ 
+            success: true, 
+            is_setup_complete: result.rows[0].is_setup_complete || false 
+        });
+    } catch (e) {
+        console.error('❌ GET /api/check-first-setup ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// Verify current faculty password
+app.post('/api/verify-faculty-password', async (req, res) => {
+    try {
+        const { userId, password } = req.body;
+        
+        if (!userId || !password) {
+            return res.status(400).json({ success: false, error: 'userId and password required' });
+        }
+        
+        const result = await pool.query(
+            `SELECT password_hash FROM faculty_user_credentials WHERE id = $1`,
+            [userId]
+        );
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
+        
+        // Simple verification using btoa (same as frontend encoding)
+        const encodedPassword = Buffer.from(password).toString('base64');
+        const verified = encodedPassword === result.rows[0].password_hash;
+        
+        res.json({ success: verified, message: verified ? 'Password verified' : 'Invalid password' });
+    } catch (e) {
+        console.error('❌ POST /api/verify-faculty-password ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// Send OTP to Gmail
+app.post('/api/send-setup-otp', async (req, res) => {
+    try {
+        const { userId, email } = req.body;
+        
+        if (!userId || !email) {
+            return res.status(400).json({ success: false, error: 'userId and email required' });
+        }
+        
+        // Generate 6-digit OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        
+        // Store OTP in database
+        await pool.query(
+            `UPDATE faculty_user_credentials 
+             SET otp_code = $1, otp_sent_at = NOW(), gmail = $2
+             WHERE id = $3`,
+            [otp, email, userId]
+        );
+        
+        // TODO: Send email via Gmail API/SMTP
+        // For now, log the OTP in development
+        console.log(`📧 OTP for user ${userId}: ${otp}`);
+        
+        // In production, integrate with Nodemailer or Gmail API
+        // For demo purposes, we'll just confirm OTP was sent
+        res.json({ success: true, message: 'OTP sent to Gmail (demo: check server logs)' });
+    } catch (e) {
+        console.error('❌ POST /api/send-setup-otp ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// Verify OTP
+app.post('/api/verify-setup-otp', async (req, res) => {
+    try {
+        const { userId, email, otp } = req.body;
+        
+        if (!userId || !otp) {
+            return res.status(400).json({ success: false, error: 'userId and otp required' });
+        }
+        
+        const result = await pool.query(
+            `SELECT otp_code, otp_sent_at FROM faculty_user_credentials WHERE id = $1`,
+            [userId]
+        );
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
+        
+        const { otp_code, otp_sent_at } = result.rows[0];
+        
+        // Check if OTP is valid and not expired (10 minutes)
+        const otpAge = (Date.now() - new Date(otp_sent_at).getTime()) / 1000 / 60;
+        if (otpAge > 10) {
+            return res.json({ success: false, message: 'OTP expired' });
+        }
+        
+        if (otp_code !== otp) {
+            return res.json({ success: false, message: 'Invalid OTP' });
+        }
+        
+        res.json({ success: true, message: 'OTP verified' });
+    } catch (e) {
+        console.error('❌ POST /api/verify-setup-otp ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// Complete first-time setup
+app.post('/api/complete-first-setup', async (req, res) => {
+    try {
+        const { userId, newPassword, email, is_setup_complete } = req.body;
+        
+        if (!userId || !newPassword || !email) {
+            return res.status(400).json({ success: false, error: 'userId, newPassword, and email required' });
+        }
+        
+        // Encode new password
+        const passwordHash = Buffer.from(newPassword).toString('base64');
+        
+        // Update user with new password, email, and setup complete flag
+        const result = await pool.query(
+            `UPDATE faculty_user_credentials 
+             SET password_hash = $1, gmail = $2, is_setup_complete = true, otp_code = NULL, otp_sent_at = NULL
+             WHERE id = $3
+             RETURNING id, username, gmail, is_setup_complete`,
+            [passwordHash, email, userId]
+        );
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
+        
+        res.json({ 
+            success: true, 
+            message: 'Setup completed successfully',
+            data: result.rows[0]
+        });
+    } catch (e) {
+        console.error('❌ POST /api/complete-first-setup ERROR:', e.message);
         res.status(500).json({ success: false, error: e.message });
     }
 });
