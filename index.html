@@ -51367,8 +51367,7 @@ function restoreTeacherZonePhoto() {
                 }
                 
                 // FETCH FROM DATABASE API (not localStorage)
-                const API_BASE = RAILWAY_CONFIG.api_base;
-                const response = await fetch(`${API_BASE}/faculty-users`);
+                const response = await fetch(`${window.API_BASE}/faculty-users`);
                 const result = await response.json();
                 
                 let usersHTML = '';
@@ -63111,8 +63110,7 @@ function renderAttendance() {
                     return false;
                 }
                 
-                const API_BASE = RAILWAY_CONFIG.api_base;
-                const response = await fetch(`${API_BASE}/faculty-users/${activeTeacherId}`);
+                const response = await fetch(`${window.API_BASE}/faculty-users/${activeTeacherId}`);
                 const result = await response.json();
                 
                 if (result.success && Array.isArray(result.data)) {
@@ -63281,8 +63279,7 @@ function renderAttendance() {
                 }
 
                 // Create user access in DATABASE
-                const API_BASE = RAILWAY_CONFIG.api_base;
-                const response = await fetch(`${API_BASE}/faculty-users`, {
+                const response = await fetch(`${window.API_BASE}/faculty-users`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -63383,8 +63380,7 @@ function renderAttendance() {
                 }
                 
                 // Update password in DATABASE
-                const API_BASE = RAILWAY_CONFIG.api_base;
-                const response = await fetch(`${API_BASE}/faculty-users/${userId}`, {
+                const response = await fetch(`${window.API_BASE}/faculty-users/${userId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ password: newPassword })
@@ -63420,8 +63416,7 @@ function renderAttendance() {
                 
                 if (confirm('Remove this user access? This action cannot be undone.')) {
                     // Delete from DATABASE
-                    const API_BASE = RAILWAY_CONFIG.api_base;
-                    const response = await fetch(`${API_BASE}/faculty-users/${userId}`, {
+                    const response = await fetch(`${window.API_BASE}/faculty-users/${userId}`, {
                         method: 'DELETE'
                     });
 
