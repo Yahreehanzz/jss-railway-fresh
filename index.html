@@ -9415,10 +9415,33 @@ document.addEventListener('DOMContentLoaded', function() {
 
         .dashboard-right {
             display: flex;
-            flex-direction: column;
+            flexdirection: column;
             gap: 25px;
             min-width: 0;
             overflow: hidden;
+        }
+        
+        /* Zoom animations for distribution view switching */
+        @keyframes cardZoomIn {
+            from {
+                opacity: 0;
+                transform: scale(0.92);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes cardZoomOut {
+            from {
+                opacity: 1;
+                transform: scale(1);
+            }
+            to {
+                opacity: 0;
+                transform: scale(0.92);
+            }
         }
         
         .dashboard-stats-grid {
@@ -9429,15 +9452,27 @@ document.addEventListener('DOMContentLoaded', function() {
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             opacity: 1;
             pointer-events: auto;
+            animation: cardZoomIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
 
         .dashboard-stats-grid.semester-grid {
             grid-template-columns: repeat(3, 1fr);
             opacity: 0;
             pointer-events: none;
+            animation: none;
         }
 
-        /* Professional Distribution Toggle Switch */
+        .dashboard-stats-grid.zoom-out {
+            animation: cardZoomOut 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            opacity: 0;
+        }
+
+        .dashboard-stats-grid.zoom-in {
+            animation: cardZoomIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            opacity: 1;
+        }
+
+        /* Professional Distribution Toggle Switch with Zoom Animation */
         .dist-toggle-switch {
             display: inline-flex;
             align-items: center;
@@ -9461,11 +9496,24 @@ document.addEventListener('DOMContentLoaded', function() {
             padding: 2px;
             transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+            transform: scale(1);
+        }
+
+        /* Zoom in on hover */
+        .dist-toggle-switch:hover .dist-toggle-slider {
+            transform: scale(1.08);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .dist-toggle-switch:hover input:checked + .dist-toggle-slider {
+            transform: scale(1.08);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.3);
         }
 
         .dist-toggle-switch input:checked + .dist-toggle-slider {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            transform: scale(1);
         }
 
         .dist-toggle-slider::before {
@@ -9478,11 +9526,18 @@ document.addEventListener('DOMContentLoaded', function() {
             left: 2px;
             top: 2px;
             transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+            transform: scale(1);
         }
 
+        /* Bubble zoom animation */
         .dist-toggle-switch input:checked + .dist-toggle-slider::before {
             left: calc(100% - 38px);
+        }
+
+        .dist-toggle-switch:hover .dist-toggle-slider::before {
+            transform: scale(1.05);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
         }
 
         .dist-toggle-label-year,
@@ -9496,6 +9551,36 @@ document.addEventListener('DOMContentLoaded', function() {
             width: 45px;
             text-align: center;
             transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: scale(1);
+        }
+
+        /* Label zoom animations */
+        .dist-toggle-switch:hover .dist-toggle-label-year {
+            transform: scale(1.05);
+        }
+
+        .dist-toggle-switch:hover .dist-toggle-label-semester {
+            transform: scale(1.05);
+        }
+
+        .dist-toggle-switch input:checked:hover + .dist-toggle-slider .dist-toggle-label-year {
+            transform: scale(0.95);
+            opacity: 0.6;
+        }
+
+        .dist-toggle-switch input:checked:hover + .dist-toggle-slider .dist-toggle-label-semester {
+            transform: scale(1.05);
+            opacity: 1;
+        }
+
+        .dist-toggle-switch:hover input:not(:checked) + .dist-toggle-slider .dist-toggle-label-year {
+            transform: scale(1.05);
+            opacity: 1;
+        }
+
+        .dist-toggle-switch:hover input:not(:checked) + .dist-toggle-slider .dist-toggle-label-semester {
+            transform: scale(0.95);
+            opacity: 0.6;
         }
 
         .dist-toggle-label-year {
@@ -56710,39 +56795,51 @@ function restoreTeacherZonePhoto() {
         });
 
         // Smooth professional toggle distribution view
+        // Smooth professional zoom toggle distribution view
         function toggleDistributionView(checkbox) {
             const yearContainer = document.getElementById('yearStatsContainer');
             const semContainer = document.getElementById('semStatsContainer');
             const isChecked = checkbox.checked;
             
             if (isChecked) {
-                // Show semester view
-                yearContainer.style.opacity = '0';
-                yearContainer.style.pointerEvents = 'none';
+                // Switch to semester view with zoom effect
                 
+                // Zoom out the year view
+                yearContainer.classList.remove('zoom-in');
+                yearContainer.classList.add('zoom-out');
+                
+                // Hide year content mid-animation
                 setTimeout(() => {
                     yearContainer.style.display = 'none';
                     semContainer.style.display = 'grid';
-                }, 175); // Mid-animation switch
+                    
+                    // Trigger reflow to restart animation
+                    void semContainer.offsetWidth;
+                    
+                    // Zoom in the semester view
+                    semContainer.classList.remove('zoom-out');
+                    semContainer.classList.add('zoom-in');
+                }, 150);
                 
-                setTimeout(() => {
-                    semContainer.style.opacity = '1';
-                    semContainer.style.pointerEvents = 'auto';
-                }, 200);
             } else {
-                // Show year view
-                semContainer.style.opacity = '0';
-                semContainer.style.pointerEvents = 'none';
+                // Switch to year view with zoom effect
                 
+                // Zoom out the semester view
+                semContainer.classList.remove('zoom-in');
+                semContainer.classList.add('zoom-out');
+                
+                // Hide semester content mid-animation
                 setTimeout(() => {
                     semContainer.style.display = 'none';
                     yearContainer.style.display = 'grid';
-                }, 175);
-                
-                setTimeout(() => {
-                    yearContainer.style.opacity = '1';
-                    yearContainer.style.pointerEvents = 'auto';
-                }, 200);
+                    
+                    // Trigger reflow to restart animation
+                    void yearContainer.offsetWidth;
+                    
+                    // Zoom in the year view
+                    yearContainer.classList.remove('zoom-out');
+                    yearContainer.classList.add('zoom-in');
+                }, 150);
             }
         }
 
