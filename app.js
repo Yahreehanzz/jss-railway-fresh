@@ -401,6 +401,26 @@ app.get('/api/check-first-setup/:userId', async (req, res) => {
     }
 });
 
+// TEMPORARY: Reset all teachers to incomplete setup (for migration)
+app.post('/api/admin/reset-setup-status', async (req, res) => {
+    try {
+        console.log('🔧 Resetting setup status for all faculty users...');
+        const result = await pool.query(
+            `UPDATE faculty_user_credentials SET is_setup_complete = false WHERE is_setup_complete IS NULL OR is_setup_complete = true RETURNING id, username`
+        );
+        
+        console.log(`✅ Updated ${result.rowCount} faculty users to is_setup_complete = false`);
+        res.json({ 
+            success: true, 
+            message: `Reset ${result.rowCount} users to incomplete setup`,
+            updated_users: result.rows
+        });
+    } catch (e) {
+        console.error('❌ Reset setup status ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
 // Verify current faculty password
 app.post('/api/verify-faculty-password', async (req, res) => {
     try {
