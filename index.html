@@ -38650,7 +38650,21 @@ Easily access and review students' academic performance here. This section provi
 </div>
 <div class="dashboard-main-grid">
 <div class="dashboard-left">
-<div class="dashboard-stats-grid">
+<!-- View Toggle Button -->
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+  <h4 style="margin: 0; font-size: 13px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">Distribution</h4>
+  <div class="view-toggle-container">
+    <button class="view-toggle-btn active" id="yearViewBtn" onclick="switchDashboardView('year')" title="View by Year">
+      <i class="fas fa-layer-group"></i> Year View
+    </button>
+    <button class="view-toggle-btn" id="semViewBtn" onclick="switchDashboardView('semester')" title="View by Semester">
+      <i class="fas fa-book"></i> Sem View
+    </button>
+  </div>
+</div>
+
+<!-- Year View Cards -->
+<div class="dashboard-stats-grid" id="yearStatsContainer">
 <div class="dashboard-card">
 <h3><span id="totalStudentsCount">0</span></h3>
 <p>Total Students</p>
@@ -38666,6 +38680,34 @@ Easily access and review students' academic performance here. This section provi
 <div class="dashboard-card">
 <h3><span id="year3Count">0</span></h3>
 <p>3rd Year</p>
+</div>
+</div>
+
+<!-- Semester View Cards -->
+<div class="dashboard-stats-grid semester-grid" id="semStatsContainer" style="display: none; opacity: 0;">
+<div class="dashboard-card">
+<h3><span id="sem1Count">0</span></h3>
+<p>Semester 1</p>
+</div>
+<div class="dashboard-card">
+<h3><span id="sem2Count">0</span></h3>
+<p>Semester 2</p>
+</div>
+<div class="dashboard-card">
+<h3><span id="sem3Count">0</span></h3>
+<p>Semester 3</p>
+</div>
+<div class="dashboard-card">
+<h3><span id="sem4Count">0</span></h3>
+<p>Semester 4</p>
+</div>
+<div class="dashboard-card">
+<h3><span id="sem5Count">0</span></h3>
+<p>Semester 5</p>
+</div>
+<div class="dashboard-card">
+<h3><span id="sem6Count">0</span></h3>
+<p>Semester 6</p>
 </div>
 </div>
 <div class="dashboard-pie-chart-card">
