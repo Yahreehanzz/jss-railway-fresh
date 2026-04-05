@@ -54607,17 +54607,59 @@ function restoreTeacherZonePhoto() {
             if (idEl)   idEl.textContent   = idV   || 'TCH001';
             if (deptEl) deptEl.textContent = deptV || 'Department';
         }
+        function compressImage(file, callback, maxWidth = 300, maxHeight = 300, quality = 0.7) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+
+                    // Calculate new dimensions
+                    if (width > height) {
+                        if (width > maxWidth) {
+                            height *= maxWidth / width;
+                            width = maxWidth;
+                        }
+                    } else {
+                        if (height > maxHeight) {
+                            width *= maxHeight / height;
+                            height = maxHeight;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Convert to base64 with quality compression
+                    const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+                    callback(compressedDataUrl);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
         function previewTeacherPhoto(input) {
             const file = input.files[0];
             if (!file) return;
-            const reader = new FileReader();
-            reader.onload = e => {
+
+            // Compress the image first
+            compressImage(file, (compressedDataUrl) => {
                 const img = document.getElementById('addTeacherPreviewPhoto');
                 const placeholder = document.getElementById('tcaPhotoPlaceholder');
-                if (img) { img.src = e.target.result; img.style.display = 'block'; }
+                if (img) { 
+                    img.src = compressedDataUrl; 
+                    img.style.display = 'block'; 
+                    // Store compressed image for later use
+                    img.dataset.compressedPhoto = compressedDataUrl;
+                }
                 if (placeholder) placeholder.style.display = 'none';
-            };
-            reader.readAsDataURL(file);
+                console.log('✅ Photo compressed and previewed');
+            });
         }
         function updateTeacherDeptProgressBars() {
             const cs = parseInt((document.getElementById('csTeachersCount') || {textContent:'0'}).textContent, 10) || 0;
@@ -63801,7 +63843,12 @@ function renderAttendance() {
             const designation = (document.getElementById("addTeacherDesignation") || {value:''}).value;
             const joining = (document.getElementById("addTeacherJoining") || {value:''}).value;
             const qualification = (document.getElementById("addTeacherQualification") || {value:''}).value;
-            const photoFile = document.getElementById("addTeacherPhoto").files[0];
+            
+            // Get compressed photo from preview
+            const photoImg = document.getElementById('addTeacherPreviewPhoto');
+            const compressedPhoto = photoImg && photoImg.style.display !== 'none' 
+                ? (photoImg.dataset.compressedPhoto || photoImg.src) 
+                : null;
 
             if (!name || !id) {
                 hideLoader();
@@ -63824,20 +63871,11 @@ function renderAttendance() {
                 designation,
                 joining,
                 qualification,
-                photo: defaultTeacherAvatar,
+                photo: compressedPhoto || defaultTeacherAvatar,
                 branch: selectedBranch
             };
             
-            const reader = new FileReader();
-            if (photoFile) {
-                reader.onload = function (e) {
-                    newTeacher.photo = e.target.result;
-                    finalizeAddTeacher(newTeacher);
-                };
-                reader.readAsDataURL(photoFile);
-            } else {
-                finalizeAddTeacher(newTeacher);
-            }
+            finalizeAddTeacher(newTeacher);
         }
 
         function updateTeacherDeptPie() {

@@ -79,11 +79,26 @@ app.get('/api/health', (req, res) => {
 // TEACHERS API ENDPOINTS
 // ============================================================
 
-// GET all teachers
+// GET all teachers (with all columns)
 app.get('/api/teachers', async (req, res) => {
     try {
         console.log('📖 GET /api/teachers');
-        const result = await pool.query('SELECT * FROM teachers ORDER BY name');
+        const result = await pool.query(`
+            SELECT id, name, email, phone, subject, department, employee_id, 
+                   photo_url, designation, gender, date_of_joining, qualification, 
+                   experience, created_at, updated_at 
+            FROM teachers 
+            ORDER BY name
+        `);
+        console.log(`✅ Retrieved ${result.rows.length} teachers`);
+        
+        // Log first teacher's photo status
+        if (result.rows.length > 0) {
+            const firstTeacher = result.rows[0];
+            const photoLength = firstTeacher.photo_url ? firstTeacher.photo_url.length : 0;
+            console.log(`📸 First teacher photo stored: ${photoLength > 0 ? 'YES (' + photoLength + ' bytes)' : 'NO'}`);
+        }
+        
         res.json({ success: true, data: result.rows, count: result.rows.length });
     } catch (e) {
         console.error('❌ GET /api/teachers ERROR:', e.message);
@@ -174,6 +189,31 @@ app.delete('/api/teachers/:id', async (req, res) => {
     } catch (e) {
         console.error('❌ DELETE /api/teachers ERROR:', e.message);
         res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// DEBUG - Verify photos are stored
+app.get('/api/verify-photos', async (req, res) => {
+    try {
+        console.log('🔍 Verifying photos in database...');
+        const result = await pool.query(`
+            SELECT id, name, employee_id, 
+                   CASE WHEN photo_url IS NOT NULL THEN 'YES - ' || LENGTH(photo_url::text) || ' bytes'
+                        ELSE 'NO' END as photo_status
+            FROM teachers
+        `);
+        
+        const summary = {
+            total: result.rows.length,
+            with_photos: result.rows.filter(t => t.photo_status !== 'NO').length,
+            teachers: result.rows
+        };
+        
+        console.log('📊 Photo Summary:', summary);
+        res.json(summary);
+    } catch (e) {
+        console.error('❌ verify-photos ERROR:', e.message);
+        res.status(500).json({ error: e.message });
     }
 });
 
