@@ -51117,99 +51117,17 @@ function restoreTeacherZonePhoto() {
             currentRoleSelection = role;
             currentSelectedRole = role;
             
-            // Add click ripple and scale animation
+            // Add subtle highlight animation
             const btn = document.getElementById('role-' + role);
             if (btn) {
-                // Create ripple effect
-                const ripple = document.createElement('span');
-                ripple.style.position = 'absolute';
-                ripple.style.width = '0';
-                ripple.style.height = '0';
-                ripple.style.borderRadius = '50%';
-                ripple.style.background = 'rgba(255, 255, 255, 0.6)';
-                ripple.style.pointerEvents = 'none';
-                ripple.style.left = '50%';
-                ripple.style.top = '50%';
-                ripple.style.transform = 'translate(-50%, -50%)';
-                ripple.style.animation = 'rippleEffect 0.6s ease-out';
-                
-                if (!document.getElementById('rippleStyle')) {
-                    const style = document.createElement('style');
-                    style.id = 'rippleStyle';
-                    style.textContent = `
-                        @keyframes rippleEffect {
-                            from {
-                                width: 0;
-                                height: 0;
-                                opacity: 0.8;
-                            }
-                            to {
-                                width: 300px;
-                                height: 300px;
-                                opacity: 0;
-                            }
-                        }
-                        @keyframes slideOutLeft {
-                            from {
-                                opacity: 1;
-                                transform: translateX(0);
-                            }
-                            to {
-                                opacity: 0;
-                                transform: translateX(-40px);
-                            }
-                        }
-                        @keyframes slideInRight {
-                            from {
-                                opacity: 0;
-                                transform: translateX(40px);
-                            }
-                            to {
-                                opacity: 1;
-                                transform: translateX(0);
-                            }
-                        }
-                        @keyframes slideOutRight {
-                            from {
-                                opacity: 1;
-                                transform: translateX(0);
-                            }
-                            to {
-                                opacity: 0;
-                                transform: translateX(40px);
-                            }
-                        }
-                        @keyframes slideInLeft {
-                            from {
-                                opacity: 0;
-                                transform: translateX(-40px);
-                            }
-                            to {
-                                opacity: 1;
-                                transform: translateX(0);
-                            }
-                        }
-                    `;
-                    document.head.appendChild(style);
-                }
-                
-                btn.style.position = 'relative';
-                btn.style.overflow = 'hidden';
-                btn.appendChild(ripple);
-                
-                // Button scale animation
-                btn.style.transition = 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
-                btn.style.transform = 'scale(0.95)';
-                
+                btn.style.transform = 'scale(0.98)';
                 setTimeout(() => {
                     btn.style.transform = 'scale(1)';
-                }, 50);
+                }, 100);
             }
 
-            // Delay transition for smooth effect
-            setTimeout(() => {
-                continueToRole();
-            }, 300);
+            // Automatically proceed to next step immediately with smooth animation
+            continueToRole();
         }
 
         function continueToRole() {
@@ -51239,24 +51157,25 @@ function restoreTeacherZonePhoto() {
                     return;
                 }
                 
-                // Animate role selection out with staggered effect
-                roleSelectionPanel.style.animation = 'slideOutLeft 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+                // Animate role selection out
+                roleSelectionPanel.style.opacity = '0';
+                roleSelectionPanel.style.transform = 'translateY(-20px)';
                 
                 setTimeout(() => {
                     roleSelectionPanel.style.display = 'none';
                     hodPasswordPanel.style.display = 'block';
-                    hodPasswordPanel.style.animation = 'slideInRight 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
                     
                     // Clear and focus input
                     document.getElementById('hodPasswordInput').value = '';
                     document.getElementById('hodPasswordError').style.display = 'none';
-                    document.getElementById('hodPasswordInput').focus();
                     
-                    // Add focus glow
+                    // Animate panel in
                     setTimeout(() => {
-                        document.getElementById('hodPasswordInput').style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
-                    }, 100);
-                }, 250);
+                        hodPasswordPanel.style.opacity = '1';
+                        hodPasswordPanel.style.transform = 'translateY(0)';
+                        document.getElementById('hodPasswordInput').focus();
+                    }, 50);
+                }, 400);
             } catch (e) {
                 console.error('Error showing HOD password panel:', e);
             }
@@ -51272,24 +51191,25 @@ function restoreTeacherZonePhoto() {
                     return;
                 }
                 
-                // Animate role selection out with smooth transition
-                roleSelectionPanel.style.animation = 'slideOutLeft 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+                // Animate role selection out
+                roleSelectionPanel.style.opacity = '0';
+                roleSelectionPanel.style.transform = 'translateY(-20px)';
                 
                 setTimeout(() => {
                     roleSelectionPanel.style.display = 'none';
                     adminPasswordPanel.style.display = 'block';
-                    adminPasswordPanel.style.animation = 'slideInRight 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
                     
                     // Clear and focus input
                     document.getElementById('adminPasswordInput').value = '';
                     document.getElementById('adminPasswordError').style.display = 'none';
-                    document.getElementById('adminPasswordInput').focus();
                     
-                    // Add focus glow
+                    // Animate panel in
                     setTimeout(() => {
-                        document.getElementById('adminPasswordInput').style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
-                    }, 100);
-                }, 250);
+                        adminPasswordPanel.style.opacity = '1';
+                        adminPasswordPanel.style.transform = 'translateY(0)';
+                        document.getElementById('adminPasswordInput').focus();
+                    }, 50);
+                }, 400);
             } catch (e) {
                 console.error('Error showing Admin password panel:', e);
             }
@@ -51300,14 +51220,20 @@ function restoreTeacherZonePhoto() {
                 const roleSelectionPanel = document.getElementById('roleSelectionPanel');
                 const hodPasswordPanel = document.getElementById('hodPasswordPanel');
                 
-                // Animate HOD panel out with smooth slide
-                hodPasswordPanel.style.animation = 'slideOutRight 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+                // Animate HOD panel out
+                hodPasswordPanel.style.opacity = '0';
+                hodPasswordPanel.style.transform = 'translateY(20px)';
                 
                 setTimeout(() => {
                     hodPasswordPanel.style.display = 'none';
                     roleSelectionPanel.style.display = 'block';
-                    roleSelectionPanel.style.animation = 'slideInLeft 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
-                }, 250);
+                    
+                    // Animate role selection in
+                    setTimeout(() => {
+                        roleSelectionPanel.style.opacity = '1';
+                        roleSelectionPanel.style.transform = 'translateY(0)';
+                    }, 50);
+                }, 400);
                 
                 // Reset
                 currentRoleSelection = null;
@@ -51326,14 +51252,20 @@ function restoreTeacherZonePhoto() {
                 const roleSelectionPanel = document.getElementById('roleSelectionPanel');
                 const adminPasswordPanel = document.getElementById('adminPasswordPanel');
                 
-                // Animate Admin panel out with smooth slide
-                adminPasswordPanel.style.animation = 'slideOutRight 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+                // Animate Admin panel out
+                adminPasswordPanel.style.opacity = '0';
+                adminPasswordPanel.style.transform = 'translateY(20px)';
                 
                 setTimeout(() => {
                     adminPasswordPanel.style.display = 'none';
                     roleSelectionPanel.style.display = 'block';
-                    roleSelectionPanel.style.animation = 'slideInLeft 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
-                }, 250);
+                    
+                    // Animate role selection in
+                    setTimeout(() => {
+                        roleSelectionPanel.style.opacity = '1';
+                        roleSelectionPanel.style.transform = 'translateY(0)';
+                    }, 50);
+                }, 400);
                 
                 // Reset
                 currentRoleSelection = null;
@@ -51491,14 +51423,21 @@ function restoreTeacherZonePhoto() {
                 
                 usersListContainer.innerHTML = usersHTML;
                 
-                // Animate: hide role selection, show faculty users with smooth transition
-                roleSelectionPanel.style.animation = 'slideOutLeft 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+                // Animate: hide role selection, show faculty users
+                roleSelectionPanel.style.opacity = '0';
+                roleSelectionPanel.style.transform = 'translateY(-20px)';
                 
                 setTimeout(() => {
                     roleSelectionPanel.style.display = 'none';
                     facultyUsersPanel.style.display = 'block';
-                    facultyUsersPanel.style.animation = 'slideInRight 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
-                }, 250);
+                    facultyUsersPanel.style.opacity = '0';
+                    facultyUsersPanel.style.transform = 'translateY(20px)';
+                    
+                    setTimeout(() => {
+                        facultyUsersPanel.style.opacity = '1';
+                        facultyUsersPanel.style.transform = 'translateY(0)';
+                    }, 50);
+                }, 300);
             } catch (e) {
                 console.error('Error showing faculty users:', e);
             }
@@ -51510,13 +51449,15 @@ function restoreTeacherZonePhoto() {
             
             if (!roleSelectionPanel || !facultyUsersPanel) return;
             
-            // Animate panel out with smooth slide
-            facultyUsersPanel.style.animation = 'slideOutRight 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+            // Animate panel out
+            facultyUsersPanel.style.opacity = '0';
+            facultyUsersPanel.style.transform = 'translateY(20px)';
             
             setTimeout(() => {
                 facultyUsersPanel.style.display = 'none';
                 roleSelectionPanel.style.display = 'block';
-                roleSelectionPanel.style.animation = 'slideInLeft 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
+                roleSelectionPanel.style.opacity = '1';
+                roleSelectionPanel.style.transform = 'translateY(0)';
                 
                 // Reset selection
                 currentRoleSelection = null;
@@ -51534,7 +51475,7 @@ function restoreTeacherZonePhoto() {
                     continueBtn.classList.add('disabled');
                     continueBtn.classList.remove('active');
                 }
-            }, 250);
+            }, 400);
         }
 
         function showRolePasswordModal() {
@@ -51610,14 +51551,20 @@ function restoreTeacherZonePhoto() {
             
             if (!facultyUsersPanel || !facultyUserPasswordPanel) return;
             
-            // Animate password panel out with smooth slide
-            facultyUserPasswordPanel.style.animation = 'slideOutRight 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards';
+            // Animate password panel out
+            facultyUserPasswordPanel.style.opacity = '0';
+            facultyUserPasswordPanel.style.transform = 'translateY(20px)';
             
             setTimeout(() => {
                 facultyUserPasswordPanel.style.display = 'none';
                 facultyUsersPanel.style.display = 'block';
-                facultyUsersPanel.style.animation = 'slideInLeft 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
-            }, 250);
+                
+                // Animate users panel in
+                setTimeout(() => {
+                    facultyUsersPanel.style.opacity = '1';
+                    facultyUsersPanel.style.transform = 'translateY(0)';
+                }, 50);
+            }, 400);
             
             // Reset selections
             selectedFacultyTeacherId = null;
