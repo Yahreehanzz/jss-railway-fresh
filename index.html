@@ -63579,7 +63579,14 @@ function renderAttendance() {
                     const initial = t.name.charAt(0).toUpperCase();
                     const deptLabel = t.department || (t.subjects && t.subjects[0]) || 'Staff';
                     const subjectsList = (t.subjects && t.subjects.length > 0) ? t.subjects.join(', ') : 'No subjects assigned';
-                    const teacherId = String(t.id || '');
+                    const teacherId = String(t.id || t.employee_id || '');
+                    
+                    // Log if teacher has photo
+                    if (t.photo_url) {
+                        console.log('[DEBUG] Teacher has photo:', t.name, '- Size:', t.photo_url.length, 'bytes');
+                    } else if (t.photo) {
+                        console.log('[DEBUG] Teacher has local photo:', t.name, '- Size:', t.photo.length, 'bytes');
+                    }
                     
                     console.log('[DEBUG] Rendering teacher card:', t.name);
 
@@ -63617,13 +63624,13 @@ function renderAttendance() {
                                     justify-content: center;
                                     overflow: hidden;
                                 ">
-                                    ${t.photo_url ? `<img src="${t.photo_url}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"/>` : `
+                                    ${t.photo_url || t.photo ? `<img src="${t.photo_url || t.photo}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" onerror="this.style.display='none'"/>` : `<div/>`}
                                     <div style="
                                         width: 100%;
                                         height: 100%;
                                         border-radius: 50%;
                                         background: #070B14;
-                                        display: flex;
+                                        display: ${t.photo_url || t.photo ? 'none' : 'flex'};
                                         align-items: center;
                                         justify-content: center;
                                         color: white;
@@ -63632,7 +63639,6 @@ function renderAttendance() {
                                     ">
                                         ${initial}
                                     </div>
-                                    `}
                                 </div>
                                 <!-- Status Indicator -->
                                 <div style="
@@ -63974,21 +63980,34 @@ function renderAttendance() {
             
             console.log('💾 Saving teacher to database:', teacherData);
             
-            fetch(`${window.API_BASE}/teachers`, {
+            fetch(`${window.API_BASE}/api/teachers`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(teacherData)
             })
-            .then(res => res.json())
+            .then(res => {
+                console.log('📡 API Response status:', res.status);
+                return res.json();
+            })
             .then(data => {
                 if (data.success) {
                     console.log('✅ Teacher saved to database! ID:', data.data.id);
+                    console.log('📸 Photo in database:', data.data.photo_url ? 'YES (' + data.data.photo_url.length + ' bytes)' : 'NO');
+                    
+                    // Force reload from API to show new teacher with photo
+                    setTimeout(() => {
+                        console.log('🔄 Refreshing teachers from database...');
+                        isLoadingTeachers = false;  // Reset flag
+                        fetchAndRenderTeachers();
+                    }, 800);
                 } else {
                     console.error('❌ Database save failed:', data.error);
+                    showMessageBox('Error', 'Failed to save: ' + data.error);
                 }
             })
             .catch(err => {
                 console.error('❌ API call failed:', err);
+                showMessageBox('Error', 'Failed to reach server: ' + err.message);
             });
             
             hideLoader();

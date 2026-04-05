@@ -109,7 +109,7 @@ app.get('/api/teachers', async (req, res) => {
 // POST - Add new teacher
 app.post('/api/teachers', async (req, res) => {
     try {
-        console.log('📝 POST /api/teachers - Body:', req.body);
+        console.log('📝 POST /api/teachers - Body keys:', Object.keys(req.body));
         
         const { name, email, phone, subject, department, employee_id, designation, gender, date_of_joining, qualification, experience, photo_url } = req.body;
         
@@ -117,11 +117,18 @@ app.post('/api/teachers', async (req, res) => {
             return res.status(400).json({ success: false, error: 'Name and employee_id are required' });
         }
         
+        // Log photo info
+        if (photo_url) {
+            console.log(`📸 Photo received: ${photo_url.length} bytes`);
+        } else {
+            console.log('📸 No photo provided');
+        }
+        
         const query = `
             INSERT INTO teachers 
             (name, email, phone, subject, department, employee_id, designation, gender, date_of_joining, qualification, experience, photo_url) 
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) 
-            RETURNING *
+            RETURNING id, name, employee_id, photo_url
         `;
         
         const values = [
@@ -144,6 +151,8 @@ app.post('/api/teachers', async (req, res) => {
         const savedTeacher = result.rows[0];
         
         console.log('✅ Teacher saved! ID:', savedTeacher.id);
+        console.log('📸 Photo stored:', savedTeacher.photo_url ? 'YES (' + savedTeacher.photo_url.length + ' bytes)' : 'NO');
+        
         res.status(201).json({ 
             success: true, 
             data: savedTeacher,
