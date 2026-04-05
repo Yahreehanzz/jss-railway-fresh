@@ -51773,28 +51773,6 @@ function restoreTeacherZonePhoto() {
             }, 400);
         }
 
-        function showFirstTimeSetupFlow() {
-            const facultyUsersPanel = document.getElementById('facultyUsersPanel');
-            const setupModal = document.getElementById('firstTimeSetupModal');
-            
-            if (!facultyUsersPanel || !setupModal) return;
-            
-            // Animate users panel out
-            facultyUsersPanel.style.opacity = '0';
-            facultyUsersPanel.style.transform = 'translateY(-20px)';
-            
-            setTimeout(() => {
-                facultyUsersPanel.style.display = 'none';
-                setupModal.style.display = 'block';
-                
-                // Animate setup modal in
-                setTimeout(() => {
-                    setupModal.style.opacity = '1';
-                    setupModal.style.transform = 'translateY(0)';
-                }, 50);
-            }, 400);
-        }
-
         function backFromFacultyUserPassword() {
             const facultyUsersPanel = document.getElementById('facultyUsersPanel');
             const facultyUserPasswordPanel = document.getElementById('facultyUserPasswordPanel');
@@ -51843,6 +51821,7 @@ function restoreTeacherZonePhoto() {
                 }
                 
                 // Verify password with backend
+                console.log('🔍 Verifying password for user:', window.selectedFacultyUserId);
                 const response = await fetch(`${window.API_BASE}/verify-faculty-password`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -51853,34 +51832,12 @@ function restoreTeacherZonePhoto() {
                 });
                 
                 const data = await response.json();
+                console.log('✓ Password verification result:', data.success);
                 
                 if (!data.success) {
                     errorEl.textContent = 'Invalid password. Please try again.';
                     errorEl.style.display = 'block';
                     return;
-                }
-                
-                // Password verified! Now check if first-time setup is needed
-                try {
-                    const setupCheckResponse = await fetch(`${window.API_BASE}/check-first-setup/${window.selectedFacultyUserId}`);
-                    const setupCheckData = await setupCheckResponse.json();
-                    
-                    console.log('Setup check result:', setupCheckData);
-                    
-                    if (setupCheckData.success && !setupCheckData.is_setup_complete) {
-                        // First-time login - show setup flow
-                        console.log('First-time setup needed - showing setup modal');
-                        window.setupData = {};
-                        const encodedPassword = btoa(password);
-                        sessionStorage.setItem('userRole', 'teacher');
-                        sessionStorage.setItem('facultyUserId', window.selectedFacultyUserId);
-                        sessionStorage.setItem('facultyUsername', window.selectedFacultyUsername);
-                        sessionStorage.setItem('facultyPassword', encodedPassword);
-                        showFirstTimeSetupFlow();
-                        return;
-                    }
-                } catch (setupErr) {
-                    console.warn('Setup check failed, continuing with 2FA:', setupErr);
                 }
                 
                 // Store the faculty user info in sessionStorage
@@ -51890,15 +51847,37 @@ function restoreTeacherZonePhoto() {
                 sessionStorage.setItem('facultyUsername', window.selectedFacultyUsername);
                 sessionStorage.setItem('facultyPassword', encodedPassword);
                 
+                // Password verified! Now check if first-time setup is needed
+                console.log('📋 Checking setup status for user:', window.selectedFacultyUserId);
+                try {
+                    const setupCheckResponse = await fetch(`${window.API_BASE}/check-first-setup/${window.selectedFacultyUserId}`);
+                    const setupCheckData = await setupCheckResponse.json();
+                    
+                    console.log('✓ Setup check result:', setupCheckData);
+                    
+                    if (setupCheckData.success && setupCheckData.is_setup_complete === false) {
+                        // First-time login - show setup flow
+                        console.log('🎉 First-time setup needed - showing setup modal');
+                        window.setupData = { newPassword: password };
+                        showFirstTimeSetupFlow();
+                        return;
+                    } else {
+                        // Setup already complete or no data - proceed to 2FA
+                        console.log('✓ Setup already complete - showing 2FA');
+                    }
+                } catch (setupErr) {
+                    console.warn('⚠️ Setup check failed:', setupErr);
+                    // Continue to 2FA if check fails
+                }
+                
                 // Normal login - show 2FA
-                console.log('Setup complete, showing 2FA');
                 document.getElementById('roleSelectionOverlay').classList.add('hidden');
                 
                 setTimeout(() => {
                     show2FAModal();
                 }, 300);
             } catch (e) {
-                console.error('Error verifying password:', e);
+                console.error('❌ Error verifying password:', e);
                 document.getElementById('facultyUserPasswordError').textContent = 'Error verifying password. Please try again.';
                 document.getElementById('facultyUserPasswordError').style.display = 'block';
             }

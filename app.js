@@ -286,11 +286,13 @@ app.post('/api/faculty-users', async (req, res) => {
         
         console.log('📝 POST /api/faculty-users - Creating user:', username);
         const result = await pool.query(
-            `INSERT INTO faculty_user_credentials (teacher_id, username, password_hash)
-             VALUES ($1, $2, $3)
-             RETURNING id, teacher_id, username, created_at`,
+            `INSERT INTO faculty_user_credentials (teacher_id, username, password_hash, is_setup_complete)
+             VALUES ($1, $2, $3, false)
+             RETURNING id, teacher_id, username, is_setup_complete, created_at`,
             [teacher_id, username, password_hash]
         );
+        
+        console.log('✅ New faculty user created - Setup required:', result.rows[0].id);
         
         res.status(201).json({ 
             success: true, 
