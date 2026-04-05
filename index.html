@@ -55911,6 +55911,20 @@ function restoreTeacherZonePhoto() {
             // Load fresh students from API
             await loadStudentsData();
             
+            // Auto-populate missing year data
+            try {
+                await fetch(`${API_BASE}/fix/populate-years`, { method: 'POST' })
+                    .then(r => r.json())
+                    .then(res => {
+                        if (res.success && res.updated > 0) {
+                            console.log(`✅ Auto-populated years for ${res.updated} students`);
+                            // Reload students to get updated year values
+                            loadStudentsData();
+                        }
+                    })
+                    .catch(() => {}); // Silently ignore errors
+            } catch (e) {}
+            
             requestAnimationFrame(() => {
                 const filteredByBranchStudents = selectedBranch 
                     ? students.filter(s => s.branch === selectedBranch)
@@ -55934,13 +55948,33 @@ function restoreTeacherZonePhoto() {
                 }
                 
                 filteredByBranchStudents.forEach(s => {
-                    if (s.year === '1st Year') counts.year1++;
-                    else if (s.year === '2nd Year') counts.year2++;
-                    else if (s.year === '3rd Year') counts.year3++;
+                    // Convert year value to standard format - accept both numeric and string formats
+                    let studentYear = null;
+                    
+                    // Check direct year field
+                    if (s.year === 1 || s.year === '1' || s.year === '1st Year') studentYear = 1;
+                    else if (s.year === 2 || s.year === '2' || s.year === '2nd Year') studentYear = 2;
+                    else if (s.year === 3 || s.year === '3' || s.year === '3rd Year') studentYear = 3;
+                    
+                    // Fallback to batch_year if available
+                    else if (s.batch_year === 1 || s.batch_year === '1') studentYear = 1;
+                    else if (s.batch_year === 2 || s.batch_year === '2') studentYear = 2;
+                    else if (s.batch_year === 3 || s.batch_year === '3') studentYear = 3;
+                    
+                    // Fallback to semester (divide by 2 and round up to get year)
+                    else if (s.semester) {
+                        const sem = parseInt(s.semester);
+                        studentYear = Math.ceil(sem / 2);
+                        if (studentYear > 3) studentYear = 3;
+                    }
+                    
+                    if (studentYear === 1) counts.year1++;
+                    else if (studentYear === 2) counts.year2++;
+                    else if (studentYear === 3) counts.year3++;
                 });
                 
                 console.log('[Dashboard] Total:', counts.total, 'Y1:', counts.year1, 'Y2:', counts.year2, 'Y3:', counts.year3);
-                console.log('📊 All students year values:', filteredByBranchStudents.map(s => ({ name: s.name, year: s.year, semester: s.semester })).slice(0, 5));
+                console.log('📊 All students year values:', filteredByBranchStudents.map(s => ({ name: s.name, year: s.year, batch_year: s.batch_year, semester: s.semester })).slice(0, 5));
                 
                 document.getElementById("totalStudentsCount").textContent = counts.total;
                 document.getElementById("year1Count").textContent = counts.year1;
@@ -55997,7 +56031,26 @@ function restoreTeacherZonePhoto() {
                     if (s.status === 'Passed Out') {
                         yearCounts['Passed Out']++;
                     } else {
-                        yearCounts[s.year] = (yearCounts[s.year] || 0) + 1;
+                        // Convert year value to standard format
+                        let studentYear = null;
+                        
+                        if (s.year === 1 || s.year === '1' || s.year === '1st Year') studentYear = '1st Year';
+                        else if (s.year === 2 || s.year === '2' || s.year === '2nd Year') studentYear = '2nd Year';
+                        else if (s.year === 3 || s.year === '3' || s.year === '3rd Year') studentYear = '3rd Year';
+                        else if (s.batch_year === 1 || s.batch_year === '1') studentYear = '1st Year';
+                        else if (s.batch_year === 2 || s.batch_year === '2') studentYear = '2nd Year';
+                        else if (s.batch_year === 3 || s.batch_year === '3') studentYear = '3rd Year';
+                        else if (s.semester) {
+                            const sem = parseInt(s.semester);
+                            const year = Math.ceil(sem / 2);
+                            if (year === 1) studentYear = '1st Year';
+                            else if (year === 2) studentYear = '2nd Year';
+                            else if (year === 3) studentYear = '3rd Year';
+                        }
+                        
+                        if (studentYear && yearCounts[studentYear] !== undefined) {
+                            yearCounts[studentYear]++;
+                        }
                     }
                 });
 

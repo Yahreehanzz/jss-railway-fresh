@@ -854,6 +854,31 @@ app.post('/api/fix/populate-phone-numbers', async (req, res) => {
     }
 });
 
+// Populate year for students based on semester
+app.post('/api/fix/populate-years', async (req, res) => {
+    try {
+        console.log('🔧 Populating year field for students based on semester...');
+        
+        const result = await pool.query(`
+            UPDATE students 
+            SET year = CEIL(CAST(semester AS NUMERIC(10,1)) / 2)
+            WHERE (year IS NULL OR year = 0)
+            RETURNING id, name, semester, year
+        `);
+        
+        console.log(`✅ Updated ${result.rowCount} students with year data`);
+        res.json({ 
+            success: true, 
+            message: `Updated ${result.rowCount} students with year data`,
+            updated: result.rowCount,
+            data: result.rows
+        });
+    } catch (e) {
+        console.error('❌ POST /api/fix/populate-years ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
 // ============================================================
 app.post('/api/students', async (req, res) => {
     try {
