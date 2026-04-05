@@ -51355,6 +51355,11 @@ function restoreTeacherZonePhoto() {
             }
         }
 
+        // Cache for faculty users (prevents refetching)
+        let facultyUsersCache = null;
+        let facultyUsersCacheTime = 0;
+        const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
         async function showFacultyUserSelectionAnimated() {
             try {
                 const roleSelectionPanel = document.getElementById('roleSelectionPanel');
@@ -51366,62 +51371,33 @@ function restoreTeacherZonePhoto() {
                     return;
                 }
                 
-                // FETCH FROM DATABASE API (not localStorage)
-                const response = await fetch(`${window.API_BASE}/faculty-users`);
-                const result = await response.json();
-                
-                let usersHTML = '';
-                
-                if (!result.success || !Array.isArray(result.data) || result.data.length === 0) {
-                    usersHTML = '<div style="color: #999; text-align: center; padding: 20px;">📭 No user accounts available. Ask your administrator to create accounts.</div>';
-                } else {
-                    // Build user list HTML with staggered animation
-                    result.data.forEach((user, idx) => {
-                        const delay = idx * 0.08;
-                        usersHTML += `
-                            <div onclick="selectFacultyUser(${user.id}, '${user.username}')" style="
-                                background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%);
-                                border: 2px solid rgba(59, 130, 246, 0.3);
-                                padding: 16px 20px;
-                                border-radius: 12px;
-                                cursor: pointer;
-                                transition: all 0.3s ease;
-                                display: flex;
-                                align-items: center;
-                                gap: 16px;
-                                animation: slideUpUser 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) ${delay}s backwards;
-                            " onmouseover="this.style.borderColor='rgba(59, 130, 246, 0.8)'; this.style.background='linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(37, 99, 235, 0.1) 100%)'; this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='rgba(59, 130, 246, 0.3)'; this.style.background='linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%)'; this.style.transform='translateY(0)'">
-                                <div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.2rem; flex-shrink: 0;">${user.username[0].toUpperCase()}</div>
-                                <div style="flex: 1;">
-                                    <div style="color: #1f2937; font-weight: 700; font-size: 1rem; margin-bottom: 4px;">${user.username}</div>
-                                    <div style="color: #6b7280; font-size: 0.85rem;">${user.teacher_name} • ${new Date(user.created_at).toLocaleDateString()}</div>
-                                </div>
-                                <div style="color: #3b82f6; font-size: 1.4rem; font-weight: 700;">→</div>
-                            </div>
-                        `;
-                    });
-                }
-                
-                // Add CSS animation if not already added
+                // Add CSS animations if not already added
                 if (!document.getElementById('userListAnimationStyle')) {
                     const style = document.createElement('style');
                     style.id = 'userListAnimationStyle';
                     style.textContent = `
                         @keyframes slideUpUser {
-                            from {
-                                opacity: 0;
-                                transform: translateY(20px);
-                            }
-                            to {
-                                opacity: 1;
-                                transform: translateY(0);
-                            }
+                            from { opacity: 0; transform: translateY(20px); }
+                            to { opacity: 1; transform: translateY(0); }
+                        }
+                        @keyframes shimmer {
+                            0% { background-position: -1000px 0; }
+                            100% { background-position: 1000px 0; }
+                        }
+                        .skeleton-loader {
+                            background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+                            background-size: 1000px 100%;
+                            animation: shimmer 2s infinite;
                         }
                     `;
                     document.head.appendChild(style);
                 }
                 
-                usersListContainer.innerHTML = usersHTML;
+                // STEP 1: Show loading UI immediately (instant visual feedback)
+                const skeletonHTML = Array(3).fill().map((_, i) => `
+                    <div class="skeleton-loader" style="padding: 16px 20px; border-radius: 12px; margin-bottom: 12px; height: 80px;"></div>
+                `).join('');
+                usersListContainer.innerHTML = skeletonHTML;
                 
                 // Animate: hide role selection, show faculty users
                 roleSelectionPanel.style.opacity = '0';
@@ -51437,9 +51413,74 @@ function restoreTeacherZonePhoto() {
                         facultyUsersPanel.style.opacity = '1';
                         facultyUsersPanel.style.transform = 'translateY(0)';
                     }, 50);
-                }, 300);
+                }, 180);
+                
+                // STEP 2: Fetch data in background (non-blocking)
+                fetchFacultyUsersOptimized().then(result => {
+                    if (!facultyUsersPanel.querySelector('.skeleton-loader')) return; // Already updated
+                    
+                    let usersHTML = '';
+                    
+                    if (!result.success || !Array.isArray(result.data) || result.data.length === 0) {
+                        usersHTML = '<div style="color: #999; text-align: center; padding: 20px;">📭 No user accounts available. Ask your administrator to create accounts.</div>';
+                    } else {
+                        // Build user list HTML with staggered animation
+                        result.data.forEach((user, idx) => {
+                            const delay = idx * 0.06;
+                            usersHTML += `
+                                <div onclick="selectFacultyUser(${user.id}, '${user.username}')" style="
+                                    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%);
+                                    border: 2px solid rgba(59, 130, 246, 0.3);
+                                    padding: 16px 20px;
+                                    border-radius: 12px;
+                                    cursor: pointer;
+                                    transition: all 0.3s ease;
+                                    display: flex;
+                                    align-items: center;
+                                    gap: 16px;
+                                    animation: slideUpUser 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) ${delay}s backwards;
+                                " onmouseover="this.style.borderColor='rgba(59, 130, 246, 0.8)'; this.style.background='linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(37, 99, 235, 0.1) 100%)'; this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='rgba(59, 130, 246, 0.3)'; this.style.background='linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%)'; this.style.transform='translateY(0)'">
+                                    <div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.2rem; flex-shrink: 0;">${user.username[0].toUpperCase()}</div>
+                                    <div style="flex: 1;">
+                                        <div style="color: #1f2937; font-weight: 700; font-size: 1rem; margin-bottom: 4px;">${user.username}</div>
+                                        <div style="color: #6b7280; font-size: 0.85rem;">${user.teacher_name} • ${new Date(user.created_at).toLocaleDateString()}</div>
+                                    </div>
+                                    <div style="color: #3b82f6; font-size: 1.4rem; font-weight: 700;">→</div>
+                                </div>
+                            `;
+                        });
+                    }
+                    
+                    usersListContainer.innerHTML = usersHTML;
+                }).catch(err => {
+                    console.error('Error loading faculty users:', err);
+                    usersListContainer.innerHTML = '<div style="color: #dc2626; text-align: center; padding: 20px;">❌ Error loading users. Please try again.</div>';
+                });
             } catch (e) {
                 console.error('Error showing faculty users:', e);
+            }
+        }
+
+        async function fetchFacultyUsersOptimized() {
+            const now = Date.now();
+            
+            // Return cached data if available and fresh
+            if (facultyUsersCache && (now - facultyUsersCacheTime) < CACHE_DURATION) {
+                return facultyUsersCache;
+            }
+            
+            try {
+                const response = await fetch(`${window.API_BASE}/faculty-users`);
+                const result = await response.json();
+                
+                // Cache the result
+                facultyUsersCache = result;
+                facultyUsersCacheTime = now;
+                
+                return result;
+            } catch (error) {
+                console.error('Fetch error:', error);
+                return { success: false, data: [] };
             }
         }
 
