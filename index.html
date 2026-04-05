@@ -54608,10 +54608,23 @@ function restoreTeacherZonePhoto() {
             if (deptEl) deptEl.textContent = deptV || 'Department';
         }
         function compressImage(file, callback, maxWidth = 300, maxHeight = 300, quality = 0.7) {
+            console.log('📦 Starting image compression...');
             const reader = new FileReader();
+            
+            reader.onerror = () => {
+                console.error('❌ FileReader error:', reader.error);
+            };
+            
             reader.onload = (e) => {
+                console.log('📖 FileReader loaded, data URL length:', e.target.result.length);
                 const img = new Image();
+                
+                img.onerror = () => {
+                    console.error('❌ Image failed to load');
+                };
+                
                 img.onload = () => {
+                    console.log('📐 Image dimensions:', img.width, 'x', img.height);
                     const canvas = document.createElement('canvas');
                     let width = img.width;
                     let height = img.height;
@@ -54629,6 +54642,7 @@ function restoreTeacherZonePhoto() {
                         }
                     }
 
+                    console.log('🎨 Resized to:', width, 'x', height);
                     canvas.width = width;
                     canvas.height = height;
                     const ctx = canvas.getContext('2d');
@@ -54636,6 +54650,7 @@ function restoreTeacherZonePhoto() {
 
                     // Convert to base64 with quality compression
                     const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+                    console.log('✅ Compression complete. Final size:', compressedDataUrl.length, 'bytes');
                     callback(compressedDataUrl);
                 };
                 img.src = e.target.result;
@@ -54644,21 +54659,53 @@ function restoreTeacherZonePhoto() {
         }
 
         function previewTeacherPhoto(input) {
+            console.group('📷 PHOTO SELECTION DETECTED');
             const file = input.files[0];
-            if (!file) return;
+            console.log('File selected:', !!file);
+            if (!file) {
+                console.warn('No file selected');
+                console.groupEnd();
+                return;
+            }
+            
+            console.log('File name:', file.name);
+            console.log('File size (raw):', file.size, 'bytes');
+            console.log('File type:', file.type);
 
             // Compress the image first
             compressImage(file, (compressedDataUrl) => {
+                console.log('✅ Compression complete');
+                console.log('Compressed size:', compressedDataUrl.length, 'bytes');
+                
                 const img = document.getElementById('addTeacherPreviewPhoto');
                 const placeholder = document.getElementById('tcaPhotoPlaceholder');
-                if (img) { 
-                    img.src = compressedDataUrl; 
-                    img.style.display = 'block'; 
-                    // Store compressed image for later use
-                    img.dataset.compressedPhoto = compressedDataUrl;
+                
+                if (!img) {
+                    console.error('❌ Preview image element not found!');
+                    console.groupEnd();
+                    return;
                 }
-                if (placeholder) placeholder.style.display = 'none';
-                console.log('✅ Photo compressed and previewed');
+                
+                console.log('Found preview img element');
+                console.log('Setting img.src...');
+                img.src = compressedDataUrl;
+                
+                console.log('Setting display block...');
+                img.style.display = 'block';
+                img.style.visibility = 'visible';
+                img.style.opacity = '1';
+                
+                // Store compressed image for later use
+                img.dataset.compressedPhoto = compressedDataUrl;
+                console.log('Stored in dataset.compressedPhoto');
+                
+                if (placeholder) {
+                    console.log('Hiding placeholder');
+                    placeholder.style.display = 'none';
+                }
+                
+                console.log('✅ Photo preview displayed successfully');
+                console.groupEnd();
             });
         }
         function updateTeacherDeptProgressBars() {
@@ -64058,10 +64105,22 @@ function renderAttendance() {
             });
             
             hideLoader();
-            showMessageBox('Success', "Teacher Added!");
+            showMessageBox('Success', "Teacher Added! Photo being synced...");
             document.getElementById("addTeacher").querySelectorAll('input:not([type="file"])').forEach(input => input.value = '');
-            document.getElementById("addTeacherPhoto").value = '';
-            document.getElementById("addTeacherPreviewPhoto").classList.add('hidden');
+            
+            const photoInput = document.getElementById("addTeacherPhoto");
+            if (photoInput) photoInput.value = '';
+            
+            const previewImg = document.getElementById("addTeacherPreviewPhoto");
+            if (previewImg) {
+                previewImg.src = '';
+                previewImg.dataset.compressedPhoto = '';
+                previewImg.style.display = 'none';
+            }
+            
+            const photoPlaceholder = document.getElementById("tcaPhotoPlaceholder");
+            if (photoPlaceholder) photoPlaceholder.style.display = 'block';
+            
             renderTeacherDashboard();
         }
 
