@@ -384,9 +384,14 @@ app.get('/api/check-first-setup/:userId', async (req, res) => {
             return res.status(404).json({ success: false, error: 'User not found' });
         }
         
+        // Treat NULL, false, and 0 as incomplete setup
+        const isSetupComplete = result.rows[0].is_setup_complete === true;
+        
+        console.log(`✓ Setup check for user ${userId}: is_setup_complete=${isSetupComplete}`);
+        
         res.json({ 
             success: true, 
-            is_setup_complete: result.rows[0].is_setup_complete || false 
+            is_setup_complete: isSetupComplete
         });
     } catch (e) {
         console.error('❌ GET /api/check-first-setup ERROR:', e.message);

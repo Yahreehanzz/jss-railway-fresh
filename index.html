@@ -51861,8 +51861,27 @@ function restoreTeacherZonePhoto() {
                 }
                 
                 // Password verified! Now check if first-time setup is needed
-                const setupCheckResponse = await fetch(`${window.API_BASE}/check-first-setup/${window.selectedFacultyUserId}`);
-                const setupCheckData = await setupCheckResponse.json();
+                try {
+                    const setupCheckResponse = await fetch(`${window.API_BASE}/check-first-setup/${window.selectedFacultyUserId}`);
+                    const setupCheckData = await setupCheckResponse.json();
+                    
+                    console.log('Setup check result:', setupCheckData);
+                    
+                    if (setupCheckData.success && !setupCheckData.is_setup_complete) {
+                        // First-time login - show setup flow
+                        console.log('First-time setup needed - showing setup modal');
+                        window.setupData = {};
+                        const encodedPassword = btoa(password);
+                        sessionStorage.setItem('userRole', 'teacher');
+                        sessionStorage.setItem('facultyUserId', window.selectedFacultyUserId);
+                        sessionStorage.setItem('facultyUsername', window.selectedFacultyUsername);
+                        sessionStorage.setItem('facultyPassword', encodedPassword);
+                        showFirstTimeSetupFlow();
+                        return;
+                    }
+                } catch (setupErr) {
+                    console.warn('Setup check failed, continuing with 2FA:', setupErr);
+                }
                 
                 // Store the faculty user info in sessionStorage
                 const encodedPassword = btoa(password);
@@ -51871,19 +51890,13 @@ function restoreTeacherZonePhoto() {
                 sessionStorage.setItem('facultyUsername', window.selectedFacultyUsername);
                 sessionStorage.setItem('facultyPassword', encodedPassword);
                 
-                // Navigate based on setup status
-                if (setupCheckData.success && !setupCheckData.is_setup_complete) {
-                    // First-time login - show setup flow
-                    window.setupData = {};
-                    showFirstTimeSetupFlow();
-                } else {
-                    // Normal login - show 2FA
-                    document.getElementById('roleSelectionOverlay').classList.add('hidden');
-                    
-                    setTimeout(() => {
-                        show2FAModal();
-                    }, 300);
-                }
+                // Normal login - show 2FA
+                console.log('Setup complete, showing 2FA');
+                document.getElementById('roleSelectionOverlay').classList.add('hidden');
+                
+                setTimeout(() => {
+                    show2FAModal();
+                }, 300);
             } catch (e) {
                 console.error('Error verifying password:', e);
                 document.getElementById('facultyUserPasswordError').textContent = 'Error verifying password. Please try again.';
@@ -51894,8 +51907,14 @@ function restoreTeacherZonePhoto() {
         function showFirstTimeSetupFlow() {
             const facultyUserPasswordPanel = document.getElementById('facultyUserPasswordPanel');
             const setupModal = document.getElementById('firstTimeSetupModal');
+            const roleSelectionOverlay = document.getElementById('roleSelectionOverlay');
             
-            if (!facultyUserPasswordPanel || !setupModal) return;
+            if (!facultyUserPasswordPanel || !setupModal) {
+                console.error('Setup modal or password panel not found');
+                return;
+            }
+            
+            console.log('Showing first-time setup flow');
             
             // Reset setup screens
             document.getElementById('setupCurrentPassword').value = '';
@@ -51912,7 +51931,16 @@ function restoreTeacherZonePhoto() {
             
             setTimeout(() => {
                 facultyUserPasswordPanel.style.display = 'none';
+                
+                // Ensure role selection overlay stays visible for backdrop
+                if (roleSelectionOverlay) {
+                    roleSelectionOverlay.classList.remove('hidden');
+                }
+                
+                // Show setup modal with proper visibility
                 setupModal.style.display = 'block';
+                setupModal.style.visibility = 'visible';
+                setupModal.style.zIndex = '1000001';
                 
                 // Animate setup modal in
                 setTimeout(() => {
@@ -51920,6 +51948,7 @@ function restoreTeacherZonePhoto() {
                     setupModal.style.transform = 'translateY(0)';
                     // Show welcome screen
                     showSetupScreen('setupWelcomeScreen');
+                    console.log('Setup modal animated in');
                 }, 50);
             }, 400);
         }
