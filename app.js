@@ -480,72 +480,6 @@ app.post('/api/admin/reset-setup-status', async (req, res) => {
     }
 });
 
-// TEMPORARY: Populate phone numbers for students (demo data)
-app.post('/api/admin/populate-phone-numbers', async (req, res) => {
-    try {
-        console.log('🔧 Populating phone numbers for students...');
-        
-        // Get all students without phone numbers
-        const result = await pool.query(
-            `SELECT id, name, usn FROM students WHERE phone IS NULL OR phone = '' LIMIT 100`
-        );
-        
-        const students = result.rows;
-        let updated = 0;
-        
-        // Generate realistic Indian phone numbers (demo data)
-        for (let i = 0; i < students.length; i++) {
-            const baseNumber = 9750000000 + i; // Generate realistic phone numbers
-            const phone = `+91${baseNumber}`;
-            
-            await pool.query(
-                `UPDATE students SET phone = $1 WHERE id = $2`,
-                [phone, students[i].id]
-            );
-            updated++;
-        }
-        
-        console.log(`✅ Updated ${updated} students with phone numbers`);
-        res.json({ 
-            success: true, 
-            message: `Populated phone numbers for ${updated} students`,
-            count: updated
-        });
-    } catch (e) {
-        console.error('❌ Populate phone numbers ERROR:', e.message);
-        res.status(500).json({ success: false, error: e.message });
-    }
-});
-
-// Verify/check current phone data
-app.get('/api/admin/check-phone-data', async (req, res) => {
-    try {
-        console.log('🔍 Checking phone data status...');
-        
-        const withPhone = await pool.query(
-            `SELECT COUNT(*) FROM students WHERE phone IS NOT NULL AND phone != ''`
-        );
-        
-        const withoutPhone = await pool.query(
-            `SELECT COUNT(*) FROM students WHERE phone IS NULL OR phone = ''`
-        );
-        
-        const sample = await pool.query(
-            `SELECT id, name, usn, phone FROM students LIMIT 5`
-        );
-        
-        res.json({ 
-            success: true, 
-            with_phone: parseInt(withPhone.rows[0].count),
-            without_phone: parseInt(withoutPhone.rows[0].count),
-            sample_data: sample.rows
-        });
-    } catch (e) {
-        console.error('❌ Check phone data ERROR:', e.message);
-        res.status(500).json({ success: false, error: e.message });
-    }
-});
-
 // Verify current faculty password
 app.post('/api/verify-faculty-password', async (req, res) => {
     try {
@@ -869,6 +803,35 @@ app.get('/api/uploads/:usn', async (req, res) => {
         res.json({ success: true, data: result.rows });
     } catch (e) {
         console.error('❌ GET /api/uploads ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// ============================================================
+// UTILITY ENDPOINTS - Fix/Populate Missing Data
+// ============================================================
+
+// Populate phone numbers for students that don't have them
+app.post('/api/fix/populate-phone-numbers', async (req, res) => {
+    try {
+        console.log('🔧 Populating phone numbers for students...');
+        
+        // Generate fake but realistic Indian phone numbers for demo
+        const result = await pool.query(`
+            UPDATE students 
+            SET phone = '9' || LPAD(FLOOR(random() * 999999999)::TEXT, 9, '0')
+            WHERE phone IS NULL OR phone = '' OR phone = '?'
+            RETURNING id, name, phone
+        `);
+        
+        console.log(`✅ Updated ${result.rowCount} students with phone numbers`);
+        res.json({ 
+            success: true, 
+            message: `Updated ${result.rowCount} students with phone numbers`,
+            updated: result.rows.length
+        });
+    } catch (e) {
+        console.error('❌ POST /api/fix/populate-phone-numbers ERROR:', e.message);
         res.status(500).json({ success: false, error: e.message });
     }
 });

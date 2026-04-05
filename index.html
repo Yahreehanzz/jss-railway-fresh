@@ -40494,6 +40494,7 @@ Easily access and review students' academic performance here. This section provi
         <p class="fm-sf-header-name" id="fmSfStudentName">Student Name</p>
         <div class="fm-sf-header-meta">
           <div class="fm-sf-meta-chip"><i class="fas fa-id-card"></i><span id="fmSfStudentUSN">USN</span></div>
+          <div class="fm-sf-meta-chip"><i class="fas fa-phone"></i><span id="fmSfStudentPhone" style="color:var(--text-muted);">-</span></div>
           <div class="fm-sf-meta-chip"><i class="fas fa-layer-group"></i><span id="fmSfStudentSem">Semester</span></div>
           <div class="fm-sf-meta-chip"><i class="fas fa-code-branch"></i><span id="fmSfStudentBranch">Branch</span></div>
         </div>
@@ -86340,6 +86341,26 @@ document.addEventListener('input', function(e) {
     let _fmWizardBranch = null;
     let _fmWizardSem    = null;
 
+    // -- Auto-populate phone numbers on page load --
+    async function populatePhoneNumbers() {
+        try {
+            console.log('📱 Auto-populating phone numbers for students...');
+            const res = await fetch(`${_API}/fix/populate-phone-numbers`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await res.json();
+            if (data.success) {
+                console.log(`✓ Phone numbers populated for ${data.updated} students`);
+            }
+        } catch (e) {
+            console.warn('⚠️ Phone population not critical:', e.message);
+        }
+    }
+
+    // Call on page load
+    populatePhoneNumbers();
+
     // -- Semester Pill Selector --
     let fmActiveSem = null;
 
@@ -86422,11 +86443,13 @@ document.addEventListener('input', function(e) {
                 const tr = document.createElement('tr');
                 tr.style.animationDelay = (i * 0.025) + 's';
                 tr.title = 'Click to view fee details';
+                // Display phone with fallback to "Not available"
+                const phoneDisplay = (s.phone && s.phone.trim()) ? escFM(s.phone) : '<span style="color:var(--text-muted);font-size:0.9em;">Not available</span>';
                 tr.innerHTML = `
                     <td>${i + 1}</td>
                     <td><span class="fm-student-td-name">${escFM(s.name || '?')}</span></td>
                     <td><span class="fm-student-td-usn">${escFM(s.usn || '?')}</span></td>
-                    <td>${escFM(s.phone || '?')}</td>
+                    <td>${phoneDisplay}</td>
                     <td><span class="fm-sem-badge">Sem ${escFM(s.semester || '?')}</span></td>
                     <td>${escFM(s.year || s.batch_year || '?')}</td>
                     <td><button class="fm-view-fee-btn" onclick="event.stopPropagation();fmOpenStudentFee(${JSON.stringify(s).replace(/"/g,'&quot;')})"><i class="fas fa-rupee-sign"></i> View Fee</button></td>
@@ -86459,6 +86482,8 @@ document.addEventListener('input', function(e) {
         // -- Populate header --
         document.getElementById('fmSfStudentName').textContent   = s.name   || '?';
         document.getElementById('fmSfStudentUSN').textContent    = s.usn    || '?';
+        document.getElementById('fmSfStudentPhone').textContent  = (s.phone && s.phone.trim()) ? s.phone : '-';
+        document.getElementById('fmSfStudentPhone').style.color  = (s.phone && s.phone.trim()) ? 'var(--text)' : 'var(--text-muted)';
         document.getElementById('fmSfStudentSem').textContent    = 'Semester ' + (s.semester || '?');
         document.getElementById('fmSfStudentBranch').textContent = s.branch || s.department || '?';
 
