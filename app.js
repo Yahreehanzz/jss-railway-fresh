@@ -85,6 +85,36 @@ pool.query(`
     )
 `).then(() => console.log('✅ Faculty Notes table ready')).catch(e => console.error('⚠️ Faculty notes table error:', e.message));
 
+// Initialize students table if not exists
+pool.query(`
+    CREATE TABLE IF NOT EXISTS students (
+        id SERIAL PRIMARY KEY,
+        usn VARCHAR(20) UNIQUE,
+        name VARCHAR(100),
+        email VARCHAR(100),
+        phone VARCHAR(20),
+        dob DATE,
+        gender VARCHAR(20),
+        branch VARCHAR(100),
+        semester INTEGER,
+        batch_year INTEGER,
+        year INTEGER,
+        stream VARCHAR(50),
+        college VARCHAR(100),
+        photo_url TEXT,
+        auth VARCHAR(20),
+        marks JSONB,
+        attendance JSONB,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+    )
+`).then(() => console.log('✅ Students table ready')).catch(e => console.error('⚠️ Students table error:', e.message));
+
+// Ensure phone column exists in students table
+pool.query(`
+    ALTER TABLE students ADD COLUMN IF NOT EXISTS phone VARCHAR(20)
+`).then(() => console.log('✅ Phone column ensured in students table')).catch(e => console.error('⚠️ Phone column error:', e.message));
+
 // Initialize payments table if not exists (for tracking live payments)
 pool.query(`
     CREATE TABLE IF NOT EXISTS student_payments (

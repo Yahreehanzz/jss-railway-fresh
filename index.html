@@ -86693,13 +86693,35 @@ document.addEventListener('input', function(e) {
             return;
         }
 
-        if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving?'; }
+        if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving…'; }
 
         const today = new Date().toISOString().split('T')[0];
         const studentUSN = s.usn || s.name;
         const paymentDate = dateEl.value || today;
         
         try {
+            // **NEW: Save payment to database via API**
+            console.log('💾 Saving payment to database...');
+            const dbSaveRes = await fetch(`${_API}/save-payment`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    usn: studentUSN,
+                    studentId: s.id,
+                    amount: paid,
+                    paymentMethod: methodEl.value || 'cash',
+                    semester: s.semester,
+                    notes: `Payment of ₹${paid} against total ₹${total}`
+                })
+            });
+            
+            const dbSaveData = await dbSaveRes.json();
+            if (dbSaveData.success) {
+                console.log('✓ Payment saved to database:', dbSaveData.data);
+            } else {
+                console.warn('⚠️ Database save warning:', dbSaveData.error);
+            }
+            
             // Fetch current fees data with fallback to localStorage
             let allFees = {};
             try {
@@ -86747,6 +86769,9 @@ document.addEventListener('input', function(e) {
             document.getElementById('fmSfAddForm').classList.remove('fm-sf-form-open');
             fmUpdatePendingBalance();
             if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = '<i class="fas fa-save"></i> Save Payment'; }
+            
+            // Show success message
+            showMessageBox('✓ Payment Saved', 'Payment of ₹' + paid + ' has been recorded and saved to database!', 'success');
 
             console.log(`? Fee data saved: Total ?${total}, Paid ?${paid} for ${studentUSN}`);
             
