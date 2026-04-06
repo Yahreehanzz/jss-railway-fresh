@@ -13,6 +13,7 @@
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <!-- Google Fonts for Outfit -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.cdnfonts.com/css/avengeance" rel="stylesheet">
 </head>
 <body>
 
@@ -695,20 +696,30 @@ body.teacher-dark .tc-card {
 }
 .tca-photo-wrap { margin-bottom: 18px; }
 .tca-photo-circle {
-    width: 110px;
-    height: 110px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.08);
-    border: 3px dashed rgba(255,255,255,0.2);
+    width: 118px;
+    height: 118px;
+    border-radius: 22px;
+    background: linear-gradient(145deg, rgba(255,255,255,0.1) 0%, rgba(15,23,42,0.85) 100%);
+    border: 2px solid rgba(255,255,255,0.14);
+    box-shadow:
+        0 8px 32px rgba(0,0,0,0.45),
+        inset 0 1px 0 rgba(255,255,255,0.08),
+        inset 0 -2px 12px rgba(0,0,0,0.25);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     overflow: hidden;
-    transition: border-color 0.2s, background 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
 }
-.tca-photo-circle:hover { border-color: #6366f1; background: rgba(99,102,241,0.12); }
+.tca-photo-circle:hover {
+    border-color: rgba(99,102,241,0.65);
+    box-shadow:
+        0 12px 40px rgba(99,102,241,0.2),
+        inset 0 1px 0 rgba(255,255,255,0.1);
+    transform: translateY(-2px);
+}
 .tca-photo-placeholder {
     display: flex;
     flex-direction: column;
@@ -27360,6 +27371,102 @@ document.addEventListener('DOMContentLoaded', function() {
     margin: 0 0 10px 0;
     text-shadow: 0 2px 24px rgba(0,0,0,0.45);
 }
+
+/* Cinematic "Teacher Zone" title (scoped to home hero) */
+#tcp-home .tc-cinematic-wrap {
+    position: relative;
+    margin: 0 0 14px 0;
+    padding: 28px 16px 32px;
+    perspective: 1000px;
+    max-width: 920px;
+}
+#tcp-home .tc-cinematic-bg {
+    position: absolute;
+    inset: -8px;
+    border-radius: 20px;
+    background: radial-gradient(ellipse at center, #1b2838 0%, #06090e 70%, #000000 100%);
+    z-index: 0;
+    pointer-events: none;
+}
+#tcp-home .tc-cinematic-noise {
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
+    mix-blend-mode: overlay;
+    z-index: 1;
+    pointer-events: none;
+}
+#tcp-home .tc-cinematic-scene {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transform-style: preserve-3d;
+    padding: 0 8px;
+    font-family: 'Avengeance', 'Outfit', sans-serif;
+}
+#tcp-home .tc-avengers-text {
+    position: relative;
+    margin: 0;
+    text-transform: uppercase;
+    -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.7);
+    background:
+        repeating-linear-gradient(110deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0) 1%, rgba(255,255,255,0.06) 1.5%, rgba(255,255,255,0) 2%),
+        repeating-linear-gradient(70deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 1%, rgba(0,0,0,0.06) 1.5%, rgba(0,0,0,0) 2%),
+        linear-gradient(to bottom, #fbfcfd 0%, #b9c7d4 35%, #ffffff 40%, #fdfdfd 44%, #536473 48%, #344351 70%, #1b252d 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    letter-spacing: 3px;
+    line-height: 1;
+    transform: translateZ(20px);
+}
+#tcp-home .tc-line-1 {
+    font-size: clamp(1.75rem, 4.5vw, 3.75rem);
+    letter-spacing: 8px;
+}
+#tcp-home .tc-line-2 {
+    font-size: clamp(2.5rem, 7vw, 5.5rem);
+    letter-spacing: 2px;
+}
+#tcp-home .tc-avengers-text::before {
+    content: attr(data-text);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    -webkit-text-stroke: 0px transparent;
+    color: transparent;
+    text-shadow:
+        1px 1px 0 #7a8d9a,
+        2px 2px 0 #526370,
+        3px 3px 0 #323f49,
+        4px 4px 0 #1b232a,
+        5px 5px 0 #0d1217,
+        6px 6px 0 #000000,
+        7px 7px 10px rgba(0, 0, 0, 0.9),
+        12px 12px 25px rgba(0, 0, 0, 0.8),
+        0px 0px 40px rgba(28, 59, 90, 0.4);
+    transform: translateZ(-5px);
+}
+@media (max-width: 768px) {
+    #tcp-home .tc-line-1 { letter-spacing: 4px; }
+    #tcp-home .tc-cinematic-scene { gap: 5px; }
+    #tcp-home .tc-avengers-text { -webkit-text-stroke: 1px rgba(255, 255, 255, 0.6); }
+    #tcp-home .tc-avengers-text::before {
+        text-shadow:
+            1px 1px 0 #526370,
+            2px 2px 0 #323f49,
+            3px 3px 0 #1b232a,
+            4px 4px 0 #0d1217,
+            5px 5px 10px rgba(0,0,0,0.9);
+    }
+}
 .tc-home-subtitle {
     font-size: 13px;
     font-weight: 400;
@@ -41604,6 +41711,24 @@ document.addEventListener('DOMContentLoaded', function() {
     if (typeof restoreTeacherZonePhoto === 'function') {
         setTimeout(function() { restoreTeacherZonePhoto(); }, 0);
     }
+    (function initTcHeroParallax() {
+        var scene = document.getElementById('tcTeacherZoneScene');
+        if (!scene) return;
+        function onMove(e) {
+            var x = (window.innerWidth / 2 - e.pageX) / 40;
+            var y = (window.innerHeight / 2 - e.pageY) / 40;
+            scene.style.transform = 'rotateY(' + (-x) + 'deg) rotateX(' + y + 'deg)';
+            scene.style.transition = 'none';
+        }
+        function onOut() {
+            scene.style.transform = 'rotateY(0deg) rotateX(0deg)';
+            scene.style.transition = 'transform 0.5s ease-out';
+        }
+        function onOver() { scene.style.transition = 'none'; }
+        window.addEventListener('mousemove', onMove);
+        document.documentElement.addEventListener('mouseleave', onOut);
+        window.addEventListener('mouseover', onOver);
+    })();
 });
 </script>
 
@@ -41674,7 +41799,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="tc-home-eyebrow-bar"></div>
                     <span class="tc-home-eyebrow">Govt. Polytechnic, Beelagi &nbsp;?&nbsp; Staff Portal</span>
                 </div>
-                <h1 class="tc-home-title">Welcome to the<br>Teacher Zone.</h1>
+                <div class="tc-cinematic-wrap">
+                    <div class="tc-cinematic-bg" aria-hidden="true"></div>
+                    <div class="tc-cinematic-noise" aria-hidden="true"></div>
+                    <div class="tc-cinematic-scene" id="tcTeacherZoneScene">
+                        <h1 class="tc-avengers-text tc-line-1" data-text="Welcome to the">Welcome to the</h1>
+                        <h1 class="tc-avengers-text tc-line-2" data-text="Teacher Zone">Teacher Zone</h1>
+                    </div>
+                </div>
                 <p class="tc-home-subtitle">Manage attendance, leave, timetables and more ?<br>all in one professional portal.</p>
                 <div class="tc-home-meta">
                     <span><i class="fas fa-clipboard-check"></i>Attendance</span>
@@ -42071,7 +42203,7 @@ document.addEventListener('DOMContentLoaded', function() {
       <div class="tca-preview-side">
         <div class="tca-photo-wrap">
           <div class="tca-photo-circle" id="tcaPhotoCircle" onclick="document.getElementById('addTeacherPhoto').click()">
-            <img id="addTeacherPreviewPhoto" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:50%;"/>
+            <img id="addTeacherPreviewPhoto" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:18px;"/>
             <div class="tca-photo-placeholder" id="tcaPhotoPlaceholder">
               <i class="fas fa-camera"></i>
               <span>Upload Photo</span>
@@ -42266,66 +42398,12 @@ document.addEventListener('DOMContentLoaded', function() {
             </h1>
         </header>
 
-        <!-- Main Content Area with LEFT SIDEBAR -->
-        <section style="background: rgba(15, 22, 41, 0.6); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); border-radius: 24px; overflow: hidden; display: flex; flex-direction: row; height: auto;">
-            
-            <!-- LEFT SIDEBAR - Filter Options (220px) -->
-            <div style="width: 220px; padding: 24px 0; border-right: 1px solid rgba(255, 255, 255, 0.05); background: rgba(255, 255, 255, 0.01); display: flex; flex-direction: column; gap: 0;">
-                <button class="filter-btn active" onclick="setViewTeacherFilter('all')" style="padding: 16px 20px; border-left: 3px solid transparent; cursor: pointer; transition: all 0.3s ease; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 12px; color: rgba(148, 163, 184, 1); background: none; border: none; text-align: left; position: relative;">
-                    <i class="fas fa-list" style="font-size: 14px;"></i>
-                    <span>All Teachers</span>
-                </button>
+        <!-- Main content: full-width list (no sidebar / no search bar) -->
+        <section style="background: rgba(15, 22, 41, 0.6); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); border-radius: 24px; overflow: hidden; display: flex; flex-direction: column; height: auto;">
+            <input type="hidden" id="searchTeacherTable" value="" />
+            <input type="hidden" id="filterTeacherSubjectTable" value="all" />
 
-            </div>
-
-            <!-- RIGHT CONTENT AREA -->
-            <div style="flex: 1; display: flex; flex-direction: column; padding: 40px;">
-                
-                <!-- Search & Filter Section -->
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 36px; gap: 20px;">
-                    <div style="display: flex; gap: 16px; flex: 1;">
-                        <div style="
-                            flex: 1;
-                            position: relative;
-                            display: flex;
-                            align-items: center;
-                            background: rgba(15, 22, 41, 0.5);
-                            border: 1px solid rgba(255, 255, 255, 0.08);
-                            border-radius: 12px;
-                            padding: 12px 16px;
-                            transition: all 0.3s ease;
-                        ">
-                            <i class="fas fa-search" style="color: rgba(100, 116, 139, 1); font-size: 13px; margin-right: 10px;"></i>
-                            <input id="searchTeacherTable" type="text" placeholder="Search by name or ID..." onkeyup="filterTeacherTable()" autocomplete="off" style="
-                                flex: 1;
-                                background: none;
-                                border: none;
-                                color: rgba(226, 232, 240, 1);
-                                font-size: 13px;
-                                outline: none;
-                            " />
-                        </div>
-                        <select id="filterTeacherSubjectTable" onchange="filterTeacherTable()" style="
-                            background: rgba(15, 22, 41, 0.5);
-                            border: 1px solid rgba(255, 255, 255, 0.08);
-                            color: rgba(226, 232, 240, 1);
-                            padding: 12px 14px;
-                            border-radius: 12px;
-                            font-size: 12px;
-                            cursor: pointer;
-                            transition: all 0.3s ease;
-                            font-weight: 600;
-                        ">
-                            <option value="all">All Subjects</option>
-                            <option value="Computer Science">Computer Science</option>
-                            <option value="Electronics">Electronics</option>
-                            <option value="Mechanical">Mechanical</option>
-                            <option value="Mathematics">Mathematics</option>
-                            <option value="Physics">Physics</option>
-                            <option value="Chemistry">Chemistry</option>
-                        </select>
-                    </div>
-                </div>
+            <div style="flex: 1; display: flex; flex-direction: column; padding: 32px 36px 40px;">
 
                 <!-- Teachers List Container -->
                 <div id="teacherListViewContainer" style="display: flex; flex-direction: column; gap: 16px;">
@@ -42335,7 +42413,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <!-- Empty State -->
                 <div id="empty-state-view" style="display: none; text-align: center; padding: 48px 20px;">
                     <i class="fas fa-inbox" style="font-size: 48px; color: rgba(71, 85, 105, 1); margin-bottom: 16px;"></i>
-                    <p style="color: rgba(100, 116, 139, 1); font-size: 14px;">No teachers found. Try adjusting your filters.</p>
+                    <p style="color: rgba(100, 116, 139, 1); font-size: 14px;">No teachers found in this directory.</p>
                 </div>
 
             </div>
@@ -63864,7 +63942,7 @@ function renderAttendance() {
                             <div style="
                                 width: 64px;
                                 height: 64px;
-                                border-radius: 50%;
+                                border-radius: 16px;
                                 background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
                                 padding: 2px;
                                 display: flex;
@@ -63873,12 +63951,13 @@ function renderAttendance() {
                                 overflow: hidden;
                                 flex-shrink: 0;
                                 position: relative;
+                                box-shadow: 0 4px 16px rgba(0,0,0,0.35);
                             ">
-                                ${photoUrl ? `<img src="${photoUrl}" alt="${t.name}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;position:absolute;top:0;left:0;" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';" />` : ''}
+                                ${photoUrl ? `<img src="${photoUrl}" alt="${t.name}" style="width:100%;height:100%;border-radius:14px;object-fit:cover;position:absolute;top:0;left:0;" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';" />` : ''}
                                 <div style="
                                     width: 100%;
                                     height: 100%;
-                                    border-radius: 50%;
+                                    border-radius: 14px;
                                     background: linear-gradient(135deg, #070B14 0%, #1a1f35 100%);
                                     display: ${photoUrl ? 'none' : 'flex'};
                                     align-items: center;
@@ -64063,22 +64142,35 @@ function renderAttendance() {
 
         function deleteTeacher(teacherId) {
             console.log('🗑️ Delete teacher:', teacherId);
-            if (confirm('Are you sure you want to delete this teacher?')) {
-                const teacherToDelete = teachers.find(t => (t.id === teacherId || t.employee_id === teacherId));
-                if (teacherToDelete) {
-                    teachers = teachers.filter(t => !(t.id === teacherId || t.employee_id === teacherId));
+            if (!confirm('Are you sure you want to delete this teacher?')) return;
+            const tid = String(teacherId);
+            const teacherToDelete = teachers.find(t => teacherRecordMatchesId(t, tid));
+            if (!teacherToDelete) {
+                showMessageBox('Error', 'Teacher not found in the current list.');
+                return;
+            }
+            const apiKey = encodeURIComponent(teacherApiDeleteKey(teacherToDelete));
+            const base = window.API_BASE || '/api';
+            fetch(`${base}/teachers/${apiKey}`, { method: 'DELETE' })
+                .then(r => r.json())
+                .then(data => {
+                    if (!data.success) {
+                        showMessageBox('Error', data.error || 'Could not delete from database.');
+                        return;
+                    }
+                    teachers = teachers.filter(t => !teacherRecordMatchesId(t, tid));
                     localStorage.setItem('teachers', JSON.stringify(teachers));
-                    
-                    // Optional: Delete from database via API
-                    fetch(`${window.API_BASE}/teachers/${teacherId}`, { method: 'DELETE' })
-                        .then(() => console.log('Teacher deleted from database'))
-                        .catch(err => console.error('Error deleting from database:', err));
-                    
+                    if (typeof syncSettingToRailway === 'function') {
+                        try { syncSettingToRailway('teachers_data', teachers); } catch (e) { /* ignore */ }
+                    }
                     showMessageBox('Deleted', 'Teacher has been removed!', 'success');
                     isLoadingTeachers = false;
                     fetchAndRenderTeachers();
-                }
-            }
+                })
+                .catch(err => {
+                    console.error('Error deleting from database:', err);
+                    showMessageBox('Error', 'Network error: ' + err.message);
+                });
         }
 
         function addTeacher() {
@@ -64353,13 +64445,24 @@ function renderAttendance() {
 
         function setViewTeacherFilter(filterType) {
             currentViewFilter = filterType;
-            
-            // Update active button
             document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.closest('.filter-btn').classList.add('active');
-            
-            // Re-render teachers
+            if (typeof event !== 'undefined' && event && event.target && event.target.closest) {
+                const b = event.target.closest('.filter-btn');
+                if (b) b.classList.add('active');
+            }
             renderTeacherCardsView();
+        }
+
+        function teacherRecordMatchesId(t, rawId) {
+            if (!t || rawId === undefined || rawId === null) return false;
+            const s = String(rawId).trim();
+            return String(t.id) === s || String(t.employee_id || '') === s;
+        }
+
+        function teacherApiDeleteKey(t) {
+            if (!t) return '';
+            if (t.employee_id != null && String(t.employee_id).trim() !== '') return String(t.employee_id).trim();
+            return String(t.id);
         }
 
         function renderTeacherCardsView() {
@@ -64376,8 +64479,8 @@ function renderAttendance() {
                 filteredTeachers = filteredTeachers.filter(t => t.status === 'active' || t.status === 'Active');
             }
             
-            // Apply search filter
-            const searchTerm = document.getElementById('searchTeacherTable').value.toLowerCase();
+            const searchEl = document.getElementById('searchTeacherTable');
+            const searchTerm = (searchEl && searchEl.value) ? searchEl.value.toLowerCase() : '';
             if (searchTerm) {
                 filteredTeachers = filteredTeachers.filter(t => 
                     (t.name && t.name.toLowerCase().includes(searchTerm)) ||
@@ -64385,8 +64488,8 @@ function renderAttendance() {
                 );
             }
             
-            // Apply subject filter
-            const subjectFilter = document.getElementById('filterTeacherSubjectTable').value;
+            const subjectEl = document.getElementById('filterTeacherSubjectTable');
+            const subjectFilter = subjectEl ? subjectEl.value : 'all';
             if (subjectFilter !== 'all' && filteredTeachers.length > 0) {
                 filteredTeachers = filteredTeachers.filter(t =>
                     t.subjects && t.subjects.includes(subjectFilter)
@@ -64404,7 +64507,7 @@ function renderAttendance() {
                 try {
                     const initial = teacher.name.charAt(0).toUpperCase();
                     const subjectsList = (teacher.subjects && teacher.subjects.length > 0) ? teacher.subjects.join(', ') : 'No subjects assigned';
-                    const teacherId = String(teacher.id || '');
+                    const teacherId = String(teacher.id != null && teacher.id !== '' ? teacher.id : (teacher.employee_id || ''));
                     
                     const card = document.createElement("div");
                     card.style.cssText = `
@@ -64430,17 +64533,18 @@ function renderAttendance() {
                                 <div style="
                                     width: 52px;
                                     height: 52px;
-                                    border-radius: 50%;
+                                    border-radius: 14px;
                                     background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
                                     padding: 2px;
                                     display: flex;
                                     align-items: center;
                                     justify-content: center;
+                                    box-shadow: 0 4px 14px rgba(0,0,0,0.35);
                                 ">
                                     <div style="
                                         width: 100%;
                                         height: 100%;
-                                        border-radius: 50%;
+                                        border-radius: 12px;
                                         background: #070B14;
                                         display: flex;
                                         align-items: center;
@@ -65407,15 +65511,51 @@ function renderAttendance() {
         }
 
         function deleteTeacherFromProfile() {
+            const profileData = teachers.find(t =>
+                Number(t.id) === Number(activeTeacherId) ||
+                String(t.employee_id) === String(activeTeacherId) ||
+                String(t.id) === String(activeTeacherId)
+            );
+            if (!profileData) {
+                showMessageBox('Error', 'Teacher not found.');
+                return;
+            }
             showLoader('Deleting teacher...');
-            teachers = teachers.filter(t => !(t.id === activeTeacherId && t.branch === selectedBranch));
-            localStorage.setItem("teachers", JSON.stringify(teachers));
-            syncSettingToRailway('teachers_data', teachers);
-            
-            hideLoader();
-            showMessageBox('Success', "Teacher deleted successfully!");
-            closeTeacherProfile();
-            showSection('teacherZone', document.querySelector('#teacherNav a')); switchTeacherTab('dashboard');
+            const apiKey = encodeURIComponent(teacherApiDeleteKey(profileData));
+            const base = window.API_BASE || '/api';
+            fetch(`${base}/teachers/${apiKey}`, { method: 'DELETE' })
+                .then(r => r.json())
+                .then(data => {
+                    hideLoader();
+                    if (!data.success) {
+                        showMessageBox('Error', data.error || 'Could not delete from database.');
+                        return;
+                    }
+                    const rid = String(profileData.id);
+                    const remp = profileData.employee_id != null && String(profileData.employee_id).trim() !== '' ? String(profileData.employee_id).trim() : '';
+                    teachers = teachers.filter(t => {
+                        if (String(t.id) === rid) return false;
+                        if (remp && String(t.employee_id || '') === remp) return false;
+                        return true;
+                    });
+                    localStorage.setItem('teachers', JSON.stringify(teachers));
+                    if (typeof syncSettingToRailway === 'function') {
+                        try { syncSettingToRailway('teachers_data', teachers); } catch (e) { /* ignore */ }
+                    }
+                    showMessageBox('Success', 'Teacher deleted successfully!');
+                    closeTeacherProfile();
+                    showSection('teacherZone', document.querySelector('#teacherNav a'));
+                    switchTeacherTab('dashboard');
+                    if (typeof fetchAndRenderTeachers === 'function') {
+                        isLoadingTeachers = false;
+                        fetchAndRenderTeachers();
+                    }
+                })
+                .catch(err => {
+                    hideLoader();
+                    console.error(err);
+                    showMessageBox('Error', 'Network error: ' + err.message);
+                });
         }
 
         /* --- Student Data Overview Functions (NEW) --- */
