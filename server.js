@@ -127,88 +127,106 @@ app.get('/api/teachers', async (req, res) => {
 
 // POST - Add new teacher
 app.post('/api/teachers', async (req, res) => {
+    let client;
     try {
-        console.group('📥 POST /api/teachers - INCOMING REQUEST');
-        console.log('Body keys:', Object.keys(req.body));
-        console.log('Request headers:', req.headers);
+        console.log('\n========================================');
+        console.log('📝 POST /api/teachers - START');
+        console.log('========================================\n');
         
         const { name, email, phone, subject, department, employee_id, designation, gender, date_of_joining, qualification, experience, photo_url } = req.body;
         
-        console.log('Extracted fields:');
-        console.log('  - name:', name);
-        console.log('  - employee_id:', employee_id);
-        console.log('  - photo_url provided:', !!photo_url);
-        console.log('  - photo_url type:', typeof photo_url);
+        console.log('📬 RECEIVED DATA:');
+        console.log('  Name:', name);
+        console.log('  Employee ID:', employee_id);
+        console.log('  Photo provided:', !!photo_url);
         if (photo_url) {
-            console.log('  - photo_url length:', photo_url.length, 'bytes');
-            console.log('  - photo_url starts with:', photo_url.substring(0, 50) + '...');
+            console.log('  Photo type:', typeof photo_url);
+            console.log('  Photo length:', photo_url.length, 'bytes');
+            console.log('  Photo starts with:', photo_url.substring(0, 30) + '...');
         }
-        console.groupEnd();
         
         if (!name || !employee_id) {
+            console.error('❌ VALIDATION: Missing required fields');
             return res.status(400).json({ success: false, error: 'Name and employee_id are required' });
         }
         
-        // Log photo info
-        if (photo_url) {
-            console.log(`📸 Photo received: ${photo_url.length} bytes`);
-            console.log(`   Starts with: ${photo_url.substring(0, 40)}...`);
-        } else {
-            console.log('📸 No photo provided');
-        }
+        const values = [
+            name.trim(),           // $1
+            email || null,         // $2
+            phone || null,         // $3
+            subject || null,       // $4
+            department || null,    // $5
+            employee_id.trim(),    // $6
+            designation || null,   // $7
+            gender || null,        // $8
+            date_of_joining || null, // $9
+            qualification || null, // $10
+            experience || null,    // $11
+            photo_url || null      // $12
+        ];
+        
+        console.log('\n🔧 PREPARED VALUES:');
+        console.log('  [1] name:', values[0]);
+        console.log('  [6] employee_id:', values[5]);
+        console.log('  [12] photo_url length:', values[11] ? values[11].length + ' bytes' : 'NULL');
+        console.log('  [12] photo_url is string:', typeof values[11] === 'string');
+        console.log('  [12] photo_url starts:', values[11] ? values[11].substring(0, 30) : 'N/A');
         
         const query = `
             INSERT INTO teachers 
             (name, email, phone, subject, department, employee_id, designation, gender, date_of_joining, qualification, experience, photo_url) 
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) 
-            RETURNING *
+            RETURNING id, name, employee_id, photo_url, designation, gender
         `;
         
-        const values = [
-            name.trim(),
-            email || null,
-            phone || null,
-            subject || null,
-            department || null,
-            employee_id.trim(),
-            designation || null,
-            gender || null,
-            date_of_joining || null,
-            qualification || null,
-            experience || null,
-            photo_url || null
-        ];
-        
-        console.log('🔒 Prepared values - Parameter 12 (photo_url):', values[11] ? values[11].substring(0, 40) + '...' : 'NULL');
-        
+        console.log('\n⚙️ EXECUTING INSERT...');
         const result = await pool.query(query, values);
+        
+        if (!result.rows || result.rows.length === 0) {
+            throw new Error('INSERT returned no rows');
+        }
+        
         const savedTeacher = result.rows[0];
         
-        console.group('✅ DATABASE STORED RESULT');
-        console.log('ID:', savedTeacher.id);
-        console.log('Name:', savedTeacher.name);
-        console.log('Employee ID:', savedTeacher.employee_id);
-        console.log('Photo in DB (exists):', !!savedTeacher.photo_url);
+        console.log('\n✅ INSERT SUCCESSFUL');
+        console.log('  Returned ID:', savedTeacher.id);
+        console.log('  Returned name:', savedTeacher.name);
+        console.log('  Returned employee_id:', savedTeacher.employee_id);
+        
+        console.log('\n🔍 CRITICAL CHECK - PHOTO IN DATABASE:');
+        console.log('  photo_url field exists:', 'photo_url' in savedTeacher);
+        console.log('  photo_url value:', savedTeacher.photo_url ? 'HAS VALUE' : 'NULL/UNDEFINED');
         
         if (savedTeacher.photo_url) {
-            console.log('Photo size in DB:', savedTeacher.photo_url.length, 'bytes');
-            console.log('Photo starts with:', savedTeacher.photo_url.substring(0, 40) + '...');
+            console.log('  ✅ PHOTO STORED SUCCESSFULLY');
+            console.log('  Size:', savedTeacher.photo_url.length, 'bytes');
+            console.log('  Starts with:', savedTeacher.photo_url.substring(0, 30) + '...');
         } else {
-            console.warn('⚠️ Photo NOT in database!');
-            if (photo_url) {
-                console.error('ERROR: Photo was sent (' + photo_url.length + ' bytes) but database stored NULL!');
+            console.log('  ❌ PHOTO NOT IN DATABASE!');
+            if (values[11]) {
+                console.log('  Problem: We sent', values[11].length, 'bytes but database returned NULL');
+                console.log('  This suggests the INSERT silently dropped the photo_url');
             }
         }
-        console.groupEnd();
         
+        console.log('\n📤 SENDING RESPONSE');
         res.status(201).json({ 
             success: true, 
             data: savedTeacher,
             message: 'Teacher saved successfully'
         });
         
+        console.log('✅ Response sent\n');
+        
     } catch (e) {
-        console.error('❌ POST /api/teachers ERROR:', e.message, e.code);
+        console.error('\n❌ ERROR OCCURRED');
+        console.error('  Message:', e.message);
+        console.error('  Code:', e.code);
+        console.error('  Severity:', e.severity);
+        if (e.detail) console.error('  Detail:', e.detail);
+        if (e.stack) console.error('  Stack:', e.stack);
+        console.log('========================================\n');
+        
         res.status(500).json({ 
             success: false, 
             error: e.message,
@@ -277,6 +295,85 @@ app.get('/api/teacher/:id', async (req, res) => {
 });
 
 // DEBUG - Verify photos are stored
+// TEST: Check teachers table schema
+app.get('/api/test-schema', async (req, res) => {
+    try {
+        console.log('🔍 Testing teachers table schema...');
+        
+        const result = await pool.query(`
+            SELECT column_name, data_type, is_nullable
+            FROM information_schema.columns
+            WHERE table_name = 'teachers'
+            ORDER BY ordinal_position
+        `);
+        
+        console.log('📋 Teachers table columns:');
+        result.rows.forEach(col => {
+            console.log(`   - ${col.column_name}: ${col.data_type} (nullable: ${col.is_nullable})`);
+        });
+        
+        const photoCol = result.rows.find(c => c.column_name === 'photo_url');
+        if (photoCol) {
+            console.log(`✅ photo_url column exists: ${photoCol.data_type}`);
+        } else {
+            console.error('❌ photo_url column MISSING!');
+        }
+        
+        res.json({
+            columns: result.rows,
+            photo_url_exists: !!photoCol,
+            photo_url_type: photoCol?.data_type || 'NOT FOUND'
+        });
+    } catch (e) {
+        console.error('Error checking schema:', e.message);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// TEST: Insert photo and verify it's returned
+app.post('/api/test-photo-insert', async (req, res) => {
+    try {
+        const testPhoto = 'data:image/jpeg;base64,' + 'A'.repeat(5000); // 5KB test photo
+        
+        console.log('\n🧪 TEST: Inserting photo...');
+        console.log('   Test photo size:', testPhoto.length, 'bytes');
+        
+        const query = `
+            INSERT INTO teachers (name, employee_id, photo_url)
+            VALUES ($1, $2, $3)
+            RETURNING id, name, employee_id, photo_url
+        `;
+        
+        const result = await pool.query(query, [
+            'Test Teacher',
+            'TEST-' + Date.now(),
+            testPhoto
+        ]);
+        
+        const row = result.rows[0];
+        console.log('   Inserted ID:', row.id);
+        console.log('   Returned photo:', !!row.photo_url);
+        console.log('   Returned photo length:', row.photo_url ? row.photo_url.length : 0);
+        
+        if (row.photo_url && row.photo_url.length === testPhoto.length) {
+            console.log('   ✅ TEST PASSED: Photo fully stored and returned');
+        } else {
+            console.log('   ❌ TEST FAILED: Photo not properly stored');
+        }
+        
+        res.json({
+            test_passed: row.photo_url && row.photo_url.length === testPhoto.length,
+            inserted_size: testPhoto.length,
+            returned_size: row.photo_url ? row.photo_url.length : 0,
+            id: row.id
+        });
+    } catch (e) {
+        console.error('Test error:', e.message);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// GET - Verify photos
 app.get('/api/verify-photos', async (req, res) => {
     try {
         console.log('🔍 Verifying photos in database...');
