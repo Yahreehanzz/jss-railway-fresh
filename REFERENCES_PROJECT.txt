@@ -1,0 +1,79 @@
+REFERENCES
+
+Student & Staff Management System – Teacher Portal
+Government Polytechnic, Beelagi
+Department of Information Science & Engineering
+Academic Year 2025–26
+
+1. Pressman, Roger S.
+   “Software Engineering: A Practitioner’s Approach.”
+   McGraw‑Hill Education, 8th Edition, 2019.
+
+2. Sommerville, Ian.
+   “Software Engineering.”
+   Pearson Education Limited, 10th Edition, 2016.
+
+3. W3Schools Online Web Tutorials.
+   Available at: https://www.w3schools.com
+   (Used for basic HTML, CSS, JavaScript syntax and form validation patterns.)
+
+4. MDN Web Docs (Mozilla Developer Network).
+   Available at: https://developer.mozilla.org
+   (Primary reference for browser APIs, Fetch API, localStorage, and modern JavaScript features used in index.html.)
+
+5. Node.js Official Documentation.
+   Available at: https://nodejs.org/en/docs
+   (Used for understanding the Node runtime, modules, npm, and environment configuration.)
+
+6. Express.js Guide.
+   Available at: https://expressjs.com
+   (Used for REST API design, middleware, JSON handling, and static file hosting for server.js.)
+
+7. PostgreSQL Documentation.
+   Available at: https://www.postgresql.org/docs
+   (Used for table design, SQL queries, JSONB columns (app_settings), and relational constraints for students and teachers.)
+
+8. node-postgres (pg) Client Documentation.
+   Available at: https://node-postgres.com
+   (Used for connecting Express to PostgreSQL, connection pooling, parameterized queries, and error handling.)
+
+9. Railway App Documentation.
+   Available at: https://docs.railway.app
+   (Used for deploying the Node.js + PostgreSQL stack, environment variables, and production database URL configuration.)
+
+10. Chart.js Documentation.
+    Available at: https://www.chartjs.org/docs/
+    (Used for visualizing teacher statistics and student analytics in the dashboard charts.)
+
+11. PDF.js (Mozilla) Reference.
+    Available at: https://mozilla.github.io/pdf.js/
+    (Used for reading and rendering PDF files in the browser for academic reports / timetables.)
+
+12. SheetJS (xlsx) Documentation.
+    Available at: https://docs.sheetjs.com/
+    (Used for importing and exporting student data from Excel sheets.)
+
+13. Font Awesome Icons.
+    Available at: https://fontawesome.com/docs
+    (Used for navigation icons, action buttons, and status indicators.)
+
+14. Phosphor Icons (Web).
+    Available at: https://phosphoricons.com
+    (Used for additional modern iconography in the UI.)
+
+15. Google Fonts – “Outfit”.
+    Available at: https://fonts.google.com/specimen/Outfit
+    (Used as the primary UI font across the application.)
+
+16. CDN Fonts – “Avengeance” Typeface.
+    Available at: https://fonts.cdnfonts.com/css/avengeance
+    (Used to create the cinematic “WELCOME TO THE TEACHER ZONE” title on the Teacher Portal home page.)
+
+17. jsPDF Library.
+    Available at: https://github.com/parallax/jsPDF
+    (Used for client-side generation of PDF documents from student or staff data.)
+
+18. General Web Design Articles and UI Inspiration.
+    Various online resources and design galleries were consulted for glassmorphism layouts,
+    dashboard card design, and responsive teacher management interfaces.
+
