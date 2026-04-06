@@ -188,24 +188,30 @@ app.post('/api/teachers', async (req, res) => {
         
         const savedTeacher = result.rows[0];
         
-        console.log('\n✅ INSERT SUCCESSFUL');
-        console.log('  Returned ID:', savedTeacher.id);
-        console.log('  Returned name:', savedTeacher.name);
-        console.log('  Returned employee_id:', savedTeacher.employee_id);
+        console.log('\n✅ INSERT SUCCESSFUL - ID:', savedTeacher.id);
         
-        console.log('\n🔍 CRITICAL CHECK - PHOTO IN DATABASE:');
-        console.log('  photo_url field exists:', 'photo_url' in savedTeacher);
-        console.log('  photo_url value:', savedTeacher.photo_url ? 'HAS VALUE' : 'NULL/UNDEFINED');
+        // CRITICAL: Verify photo was actually stored by querying the database
+        console.log('\n🔍 IMMEDIATE DATABASE VERIFICATION:');
+        const verifyResult = await pool.query(
+            'SELECT id, name, photo_url FROM teachers WHERE id = $1',
+            [savedTeacher.id]
+        );
         
-        if (savedTeacher.photo_url) {
-            console.log('  ✅ PHOTO STORED SUCCESSFULLY');
-            console.log('  Size:', savedTeacher.photo_url.length, 'bytes');
-            console.log('  Starts with:', savedTeacher.photo_url.substring(0, 30) + '...');
-        } else {
-            console.log('  ❌ PHOTO NOT IN DATABASE!');
-            if (values[11]) {
-                console.log('  Problem: We sent', values[11].length, 'bytes but database returned NULL');
-                console.log('  This suggests the INSERT silently dropped the photo_url');
+        if (verifyResult.rows.length > 0) {
+            const verified = verifyResult.rows[0];
+            console.log('  Row exists:', verified.id);
+            console.log('  Name:', verified.name);
+            console.log('  Photo in DB:', verified.photo_url ? 'YES (' + verified.photo_url.length + ' bytes)' : 'NULL');
+            
+            if (!verified.photo_url && values[11]) {
+                console.error('  ⚠️ ALERT: Photo was NULL in RETURNING but sent! Length was:', values[11].length, 'bytes');
+                console.error('  This might be a column truncation or PostgreSQL issue');
+            }
+            
+            // Use verified photo if RETURNING failed but DB has it
+            if (!savedTeacher.photo_url && verified.photo_url) {
+                console.log('  ✅ RECOVERY: Using photo from database verification');
+                savedTeacher.photo_url = verified.photo_url;
             }
         }
         
