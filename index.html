@@ -63907,23 +63907,34 @@ function renderAttendance() {
             const joining = (document.getElementById("addTeacherJoining") || {value:''}).value;
             const qualification = (document.getElementById("addTeacherQualification") || {value:''}).value;
             
-            // Get compressed photo from preview
+            // Get compressed photo from preview - CRITICAL FIX
             const photoImg = document.getElementById('addTeacherPreviewPhoto');
-            const compressedPhoto = photoImg && photoImg.style.display !== 'none' 
-                ? (photoImg.dataset.compressedPhoto || photoImg.src) 
-                : null;
+            
+            // Try multiple methods to get the photo
+            let compressedPhoto = null;
+            
+            if (photoImg && photoImg.style.display !== 'none') {
+                // Method 1: Check dataset.compressedPhoto (most reliable)
+                if (photoImg.dataset && photoImg.dataset.compressedPhoto) {
+                    compressedPhoto = photoImg.dataset.compressedPhoto;
+                    console.log('✅ Photo from dataset:', compressedPhoto.length, 'bytes');
+                } 
+                // Method 2: Fall back to src
+                else if (photoImg.src && photoImg.src.startsWith('data:')) {
+                    compressedPhoto = photoImg.src;
+                    console.log('✅ Photo from src:', compressedPhoto.length, 'bytes');
+                }
+            }
 
             console.group('📸 PHOTO EXTRACTION IN addTeacher()');
-            console.log('Pre-photo img element exists:', !!photoImg);
-            console.log('Pre-photo display visibility:', photoImg?.style.display);
-            console.log('Photo data from dataset:', !!photoImg?.dataset.compressedPhoto);
-            console.log('Photo photo from src:', !!photoImg?.src);
-            console.log('Final compressedPhoto value exists:', !!compressedPhoto);
+            console.log('Image element found:', !!photoImg);
+            console.log('Image display:', photoImg?.style.display);
+            console.log('Photo extracted:', !!compressedPhoto);
             if (compressedPhoto) {
-                console.log('Photo size extracted:', compressedPhoto.length + ' bytes');
-                console.log('Photo data URI starts with:', compressedPhoto.substring(0, 50) + '...');
+                console.log('✅ Photo size:', compressedPhoto.length, 'bytes');
+                console.log('   Starts with:', compressedPhoto.substring(0, 30) + '...');
             } else {
-                console.warn('⚠️ NO PHOTO - will use default avatar');
+                console.warn('⚠️ NO PHOTO - will use default');
             }
             console.groupEnd();
 
