@@ -63264,7 +63264,40 @@ function renderAttendance() {
         function renderTeacherDashboard() {
             try {
                 console.log('[DEBUG] renderTeacherDashboard called');
-                console.log('[DEBUG] teachers count:', teachers?.length || 0);
+                console.log('[DEBUG] teachers in memory:', teachers?.length || 0);
+                
+                // CRITICAL: Always fetch fresh data from API to get latest photos
+                console.log('[DEBUG] Fetching fresh teachers from API...');
+                const API_BASE = window.API_BASE || 'https://jss-railway-fresh-production.up.railway.app/api';
+                fetch(`${API_BASE}/teachers`)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success && data.data && Array.isArray(data.data)) {
+                            teachers = data.data;
+                            console.log('[DEBUG] ✅ Fresh teachers loaded from API:', teachers.length);
+                            console.log('[DEBUG] Teachers with photos:', teachers.filter(t => t.photo_url).length);
+                            
+                            // Save to localStorage
+                            localStorage.setItem('teachers', JSON.stringify(teachers));
+                            
+                            // Render with fresh data
+                            renderTeacherDashboardContent();
+                        }
+                    })
+                    .catch(err => {
+                        console.warn('[WARN] Failed to fetch from API, using localStorage:', err.message);
+                        // Fallback to localStorage
+                        teachers = JSON.parse(localStorage.getItem("teachers") || "[]");
+                        renderTeacherDashboardContent();
+                    });
+                } catch (error) {
+                    console.error('[ERROR] renderTeacherDashboard error:', error);
+                }
+        }
+        
+        function renderTeacherDashboardContent() {
+            try {
+                console.log('[DEBUG] renderTeacherDashboardContent called with', teachers?.length || 0, 'teachers');
                 
                 // Ensure teachers are loaded
                 if (!teachers || teachers.length === 0) {
@@ -63586,12 +63619,23 @@ function renderAttendance() {
                 .then(data => {
                     if (data.success && data.data && Array.isArray(data.data)) {
                         teachers = data.data;
+                        
+                        // CRITICAL: Log photos from API
+                        console.log('[DEBUG] API returned', teachers.length, 'teachers');
+                        teachers.forEach(t => {
+                            if (t.photo_url) {
+                                console.log('  ✅', t.name, '- photo_url:', t.photo_url.length, 'bytes');
+                            } else {
+                                console.log('  ⚠️', t.name, '- NO PHOTO in API response');
+                            }
+                        });
+                        
                         localStorage.setItem('teachers', JSON.stringify(teachers));
-                        console.log('[DEBUG] Teachers loaded from API, count:', teachers.length);
+                        console.log('[DEBUG] Teachers saved to localStorage, count:', teachers.length);
                         
                         // Log photo info
                         const withPhotos = teachers.filter(t => t.photo_url).length;
-                        console.log('[DEBUG] Teachers with photos:', withPhotos);
+                        console.log('[DEBUG] Teachers with photos:', withPhotos, 'out of', teachers.length);
                         
                         renderStaffListCards(container);
                     } else {
@@ -63639,14 +63683,17 @@ function renderAttendance() {
                     const deptLabel = t.department || (t.subjects && t.subjects[0]) || 'Staff';
                     const subjectsList = (t.subjects && t.subjects.length > 0) ? t.subjects.join(', ') : 'No subjects assigned';
                     const teacherId = String(t.id || t.employee_id || '');
+                    // CRITICAL FIX: Get photo from database (photo_url) OR local storage (photo)
                     const photoUrl = t.photo_url || t.photo;
                     
                     // Log if teacher has photo
                     if (photoUrl) {
-                        console.log('[DEBUG] Teacher has photo:', t.name, '- Size:', photoUrl.length, 'bytes');
+                        console.log('[DEBUG] ✅ Teacher HAS photo:', t.name, '- Type:', typeof photoUrl, '- Size:', photoUrl.length, 'bytes');
+                    } else {
+                        console.log('[DEBUG] ⚠️ Teacher NO photo:', t.name, '- photo_url:', !!t.photo_url, '- photo:', !!t.photo);
                     }
                     
-                    console.log('[DEBUG] Rendering teacher card:', t.name, '- Photo:', photoUrl ? 'YES' : 'NO');
+                    console.log('[DEBUG] Rendering teacher card:', t.name, '- Photo:', photoUrl ? 'YES (' + photoUrl.length + ' bytes)' : 'NO');
 
                     const card = document.createElement("div");
                     card.style.cssText = `
