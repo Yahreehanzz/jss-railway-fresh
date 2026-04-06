@@ -54697,9 +54697,13 @@ function restoreTeacherZonePhoto() {
                 img.style.visibility = 'visible';
                 img.style.opacity = '1';
                 
-                // Store compressed image for later use
+                // CRITICAL: Store compressed image in MULTIPLE places for reliability
                 img.dataset.compressedPhoto = compressedDataUrl;
-                console.log('Stored in dataset.compressedPhoto');
+                console.log('✅ Stored in dataset.compressedPhoto');
+                
+                // Also store in global variable as backup 
+                window.currentTeacherPhoto = compressedDataUrl;
+                console.log('✅ Stored in window.currentTeacherPhoto');
                 
                 if (placeholder) {
                     console.log('Hiding placeholder');
@@ -54707,7 +54711,11 @@ function restoreTeacherZonePhoto() {
                 }
                 
                 console.log('✅ Photo preview displayed successfully');
+                console.log('VERIFICATION - Can we retrieve it?');
+                console.log('  From dataset:', !!img.dataset.compressedPhoto, img.dataset.compressedPhoto?.length, 'bytes');
+                console.log('  From global:', !!window.currentTeacherPhoto, window.currentTeacherPhoto?.length, 'bytes');
                 console.groupEnd();
+            });
             });
         }
         function updateTeacherDeptProgressBars() {
@@ -63907,34 +63915,39 @@ function renderAttendance() {
             const joining = (document.getElementById("addTeacherJoining") || {value:''}).value;
             const qualification = (document.getElementById("addTeacherQualification") || {value:''}).value;
             
-            // Get compressed photo from preview - CRITICAL FIX
+            // Get compressed photo from preview - MULTIPLE METHODS
             const photoImg = document.getElementById('addTeacherPreviewPhoto');
             
             // Try multiple methods to get the photo
             let compressedPhoto = null;
             
-            if (photoImg && photoImg.style.display !== 'none') {
-                // Method 1: Check dataset.compressedPhoto (most reliable)
-                if (photoImg.dataset && photoImg.dataset.compressedPhoto) {
-                    compressedPhoto = photoImg.dataset.compressedPhoto;
-                    console.log('✅ Photo from dataset:', compressedPhoto.length, 'bytes');
-                } 
-                // Method 2: Fall back to src
-                else if (photoImg.src && photoImg.src.startsWith('data:')) {
-                    compressedPhoto = photoImg.src;
-                    console.log('✅ Photo from src:', compressedPhoto.length, 'bytes');
-                }
+            // Method 1: Try dataset.compressedPhoto
+            if (photoImg?.dataset?.compressedPhoto) {
+                compressedPhoto = photoImg.dataset.compressedPhoto;
+                console.log('✅ Photo from dataset:', compressedPhoto.length, 'bytes');
+            } 
+            // Method 2: Try img.src
+            else if (photoImg?.src && photoImg.src.startsWith('data:')) {
+                compressedPhoto = photoImg.src;
+                console.log('✅ Photo from src:', compressedPhoto.length, 'bytes');
+            }
+            // Method 3: Try global variable (backup)
+            else if (window.currentTeacherPhoto) {
+                compressedPhoto = window.currentTeacherPhoto;
+                console.log('✅ Photo from global variable:', compressedPhoto.length, 'bytes');
             }
 
             console.group('📸 PHOTO EXTRACTION IN addTeacher()');
-            console.log('Image element found:', !!photoImg);
+            console.log('Image element:', !!photoImg);
             console.log('Image display:', photoImg?.style.display);
-            console.log('Photo extracted:', !!compressedPhoto);
+            console.log('Dataset has photo:', !!photoImg?.dataset?.compressedPhoto);
+            console.log('Src has photo:', photoImg?.src?.startsWith('data:'));
+            console.log('Global has photo:', !!window.currentTeacherPhoto);
+            console.log('Final result:', !!compressedPhoto);
             if (compressedPhoto) {
-                console.log('✅ Photo size:', compressedPhoto.length, 'bytes');
-                console.log('   Starts with:', compressedPhoto.substring(0, 30) + '...');
+                console.log('✅ PHOTO EXTRACTED:', compressedPhoto.length, 'bytes');
             } else {
-                console.warn('⚠️ NO PHOTO - will use default');
+                console.error('❌ NO PHOTO FOUND - will use default');
             }
             console.groupEnd();
 
@@ -64048,6 +64061,20 @@ function renderAttendance() {
         }
 
         function finalizeAddTeacher(teacher) {
+            console.log('\n=====================================');
+            console.log('🎯 finalizeAddTeacher STARTED');
+            console.log('=====================================');
+            console.log('Teacher object keys:', Object.keys(teacher));
+            console.log('teacher.name:', teacher.name);
+            console.log('teacher.id:', teacher.id);
+            console.log('teacher.photo exists:', !!teacher.photo);
+            if (teacher.photo) {
+                console.log('teacher.photo length:', teacher.photo.length, 'bytes');
+                console.log('teacher.photo starts with:', teacher.photo.substring(0, 50) + '...');
+            } else {
+                console.error('❌ CRITICAL: teacher.photo is NULL/UNDEFINED!');
+            }
+            
             teachers.push(teacher);
             localStorage.setItem("teachers", JSON.stringify(teachers));
             syncSettingToRailway('teachers_data', teachers);
@@ -64069,12 +64096,15 @@ function renderAttendance() {
                 photo_url: teacher.photo || null  // ✅ INCLUDE PHOTO URL (BASE64 or null)
             };
             
-            console.group('💾 SAVING TEACHER TO DATABASE');
-            console.log('Teacher Name:', teacherData.name);
-            console.log('Employee ID:', teacherData.employee_id);
-            console.log('Photo URL provided:', !!teacherData.photo_url);
-            console.log('Photo size in payload:', teacherData.photo_url ? teacherData.photo_url.length + ' bytes' : 'NO PHOTO');
-            console.log('API Endpoint:', window.API_BASE + '/teachers');
+            console.group('💾 PREPARING PAYLOAD FOR DATABASE');
+            console.log('teacherData.photo_url exists:', !!teacherData.photo_url);
+            if (teacherData.photo_url) {
+                console.log('✅ Photo URL length:', teacherData.photo_url.length, 'bytes');
+                console.log('   Starts with:', teacherData.photo_url.substring(0, 50) + '...');
+            } else {
+                console.error('❌ teacherData.photo_url is NULL!');
+                console.log('   teacher.photo was:', teacher.photo ? 'HAS VALUE (' + teacher.photo.length + ' bytes)' : 'NULL');
+            }
             
             // Check payload size before sending
             const payloadStr = JSON.stringify(teacherData);
@@ -64149,6 +64179,10 @@ function renderAttendance() {
                 previewImg.dataset.compressedPhoto = '';
                 previewImg.style.display = 'none';
             }
+            
+            // Clear the global photo variable
+            window.currentTeacherPhoto = null;
+            console.log('🧹 Cleared window.currentTeacherPhoto');
             
             const photoPlaceholder = document.getElementById("tcaPhotoPlaceholder");
             if (photoPlaceholder) photoPlaceholder.style.display = 'block';
