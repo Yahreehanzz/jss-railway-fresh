@@ -1,0 +1,85 @@
+REFERENCES
+(Alphabetical / numbered list for project report — Student & Staff Management System / Teacher Portal. Open this file in Microsoft Word and save as .docx if required.)
+
+1. Pressman, Roger S.
+   Software Engineering: A Practitioner’s Approach.
+   McGraw-Hill Education, 8th Edition, 2019.
+
+2. Sommerville, Ian.
+   Software Engineering.
+   Pearson Education Limited, 10th Edition, 2016.
+
+3. W3Schools Online Web Tutorials
+   Available at: https://www.w3schools.com
+   (Used for HTML, CSS, JavaScript syntax and web fundamentals.)
+
+4. MDN Web Docs (Mozilla Developer Network)
+   Available at: https://developer.mozilla.org
+   (Used as primary reference for HTML, CSS, JavaScript, and browser APIs.)
+
+5. Node.js Official Documentation
+   Available at: https://nodejs.org/en/docs
+   (Used for server-side JavaScript runtime, modules, and deployment concepts.)
+
+6. Express.js Documentation
+   Available at: https://expressjs.com
+   (Used for REST API routing, middleware, JSON bodies, and static file serving in server.js.)
+
+7. PostgreSQL Documentation
+   Available at: https://www.postgresql.org/docs/
+   (Used for relational schema design, SQL, JSONB settings storage, and data integrity for students and teachers tables.)
+
+8. node-postgres (pg) — Node.js PostgreSQL Client
+   Available at: https://node-postgres.com/
+   (Used for connecting the Express API to PostgreSQL via connection pooling.)
+
+9. Railway Platform Documentation
+   Available at: https://docs.railway.app
+   (Used for cloud deployment, PostgreSQL provisioning, environment variables, and hosting the production Node service.)
+
+10. Dotenv (environment configuration)
+   Available at: https://github.com/motdotla/dotenv#readme
+   (Used for loading DATABASE_URL and PORT in local and hosted environments.)
+
+11. CORS — Cross-Origin Resource Sharing
+   Available at: https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
+   (Used to allow browser clients to call the API from the deployed front-end origin.)
+
+12. Chart.js Documentation
+   Available at: https://www.chartjs.org/docs/
+   (Used in index.html for dashboard charts such as teacher department distribution.)
+
+13. jsPDF Library
+   Available at: https://github.com/parallax/jsPDF
+   (Used for client-side PDF generation features referenced in the application.)
+
+14. PDF.js (Mozilla)
+   Available at: https://mozilla.github.io/pdf.js/
+   (Used for parsing and rendering PDF documents in the browser.)
+
+15. SheetJS (xlsx) Community Edition
+   Available at: https://docs.sheetjs.com/
+   (Used for Excel import/export in the browser.)
+
+16. Google Fonts — Outfit
+   Available at: https://fonts.google.com/specimen/Outfit
+   (Used for UI typography in the application interface.)
+
+17. CDN Fonts — Avengeance (display typeface)
+   Available at: https://fonts.cdnfonts.com/css/avengeance
+   (Used for stylised cinematic title treatment on the Teacher Portal home section.)
+
+18. Font Awesome (icons)
+   Available at: https://fontawesome.com/docs
+   (Used for navigation and action icons throughout index.html.)
+
+19. Phosphor Icons
+   Available at: https://phosphoricons.com/
+   (Pack loaded via unpkg for glass-style UI elements.)
+
+20. Railway Blog / Tutorials (general)
+   Available at: https://railway.app
+   (Context for deploying Node.js plus managed PostgreSQL.)
+
+---
+Note: Replace or add institution-specific report titles, department name, and academic year on your cover page. Remove any items your supervisor does not allow (e.g. blog sources).

@@ -27400,9 +27400,9 @@ document.addEventListener('DOMContentLoaded', function() {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 8px;
+    gap: 10px;
     transform-style: preserve-3d;
-    padding: 0;
+    padding: 0 4px 0 0;
     font-family: 'Avengeance', 'Outfit', sans-serif;
 }
 #tcp-home .tc-avengers-text {
@@ -27421,19 +27421,17 @@ document.addEventListener('DOMContentLoaded', function() {
     line-height: 1;
     transform: translateZ(20px);
     display: block;
-    width: 100%;
+    width: max-content;
     max-width: 100%;
     text-align: right;
 }
 #tcp-home .tc-line-1 {
-    font-size: clamp(1.25rem, 2.4vw, 2.35rem);
-    letter-spacing: 0.28em;
-    width: 100%;
+    font-size: clamp(3rem, 6vw, 6rem);
+    letter-spacing: 8px;
 }
 #tcp-home .tc-line-2 {
-    font-size: clamp(1.65rem, 3.5vw, 3.25rem);
-    letter-spacing: 0.06em;
-    width: 100%;
+    font-size: clamp(4.5rem, 10vw, 10rem);
+    letter-spacing: 2px;
 }
 #tcp-home .tc-avengers-text::before {
     content: attr(data-text);
@@ -27474,7 +27472,14 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 }
 @media (max-width: 768px) {
-    #tcp-home .tc-line-1 { letter-spacing: 4px; }
+    #tcp-home .tc-line-1 {
+        font-size: clamp(1.75rem, 7vw, 3rem);
+        letter-spacing: 4px;
+    }
+    #tcp-home .tc-line-2 {
+        font-size: clamp(2.25rem, 10vw, 4.5rem);
+        letter-spacing: 2px;
+    }
     #tcp-home .tc-cinematic-scene { gap: 5px; }
     #tcp-home .tc-avengers-text { -webkit-text-stroke: 1px rgba(255, 255, 255, 0.6); }
     #tcp-home .tc-avengers-text::before {
@@ -27522,7 +27527,7 @@ document.addEventListener('DOMContentLoaded', function() {
 .tc-home-actions {
     padding: 24px 48px 40px;
     display: flex;
-    align-items: stretch;
+    align-items: flex-end;
     gap: 14px;
     background: transparent;
     position: relative;
@@ -27532,11 +27537,12 @@ document.addEventListener('DOMContentLoaded', function() {
     flex: 1;
     display: flex;
     align-items: center;
-    gap: 14px;
-    padding: 16px 20px;
+    gap: 12px;
+    padding: 12px 16px;
+    min-height: 0;
     background: rgba(255,255,255,0.06);
     border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 16px;
+    border-radius: 14px;
     backdrop-filter: blur(16px);
     cursor: pointer;
     transition: all 0.22s ease;
@@ -27557,14 +27563,14 @@ document.addEventListener('DOMContentLoaded', function() {
     box-shadow: 0 8px 32px rgba(99,102,241,0.3);
 }
 .tc-action-icon {
-    width: 38px;
-    height: 38px;
-    border-radius: 10px;
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
     background: rgba(255,255,255,0.1);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 15px;
+    font-size: 14px;
     color: #c7d2fe;
     flex-shrink: 0;
 }
@@ -27578,14 +27584,14 @@ document.addEventListener('DOMContentLoaded', function() {
     gap: 2px;
 }
 .tc-action-label {
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 800;
-    letter-spacing: 1.8px;
+    letter-spacing: 1.5px;
     text-transform: uppercase;
     color: rgba(255,255,255,0.5);
 }
 .tc-action-title {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 700;
     color: #fff;
     letter-spacing: -0.2px;
