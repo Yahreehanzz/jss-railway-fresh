@@ -27372,40 +27372,37 @@ document.addEventListener('DOMContentLoaded', function() {
     text-shadow: 0 2px 24px rgba(0,0,0,0.45);
 }
 
-/* Cinematic "Teacher Zone" title (scoped to home hero) */
+/* Cinematic title: no box — sits bottom-right above Manage Staff */
+.tc-home-actions-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-end;
+    gap: 14px;
+    min-width: 0;
+}
 #tcp-home .tc-cinematic-wrap {
     position: relative;
-    margin: 0 0 14px 0;
-    padding: 28px 16px 32px;
+    margin: 0;
+    padding: 0 0 4px 0;
     perspective: 1000px;
-    max-width: 920px;
-}
-#tcp-home .tc-cinematic-bg {
-    position: absolute;
-    inset: -8px;
-    border-radius: 20px;
-    background: radial-gradient(ellipse at center, #1b2838 0%, #06090e 70%, #000000 100%);
-    z-index: 0;
-    pointer-events: none;
-}
-#tcp-home .tc-cinematic-noise {
-    position: absolute;
-    inset: 0;
-    border-radius: 16px;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
-    mix-blend-mode: overlay;
-    z-index: 1;
-    pointer-events: none;
+    max-width: none;
+    width: 100%;
+    background: none;
+    border: none;
+    box-shadow: none;
 }
 #tcp-home .tc-cinematic-scene {
     position: relative;
     z-index: 2;
-    text-align: center;
+    text-align: right;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    align-items: flex-end;
+    gap: 8px;
     transform-style: preserve-3d;
-    padding: 0 8px;
+    padding: 0;
     font-family: 'Avengeance', 'Outfit', sans-serif;
 }
 #tcp-home .tc-avengers-text {
@@ -27423,14 +27420,20 @@ document.addEventListener('DOMContentLoaded', function() {
     letter-spacing: 3px;
     line-height: 1;
     transform: translateZ(20px);
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    text-align: right;
 }
 #tcp-home .tc-line-1 {
-    font-size: clamp(1.75rem, 4.5vw, 3.75rem);
-    letter-spacing: 8px;
+    font-size: clamp(1.25rem, 2.4vw, 2.35rem);
+    letter-spacing: 0.28em;
+    width: 100%;
 }
 #tcp-home .tc-line-2 {
-    font-size: clamp(2.5rem, 7vw, 5.5rem);
-    letter-spacing: 2px;
+    font-size: clamp(1.65rem, 3.5vw, 3.25rem);
+    letter-spacing: 0.06em;
+    width: 100%;
 }
 #tcp-home .tc-avengers-text::before {
     content: attr(data-text);
@@ -27453,6 +27456,22 @@ document.addEventListener('DOMContentLoaded', function() {
         12px 12px 25px rgba(0, 0, 0, 0.8),
         0px 0px 40px rgba(28, 59, 90, 0.4);
     transform: translateZ(-5px);
+}
+@media (max-width: 900px) {
+    .tc-home-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .tc-home-actions-right {
+        order: -1;
+    }
+    #tcp-home .tc-cinematic-scene {
+        text-align: center;
+        align-items: center;
+    }
+    #tcp-home .tc-avengers-text {
+        text-align: center;
+    }
 }
 @media (max-width: 768px) {
     #tcp-home .tc-line-1 { letter-spacing: 4px; }
@@ -41799,14 +41818,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="tc-home-eyebrow-bar"></div>
                     <span class="tc-home-eyebrow">Govt. Polytechnic, Beelagi &nbsp;?&nbsp; Staff Portal</span>
                 </div>
-                <div class="tc-cinematic-wrap">
-                    <div class="tc-cinematic-bg" aria-hidden="true"></div>
-                    <div class="tc-cinematic-noise" aria-hidden="true"></div>
-                    <div class="tc-cinematic-scene" id="tcTeacherZoneScene">
-                        <h1 class="tc-avengers-text tc-line-1" data-text="Welcome to the">Welcome to the</h1>
-                        <h1 class="tc-avengers-text tc-line-2" data-text="Teacher Zone">Teacher Zone</h1>
-                    </div>
-                </div>
                 <p class="tc-home-subtitle">Manage attendance, leave, timetables and more ?<br>all in one professional portal.</p>
                 <div class="tc-home-meta">
                     <span><i class="fas fa-clipboard-check"></i>Attendance</span>
@@ -41829,13 +41840,21 @@ document.addEventListener('DOMContentLoaded', function() {
                         <span class="tc-action-title">Add Teacher</span>
                     </div>
                 </button>
-                <button class="tc-action-card" onclick="switchTeacherTab('manage')">
-                    <div class="tc-action-icon"><i class="fas fa-users-cog"></i></div>
-                    <div class="tc-action-info">
-                        <span class="tc-action-label">Staff</span>
-                        <span class="tc-action-title">Manage Staff</span>
+                <div class="tc-home-actions-right">
+                    <div class="tc-cinematic-wrap">
+                        <div class="tc-cinematic-scene" id="tcTeacherZoneScene">
+                            <h1 class="tc-avengers-text tc-line-1" data-text="Welcome to the">Welcome to the</h1>
+                            <h1 class="tc-avengers-text tc-line-2" data-text="Teacher Zone">Teacher Zone</h1>
+                        </div>
                     </div>
-                </button>
+                    <button type="button" class="tc-action-card" onclick="switchTeacherTab('manage')">
+                        <div class="tc-action-icon"><i class="fas fa-users-cog"></i></div>
+                        <div class="tc-action-info">
+                            <span class="tc-action-label">Staff</span>
+                            <span class="tc-action-title">Manage Staff</span>
+                        </div>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
