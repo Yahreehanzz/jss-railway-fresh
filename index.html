@@ -54607,9 +54607,10 @@ function restoreTeacherZonePhoto() {
             if (idEl)   idEl.textContent   = idV   || 'TCH001';
             if (deptEl) deptEl.textContent = deptV || 'Department';
         }
-        function compressImage(file, callback, maxWidth = 250, maxHeight = 250, quality = 0.5) {
+        function compressImage(file, callback, maxWidth = 600, maxHeight = 600, quality = 0.75) {
             console.log('📦 Starting image compression...');
             console.log('Original file size:', file.size, 'bytes');
+            console.log('Max dimensions:', maxWidth, 'x', maxHeight, ', Quality:', quality);
             const reader = new FileReader();
             
             reader.onerror = () => {
@@ -54625,12 +54626,12 @@ function restoreTeacherZonePhoto() {
                 };
                 
                 img.onload = () => {
-                    console.log('📐 Image dimensions:', img.width, 'x', img.height);
+                    console.log('📐 Original dimensions:', img.width, 'x', img.height);
                     const canvas = document.createElement('canvas');
                     let width = img.width;
                     let height = img.height;
 
-                    // Calculate new dimensions
+                    // Calculate new dimensions - maintain aspect ratio
                     if (width > height) {
                         if (width > maxWidth) {
                             height *= maxWidth / width;
@@ -54649,10 +54650,13 @@ function restoreTeacherZonePhoto() {
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
 
-                    // Convert to base64 with QUALITY COMPRESSION - try JPEG first, then WebP
+                    // Convert to base64 with quality compression
                     let compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
-                    console.log('✅ Compression complete (JPEG). Final size:', compressedDataUrl.length, 'bytes');
-                    console.log('📊 Compression ratio:', Math.round((1 - compressedDataUrl.length / file.size) * 100) + '%');
+                    console.log('✅ Compression complete - Final size:', compressedDataUrl.length, 'bytes');
+                    console.log('📊 Ratio:', Math.round((1 - compressedDataUrl.length / file.size) * 100) + '% reduction');
+                    if (compressedDataUrl.length > 500000) {
+                        console.warn('⚠️ Compressed image still large:', Math.round(compressedDataUrl.length / 1024 / 1024 * 100) / 100, 'MB');
+                    }
                     callback(compressedDataUrl);
                 };
                 img.src = e.target.result;
