@@ -152,6 +152,7 @@ app.post('/api/teachers', async (req, res) => {
         // Log photo info
         if (photo_url) {
             console.log(`📸 Photo received: ${photo_url.length} bytes`);
+            console.log(`   Starts with: ${photo_url.substring(0, 40)}...`);
         } else {
             console.log('📸 No photo provided');
         }
@@ -178,16 +179,26 @@ app.post('/api/teachers', async (req, res) => {
             photo_url || null
         ];
         
-        console.log('🔄 Running INSERT query with values...');
+        console.log('🔒 Prepared values - Parameter 12 (photo_url):', values[11] ? values[11].substring(0, 40) + '...' : 'NULL');
+        
         const result = await pool.query(query, values);
         const savedTeacher = result.rows[0];
         
-        console.group('✅ INSERTION SUCCESSFUL');
-        console.log('Teacher saved! ID:', savedTeacher.id);
-        console.log('Teacher name:', savedTeacher.name);
-        console.log('Photo_url in saved record:', !!savedTeacher.photo_url);
-        console.log('Photo size in saved record:', savedTeacher.photo_url ? savedTeacher.photo_url.length + ' bytes' : 'NULL');
-        console.log('All columns in response:', Object.keys(savedTeacher));
+        console.group('✅ DATABASE STORED RESULT');
+        console.log('ID:', savedTeacher.id);
+        console.log('Name:', savedTeacher.name);
+        console.log('Employee ID:', savedTeacher.employee_id);
+        console.log('Photo in DB (exists):', !!savedTeacher.photo_url);
+        
+        if (savedTeacher.photo_url) {
+            console.log('Photo size in DB:', savedTeacher.photo_url.length, 'bytes');
+            console.log('Photo starts with:', savedTeacher.photo_url.substring(0, 40) + '...');
+        } else {
+            console.warn('⚠️ Photo NOT in database!');
+            if (photo_url) {
+                console.error('ERROR: Photo was sent (' + photo_url.length + ' bytes) but database stored NULL!');
+            }
+        }
         console.groupEnd();
         
         res.status(201).json({ 
@@ -270,16 +281,23 @@ app.get('/api/verify-photos', async (req, res) => {
     try {
         console.log('🔍 Verifying photos in database...');
         const result = await pool.query(`
-            SELECT id, name, employee_id, 
-                   CASE WHEN photo_url IS NOT NULL THEN 'YES - ' || LENGTH(photo_url::text) || ' bytes'
-                        ELSE 'NO' END as photo_status
+            SELECT id, name, employee_id, photo_url,
+                   CASE WHEN photo_url IS NOT NULL THEN LENGTH(photo_url::text)
+                        ELSE 0 END as photo_bytes
             FROM teachers
+            ORDER BY id DESC
         `);
         
         const summary = {
             total: result.rows.length,
-            with_photos: result.rows.filter(t => t.photo_status !== 'NO').length,
-            teachers: result.rows
+            with_photos: result.rows.filter(t => t.photo_url && t.photo_bytes > 0).length,
+            teachers: result.rows.map(r => ({
+                id: r.id,
+                name: r.name,
+                employee_id: r.employee_id,
+                photo_status: r.photo_bytes > 0 ? `YES - ${r.photo_bytes} bytes` : 'NO',
+                photo_starts: r.photo_url ? r.photo_url.substring(0, 40) + '...' : 'N/A'
+            }))
         };
         
         console.log('📊 Photo Summary:', summary);

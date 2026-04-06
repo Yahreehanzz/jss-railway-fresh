@@ -54607,8 +54607,9 @@ function restoreTeacherZonePhoto() {
             if (idEl)   idEl.textContent   = idV   || 'TCH001';
             if (deptEl) deptEl.textContent = deptV || 'Department';
         }
-        function compressImage(file, callback, maxWidth = 300, maxHeight = 300, quality = 0.7) {
+        function compressImage(file, callback, maxWidth = 250, maxHeight = 250, quality = 0.5) {
             console.log('📦 Starting image compression...');
+            console.log('Original file size:', file.size, 'bytes');
             const reader = new FileReader();
             
             reader.onerror = () => {
@@ -54648,9 +54649,10 @@ function restoreTeacherZonePhoto() {
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
 
-                    // Convert to base64 with quality compression
-                    const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
-                    console.log('✅ Compression complete. Final size:', compressedDataUrl.length, 'bytes');
+                    // Convert to base64 with QUALITY COMPRESSION - try JPEG first, then WebP
+                    let compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+                    console.log('✅ Compression complete (JPEG). Final size:', compressedDataUrl.length, 'bytes');
+                    console.log('📊 Compression ratio:', Math.round((1 - compressedDataUrl.length / file.size) * 100) + '%');
                     callback(compressedDataUrl);
                 };
                 img.src = e.target.result;
@@ -64062,16 +64064,29 @@ function renderAttendance() {
             console.log('Photo URL provided:', !!teacherData.photo_url);
             console.log('Photo size in payload:', teacherData.photo_url ? teacherData.photo_url.length + ' bytes' : 'NO PHOTO');
             console.log('API Endpoint:', window.API_BASE + '/teachers');
-            console.log('Full payload:', teacherData);
+            
+            // Check payload size before sending
+            const payloadStr = JSON.stringify(teacherData);
+            console.log('📦 Total payload size:', payloadStr.length, 'bytes');
+            
+            if (teacherData.photo_url) {
+                const photoPercent = Math.round((teacherData.photo_url.length / payloadStr.length) * 100);
+                console.log('📷 Photo is', photoPercent + '%', 'of total payload');
+            }
             console.groupEnd();
             
             fetch(`${window.API_BASE}/teachers`, {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(teacherData)
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: payloadStr
             })
             .then(res => {
                 console.log('📡 API Response status:', res.status, '- Success:', res.ok);
+                if (!res.ok) {
+                    console.error('❌ HTTP Error:', res.status, res.statusText);
+                }
                 return res.json();
             })
             .then(data => {
@@ -64084,6 +64099,9 @@ function renderAttendance() {
                     console.log('✅ Photo stored in database:', data.data.photo_url.length + ' bytes');
                 } else {
                     console.warn('⚠️ Photo NOT in database response!');
+                    if (teacherData.photo_url) {
+                        console.error('💥 CRITICAL: Photo was sent (' + teacherData.photo_url.length + ' bytes) but NOT saved to database!');
+                    }
                 }
                 console.groupEnd();
                 
