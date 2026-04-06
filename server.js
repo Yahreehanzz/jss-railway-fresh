@@ -643,6 +643,75 @@ async function initSettingsTable() {
 initStudentsTable();
 initSettingsTable();
 
+async function initPortalSettingsTable() {
+    try {
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS portal_settings (
+                setting_key VARCHAR(100) PRIMARY KEY,
+                setting_value TEXT,
+                updated_at TIMESTAMP DEFAULT NOW()
+            )
+        `);
+        console.log('✅ Portal settings table ready');
+    } catch (err) {
+        console.error('❌ Portal settings table initialization error:', err.message);
+    }
+}
+
+initPortalSettingsTable();
+
+// ============================================================
+// TEACHER ZONE — HOME HERO PORTAL PHOTO (base64 in TEXT column)
+// ============================================================
+
+app.post('/api/portal-photo', async (req, res) => {
+    try {
+        const { photoData } = req.body;
+        if (!photoData || typeof photoData !== 'string') {
+            return res.status(400).json({ success: false, error: 'No photo data provided' });
+        }
+        await pool.query(
+            `INSERT INTO portal_settings (setting_key, setting_value, updated_at)
+             VALUES ($1, $2, NOW())
+             ON CONFLICT (setting_key)
+             DO UPDATE SET setting_value = $2, updated_at = NOW()`,
+            ['teacher_zone_portal_photo', photoData]
+        );
+        console.log('✅ Portal photo saved');
+        res.json({ success: true, message: 'Photo saved successfully' });
+    } catch (e) {
+        console.error('❌ POST /api/portal-photo ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+app.get('/api/portal-photo', async (req, res) => {
+    try {
+        const result = await pool.query(
+            `SELECT setting_value FROM portal_settings WHERE setting_key = $1`,
+            ['teacher_zone_portal_photo']
+        );
+        if (result.rows.length === 0) {
+            return res.json({ success: true, data: null, message: 'No photo found' });
+        }
+        res.json({ success: true, data: result.rows[0].setting_value });
+    } catch (e) {
+        console.error('❌ GET /api/portal-photo ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+app.delete('/api/portal-photo', async (req, res) => {
+    try {
+        await pool.query(`DELETE FROM portal_settings WHERE setting_key = $1`, ['teacher_zone_portal_photo']);
+        console.log('✅ Portal photo removed');
+        res.json({ success: true, message: 'Photo removed successfully' });
+    } catch (e) {
+        console.error('❌ DELETE /api/portal-photo ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
 // GET all students
 app.get('/api/students', async (req, res) => {
     try {
@@ -859,12 +928,15 @@ app.put('/api/settings/:key', async (req, res) => {
     try {
         console.log('💾 PUT /api/settings/' + req.params.key);
         const { value } = req.body;
-        
+        const dbJson = value === null || value === undefined
+            ? null
+            : JSON.stringify(value);
+
         const result = await pool.query(
-            `INSERT INTO app_settings (key, value) VALUES ($1, $2) 
-             ON CONFLICT (key) DO UPDATE SET value=$2, updated_at=NOW() 
+            `INSERT INTO app_settings (key, value) VALUES ($1, $2::jsonb) 
+             ON CONFLICT (key) DO UPDATE SET value=$2::jsonb, updated_at=NOW() 
              RETURNING *`,
-            [req.params.key, typeof value === 'string' ? value : JSON.stringify(value)]
+            [req.params.key, dbJson]
         );
         
         console.log('✅ Setting saved! Key:', req.params.key);
