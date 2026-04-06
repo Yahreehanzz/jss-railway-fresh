@@ -41483,6 +41483,35 @@ function handleTeacherZonePhoto(input) {
                 const preview = document.getElementById('tcPhotoPreview');
                 if (preview) preview.src = dataUrl;
                 localStorage.setItem('teacher_zone_photo', dataUrl);
+                
+                // Send photo to server
+                fetch('/api/portal-photo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ photoData: dataUrl })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('✅ Photo saved to server successfully');
+                        // Show success feedback
+                        const uploadBtn = document.getElementById('tcUploadBtn');
+                        if (uploadBtn) {
+                            const originalText = uploadBtn.innerHTML;
+                            uploadBtn.innerHTML = '<div class="tc-upload-circle"><i class="fas fa-check"></i></div><span class="tc-upload-label">Photo Uploaded!</span>';
+                            setTimeout(() => {
+                                uploadBtn.innerHTML = originalText;
+                            }, 2000);
+                        }
+                    } else {
+                        console.error('❌ Failed to save photo:', data.error);
+                        alert('Error saving photo: ' + (data.error || 'Unknown error'));
+                    }
+                })
+                .catch(err => {
+                    console.error('❌ Error uploading photo:', err);
+                    alert('Error uploading photo: ' + err.message);
+                });
             };
             img.src = e.target.result;
         };
@@ -41495,15 +41524,52 @@ function removeTeacherZonePhoto() {
     localStorage.removeItem('teacher_zone_photo');
     const preview = document.getElementById('tcPhotoPreview');
     if (preview) preview.src = '';
+    
+    // Remove photo from server
+    fetch('/api/portal-photo', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            console.log('✅ Photo removed from server');
+        } else {
+            console.error('❌ Failed to remove photo:', data.error);
+        }
+    })
+    .catch(err => console.error('❌ Error removing photo:', err));
 }
 
 function restoreTeacherZonePhoto() {
     console.log('[TEACHER] Restore photo');
-    const savedPhoto = localStorage.getItem('teacher_zone_photo');
-    if (savedPhoto) {
-        const preview = document.getElementById('tcPhotoPreview');
-        if (preview) preview.src = savedPhoto;
-    }
+    // First try to get from server
+    fetch('/api/portal-photo')
+    .then(res => res.json())
+    .then(data => {
+        if (data.success && data.data) {
+            console.log('✅ Photo restored from server');
+            const preview = document.getElementById('tcPhotoPreview');
+            if (preview) preview.src = data.data;
+            localStorage.setItem('teacher_zone_photo', data.data);
+        } else {
+            // Fallback to localStorage
+            const savedPhoto = localStorage.getItem('teacher_zone_photo');
+            if (savedPhoto) {
+                const preview = document.getElementById('tcPhotoPreview');
+                if (preview) preview.src = savedPhoto;
+            }
+        }
+    })
+    .catch(err => {
+        console.error('Error fetching photo from server:', err);
+        // Fallback to localStorage
+        const savedPhoto = localStorage.getItem('teacher_zone_photo');
+        if (savedPhoto) {
+            const preview = document.getElementById('tcPhotoPreview');
+            if (preview) preview.src = savedPhoto;
+        }
+    });
 }
 </script>
 

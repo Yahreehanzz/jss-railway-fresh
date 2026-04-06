@@ -151,6 +151,17 @@ pool.query(`
     )
 `).then(() => console.log('✅ Student Fees table ready')).catch(e => console.error('⚠️ Student fees table error:', e.message));
 
+// Initialize portal settings table for storing home page photo
+pool.query(`
+    CREATE TABLE IF NOT EXISTS portal_settings (
+        id SERIAL PRIMARY KEY,
+        setting_key VARCHAR(100) NOT NULL UNIQUE,
+        setting_value TEXT,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+    )
+`).then(() => console.log('✅ Portal Settings table ready')).catch(e => console.error('⚠️ Portal settings table error:', e.message));
+
 // ============================================================
 // API Routes
 // ============================================================
@@ -1016,6 +1027,74 @@ app.put('/api/fees/:usn/:semester', async (req, res) => {
         res.json({ success: true, data: result.rows[0] });
     } catch (e) {
         console.error('❌ PUT /api/fees ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// ============================================================
+// PORTAL PHOTO ENDPOINTS
+// ============================================================
+
+// Save portal home page photo
+app.post('/api/portal-photo', async (req, res) => {
+    try {
+        const { photoData } = req.body;
+        
+        if (!photoData) {
+            return res.status(400).json({ success: false, error: 'No photo data provided' });
+        }
+        
+        const result = await pool.query(
+            `INSERT INTO portal_settings (setting_key, setting_value, updated_at) 
+             VALUES ($1, $2, NOW())
+             ON CONFLICT (setting_key) 
+             DO UPDATE SET setting_value = $2, updated_at = NOW()
+             RETURNING *`,
+            ['teacher_zone_portal_photo', photoData]
+        );
+        
+        console.log('✅ Portal photo saved successfully');
+        res.json({ success: true, message: 'Photo saved successfully', data: result.rows[0] });
+    } catch (e) {
+        console.error('❌ POST /api/portal-photo ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// Get portal home page photo
+app.get('/api/portal-photo', async (req, res) => {
+    try {
+        const result = await pool.query(
+            `SELECT setting_value FROM portal_settings 
+             WHERE setting_key = $1`,
+            ['teacher_zone_portal_photo']
+        );
+        
+        if (result.rows.length === 0) {
+            return res.json({ success: true, data: null, message: 'No photo found' });
+        }
+        
+        console.log('✅ Portal photo retrieved');
+        res.json({ success: true, data: result.rows[0].setting_value });
+    } catch (e) {
+        console.error('❌ GET /api/portal-photo ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// Remove portal photo
+app.delete('/api/portal-photo', async (req, res) => {
+    try {
+        await pool.query(
+            `DELETE FROM portal_settings 
+             WHERE setting_key = $1`,
+            ['teacher_zone_portal_photo']
+        );
+        
+        console.log('✅ Portal photo removed');
+        res.json({ success: true, message: 'Photo removed successfully' });
+    } catch (e) {
+        console.error('❌ DELETE /api/portal-photo ERROR:', e.message);
         res.status(500).json({ success: false, error: e.message });
     }
 });
