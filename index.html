@@ -64037,6 +64037,7 @@ function renderAttendance() {
         }
 
         function finalizeAddTeacher(teacher) {
+            console.log('\n=== finalizeAddTeacher START ===');
             teachers.push(teacher);
             localStorage.setItem("teachers", JSON.stringify(teachers));
             syncSettingToRailway('teachers_data', teachers);
@@ -64058,22 +64059,23 @@ function renderAttendance() {
                 photo_url: teacher.photo || null  // ✅ INCLUDE PHOTO URL (BASE64 or null)
             };
             
-            console.group('💾 SAVING TEACHER TO DATABASE');
-            console.log('Teacher Name:', teacherData.name);
-            console.log('Employee ID:', teacherData.employee_id);
-            console.log('Photo URL provided:', !!teacherData.photo_url);
-            console.log('Photo size in payload:', teacherData.photo_url ? teacherData.photo_url.length + ' bytes' : 'NO PHOTO');
-            console.log('API Endpoint:', window.API_BASE + '/teachers');
+            console.log('\n💾 PREPARING TO SAVE:');
+            console.log('  teacher.photo exists:', !!teacher.photo);
+            console.log('  teacher.photo length:', teacher.photo?.length || 0);
+            console.log('  teacherData.photo_url exists:', !!teacherData.photo_url);
+            console.log('  teacherData.photo_url length:', teacherData.photo_url?.length || 0);
+            console.log('  Will send photo_url:', !!teacherData.photo_url ? 'YES (' + teacherData.photo_url.length + ' bytes)' : 'NO');
             
-            // Check payload size before sending
-            const payloadStr = JSON.stringify(teacherData);
-            console.log('📦 Total payload size:', payloadStr.length, 'bytes');
-            
-            if (teacherData.photo_url) {
-                const photoPercent = Math.round((teacherData.photo_url.length / payloadStr.length) * 100);
-                console.log('📷 Photo is', photoPercent + '%', 'of total payload');
+            // Verify teacher.photo exists BEFORE sending
+            if (!teacher.photo) {
+                console.error('❌ CRITICAL: teacher.photo is NULL/UNDEFINED!');
+                console.error('This is why photos are not saving!');
             }
-            console.groupEnd();
+            
+            const payloadStr = JSON.stringify(teacherData);
+            console.log('  Total payload size:', payloadStr.length, 'bytes');
+            console.log('  Photo is', teacherData.photo_url ? Math.round((teacherData.photo_url.length / payloadStr.length) * 100) + '%' : '0%', 'of payload');
+            console.log('\n📡 SENDING TO API...');
             
             fetch(`${window.API_BASE}/teachers`, {
                 method: 'POST',
@@ -64083,47 +64085,44 @@ function renderAttendance() {
                 body: payloadStr
             })
             .then(res => {
-                console.log('📡 API Response status:', res.status, '- Success:', res.ok);
+                console.log('  Response status:', res.status);
                 if (!res.ok) {
-                    console.error('❌ HTTP Error:', res.status, res.statusText);
+                    console.error('  ❌ HTTP Error');
                 }
                 return res.json();
             })
             .then(data => {
-                console.group('📥 DATABASE RESPONSE');
-                console.log('Success flag:', data.success);
-                console.log('Response data:', data.data);
-                console.log('Teacher from DB - ID:', data.data?.id);
-                console.log('Teacher from DB - Name:', data.data?.name);
-                if (data.data?.photo_url) {
-                    console.log('✅ Photo stored in database:', data.data.photo_url.length + ' bytes');
-                } else {
-                    console.warn('⚠️ Photo NOT in database response!');
-                    if (teacherData.photo_url) {
-                        console.error('💥 CRITICAL: Photo was sent (' + teacherData.photo_url.length + ' bytes) but NOT saved to database!');
-                    }
-                }
-                console.groupEnd();
+                console.log('\n📥 DATABASE RESPONSE:');
+                console.log('  Success:', data.success);
+                console.log('  Teacher ID:', data.data?.id);
+                
+                // CRITICAL: Check if photo was actually saved
+                const photoInDB = data.data?.photo_url;
+                console.log('  Photo in response:', !!photoInDB);
                 
                 if (data.success) {
-                    console.log('✅ Teacher saved to database! ID:', data.data.id);
-                    console.log('📸 Photo in database:', data.data.photo_url ? 'YES (' + data.data.photo_url.length + ' bytes)' : 'NO');
+                    if (photoInDB) {
+                        console.log('  ✅ PHOTO SAVED:', photoInDB.length, 'bytes');
+                    } else {
+                        console.error('  ❌ PHOTO FAILED TO SAVE!');
+                        console.error('  Problem: Photo was', teacherData.photo_url ? 'SENT (' + teacherData.photo_url.length + ' bytes) but NOT STORED' : 'NOT SENT at all');
+                    }
                     
-                    // Force reload from API to show new teacher with photo
                     setTimeout(() => {
-                        console.log('🔄 Refreshing teachers from database...');
-                        isLoadingTeachers = false;  // Reset flag
+                        console.log('\n🔄 Refreshing...');
+                        isLoadingTeachers = false;
                         fetchAndRenderTeachers();
                     }, 800);
                 } else {
-                    console.error('❌ Database save failed:', data.error);
+                    console.error('  ❌ Save failed:', data.error);
                     showMessageBox('Error', 'Failed to save: ' + data.error);
                 }
             })
             .catch(err => {
-                console.error('❌ API call failed:', err);
-                showMessageBox('Error', 'Failed to reach server: ' + err.message);
+                console.error('  ❌ API ERROR:', err.message);
+                showMessageBox('Error', 'Failed: ' + err.message);
             });
+            console.log('=== finalizeAddTeacher END ===\n');
             
             hideLoader();
             showMessageBox('Success', "Teacher Added! Photo being synced...");
