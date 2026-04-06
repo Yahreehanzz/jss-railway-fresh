@@ -54699,7 +54699,8 @@ function restoreTeacherZonePhoto() {
                 
                 // Store compressed image for later use
                 img.dataset.compressedPhoto = compressedDataUrl;
-                console.log('Stored in dataset.compressedPhoto');
+                window.teacherPhotoBackup = compressedDataUrl;
+                console.log('✅ Photo stored - size:', compressedDataUrl.length, 'bytes');
                 
                 if (placeholder) {
                     console.log('Hiding placeholder');
@@ -63924,6 +63925,11 @@ function renderAttendance() {
                     compressedPhoto = photoImg.src;
                     console.log('✅ Photo from src:', compressedPhoto.length, 'bytes');
                 }
+                // Method 3: Use backup global
+                else if (window.teacherPhotoBackup) {
+                    compressedPhoto = window.teacherPhotoBackup;
+                    console.log('✅ Photo from backup:', compressedPhoto.length, 'bytes');
+                }
             }
 
             console.group('📸 PHOTO EXTRACTION IN addTeacher()');
@@ -64149,6 +64155,7 @@ function renderAttendance() {
                 previewImg.dataset.compressedPhoto = '';
                 previewImg.style.display = 'none';
             }
+            window.teacherPhotoBackup = null;
             
             const photoPlaceholder = document.getElementById("tcaPhotoPlaceholder");
             if (photoPlaceholder) photoPlaceholder.style.display = 'block';
