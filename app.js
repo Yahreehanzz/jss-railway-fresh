@@ -233,7 +233,14 @@ app.post('/api/teachers', async (req, res) => {
     try {
         console.log('📝 POST /api/teachers - Body:', req.body);
         
-        const { name, email, phone, subject, department, employee_id, designation, gender, date_of_joining, qualification, experience } = req.body;
+        const { name, email, phone, subject, department, employee_id, designation, gender, date_of_joining, qualification, experience, photo_url, photo } = req.body;
+        const photoValue = (typeof photo_url === 'string' && photo_url.trim()) ? photo_url.trim()
+            : (typeof photo === 'string' && photo.trim()) ? photo.trim() : null;
+        let expVal = null;
+        if (experience !== null && experience !== undefined && experience !== '') {
+            const n = parseInt(String(experience), 10);
+            expVal = Number.isFinite(n) ? n : null;
+        }
         
         if (!name || !employee_id) {
             return res.status(400).json({ success: false, error: 'Name and employee_id are required' });
@@ -257,8 +264,8 @@ app.post('/api/teachers', async (req, res) => {
             gender || null,
             date_of_joining || null,
             qualification || null,
-            experience || null,
-            null
+            expVal,
+            photoValue
         ];
         
         console.log('🔄 Running INSERT query...');
@@ -285,16 +292,28 @@ app.post('/api/teachers', async (req, res) => {
 // PUT - Update teacher
 app.put('/api/teachers/:id', async (req, res) => {
     try {
-        const { name, email, phone, subject, department, employee_id, designation, gender, date_of_joining, qualification, experience } = req.body;
-        
+        const { name, email, phone, subject, department, employee_id, designation, gender, date_of_joining, qualification, experience, photo_url, photo } = req.body;
+        const photoValue = (typeof photo_url === 'string' && photo_url.trim()) ? photo_url.trim()
+            : (typeof photo === 'string' && photo.trim()) ? photo.trim() : null;
+        let expVal = null;
+        if (experience !== null && experience !== undefined && experience !== '') {
+            const n = parseInt(String(experience), 10);
+            expVal = Number.isFinite(n) ? n : null;
+        }
+
         const query = `
             UPDATE teachers 
-            SET name=$1, email=$2, phone=$3, subject=$4, department=$5, employee_id=$6, designation=$7, gender=$8, date_of_joining=$9, qualification=$10, experience=$11, updated_at=NOW() 
-            WHERE id=$12 
+            SET name=$1, email=$2, phone=$3, subject=$4, department=$5, employee_id=$6, designation=$7, gender=$8, date_of_joining=$9, qualification=$10, experience=$11, photo_url=$12, updated_at=NOW() 
+            WHERE id=$13 
             RETURNING *
         `;
         
-        const result = await pool.query(query, [name, email, phone, subject, department, employee_id, designation, gender, date_of_joining, qualification, experience, req.params.id]);
+        const result = await pool.query(query, [
+            name || null, email || null, phone || null, subject || null, department || null,
+            employee_id != null ? String(employee_id).trim() : null,
+            designation || null, gender || null, date_of_joining || null, qualification || null,
+            expVal, photoValue, req.params.id
+        ]);
         res.json({ success: true, data: result.rows[0] || null });
     } catch (e) {
         console.error('❌ PUT /api/teachers ERROR:', e.message);

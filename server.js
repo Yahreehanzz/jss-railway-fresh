@@ -64,6 +64,32 @@ async function initDatabase() {
 
 initDatabase();
 
+function normalizeTeacherPhoto(body) {
+    if (!body || typeof body !== 'object') return null;
+    const raw = body.photo_url != null && body.photo_url !== '' ? body.photo_url : body.photo;
+    if (typeof raw !== 'string') return null;
+    const s = raw.trim();
+    return s.length ? s : null;
+}
+
+function normalizeExperience(val) {
+    if (val === null || val === undefined || val === '') return null;
+    if (typeof val === 'number' && Number.isFinite(val)) return Math.trunc(val);
+    const n = parseInt(String(val), 10);
+    return Number.isFinite(n) ? n : null;
+}
+
+async function resolveTeacherRowId(param) {
+    const p = String(param);
+    if (/^\d+$/.test(p)) {
+        const byPk = await pool.query('SELECT id FROM teachers WHERE id = $1', [parseInt(p, 10)]);
+        if (byPk.rows.length > 0) return byPk.rows[0].id;
+    }
+    const byEmp = await pool.query('SELECT id FROM teachers WHERE employee_id = $1', [p]);
+    if (byEmp.rows.length > 0) return byEmp.rows[0].id;
+    return null;
+}
+
 // ============================================================
 // HEALTH CHECKS
 // ============================================================
@@ -133,7 +159,8 @@ app.post('/api/teachers', async (req, res) => {
         console.log('📝 POST /api/teachers - START');
         console.log('========================================\n');
         
-        const { name, email, phone, subject, department, employee_id, designation, gender, date_of_joining, qualification, experience, photo_url } = req.body;
+        const { name, email, phone, subject, department, employee_id, designation, gender, date_of_joining, qualification, experience } = req.body;
+        const photo_url = normalizeTeacherPhoto(req.body);
         
         console.log('📬 RECEIVED DATA:');
         console.log('  Name:', name);
@@ -161,8 +188,8 @@ app.post('/api/teachers', async (req, res) => {
             gender || null,        // $8
             date_of_joining || null, // $9
             qualification || null, // $10
-            experience || null,    // $11
-            photo_url || null      // $12
+            normalizeExperience(experience), // $11
+            photo_url              // $12
         ];
         
         console.log('\n🔧 PREPARED VALUES:');
@@ -176,7 +203,7 @@ app.post('/api/teachers', async (req, res) => {
             INSERT INTO teachers 
             (name, email, phone, subject, department, employee_id, designation, gender, date_of_joining, qualification, experience, photo_url) 
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) 
-            RETURNING id, name, employee_id, photo_url, designation, gender
+            RETURNING *
         `;
         
         console.log('\n⚙️ EXECUTING INSERT...');
@@ -241,19 +268,42 @@ app.post('/api/teachers', async (req, res) => {
     }
 });
 
-// PUT - Update teacher
+// PUT - Update teacher (:id = numeric PK preferred, else employee_id)
 app.put('/api/teachers/:id', async (req, res) => {
     try {
-        const { name, email, phone, subject, department, employee_id, designation, gender, date_of_joining, qualification, experience, photo_url } = req.body;
-        
+        const rowId = await resolveTeacherRowId(req.params.id);
+        if (rowId == null) {
+            return res.status(404).json({ success: false, error: 'Teacher not found' });
+        }
+
+        const { name, email, phone, subject, department, employee_id, designation, gender, date_of_joining, qualification, experience } = req.body;
+        const photo_url = normalizeTeacherPhoto(req.body);
+
         const query = `
             UPDATE teachers 
             SET name=$1, email=$2, phone=$3, subject=$4, department=$5, employee_id=$6, designation=$7, gender=$8, date_of_joining=$9, qualification=$10, experience=$11, photo_url=$12, updated_at=NOW() 
             WHERE id=$13 
             RETURNING *
         `;
-        
-        const result = await pool.query(query, [name, email, phone, subject, department, employee_id, designation, gender, date_of_joining, qualification, experience, photo_url || null, req.params.id]);
+
+        const result = await pool.query(query, [
+            name || null,
+            email || null,
+            phone || null,
+            subject || null,
+            department || null,
+            employee_id != null ? String(employee_id).trim() : null,
+            designation || null,
+            gender || null,
+            date_of_joining || null,
+            qualification || null,
+            normalizeExperience(experience),
+            photo_url,
+            rowId
+        ]);
+        if (result.rows.length === 0) {
+            return res.status(404).json({ success: false, error: 'Teacher not found' });
+        }
         res.json({ success: true, data: result.rows[0] || null });
     } catch (e) {
         console.error('❌ PUT /api/teachers ERROR:', e.message);
@@ -261,11 +311,15 @@ app.put('/api/teachers/:id', async (req, res) => {
     }
 });
 
-// DELETE - Remove teacher
+// DELETE - Remove teacher (:id = numeric PK preferred, else employee_id)
 app.delete('/api/teachers/:id', async (req, res) => {
     try {
         console.log('🗑️  DELETE /api/teachers/' + req.params.id);
-        await pool.query('DELETE FROM teachers WHERE id=$1', [req.params.id]);
+        const rowId = await resolveTeacherRowId(req.params.id);
+        if (rowId == null) {
+            return res.status(404).json({ success: false, error: 'Teacher not found' });
+        }
+        await pool.query('DELETE FROM teachers WHERE id=$1', [rowId]);
         res.json({ success: true, message: 'Teacher deleted' });
     } catch (e) {
         console.error('❌ DELETE /api/teachers ERROR:', e.message);

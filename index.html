@@ -63327,6 +63327,40 @@ function renderAttendance() {
 
         /* --- Teacher Management Functions --- */
 
+        /** Map PostgreSQL teacher row to in-app shape (photo, subjects, branch merge). */
+        function apiTeacherToApp(row) {
+            if (!row) return row;
+            let localMatch = null;
+            try {
+                const local = JSON.parse(localStorage.getItem('teachers') || '[]');
+                if (Array.isArray(local)) {
+                    localMatch = local.find(l =>
+                        (l.employee_id != null && row.employee_id != null && String(l.employee_id) === String(row.employee_id)) ||
+                        (l.id != null && row.id != null && Number(l.id) === Number(row.id))
+                    );
+                }
+            } catch (e) { /* ignore */ }
+            const subjects = row.subject
+                ? String(row.subject).split(',').map(s => s.trim()).filter(Boolean)
+                : (Array.isArray(row.subjects) ? row.subjects : (localMatch && localMatch.subjects) || []);
+            const photoUrl = row.photo_url || row.photo || (localMatch && localMatch.photo) || null;
+            const branch = row.branch || (localMatch && localMatch.branch) || (typeof selectedBranch !== 'undefined' ? selectedBranch : null);
+            return {
+                ...row,
+                subjects,
+                photo: photoUrl,
+                photo_url: row.photo_url || null,
+                branch: branch || row.branch
+            };
+        }
+
+        function isRealTeacherPhoto(src) {
+            if (!src || typeof src !== 'string') return false;
+            if (src === defaultTeacherAvatar) return false;
+            if (src.includes('flaticon.com')) return false;
+            return src.startsWith('data:image/');
+        }
+
         function renderTeacherDashboard() {
             try {
                 console.log('[DEBUG] renderTeacherDashboard called');
@@ -63339,7 +63373,7 @@ function renderAttendance() {
                     .then(r => r.json())
                     .then(data => {
                         if (data.success && data.data && Array.isArray(data.data)) {
-                            teachers = data.data;
+                            teachers = data.data.map(apiTeacherToApp);
                             console.log('[DEBUG] ✅ Fresh teachers loaded from API:', teachers.length);
                             console.log('[DEBUG] Teachers with photos:', teachers.filter(t => t.photo_url).length);
                             
@@ -63449,14 +63483,14 @@ function renderAttendance() {
                     .then(data => {
                         console.log('[DEBUG] Data received from', endpoint, ':', data);
                         if (data && data.success && data.data && Array.isArray(data.data)) {
-                            teachers = data.data;
+                            teachers = data.data.map(apiTeacherToApp);
                             localStorage.setItem('teachers', JSON.stringify(teachers));
                             console.log('[DEBUG] ✓ Teachers successfully loaded from:', endpoint, 'Count:', teachers.length);
                             isLoadingTeachers = false;
                             renderDashboardStaffList();
                         } else if (data && Array.isArray(data)) {
                             // Direct array response
-                            teachers = data;
+                            teachers = data.map(apiTeacherToApp);
                             localStorage.setItem('teachers', JSON.stringify(teachers));
                             console.log('[DEBUG] ✓ Teachers loaded (direct array) from:', endpoint, 'Count:', teachers.length);
                             isLoadingTeachers = false;
@@ -63523,9 +63557,9 @@ function renderAttendance() {
                         
                         // Try different response formats
                         if (data && data.success && data.data && Array.isArray(data.data)) {
-                            teachersData = data.data;
+                            teachersData = data.data.map(apiTeacherToApp);
                         } else if (data && Array.isArray(data)) {
-                            teachersData = data;
+                            teachersData = data.map(apiTeacherToApp);
                         }
                         
                         if (teachersData && Array.isArray(teachersData)) {
@@ -63684,7 +63718,7 @@ function renderAttendance() {
                 .then(r => r.json())
                 .then(data => {
                     if (data.success && data.data && Array.isArray(data.data)) {
-                        teachers = data.data;
+                        teachers = data.data.map(apiTeacherToApp);
                         
                         // CRITICAL: Log photos from API
                         console.log('[DEBUG] API returned', teachers.length, 'teachers');
@@ -64189,7 +64223,7 @@ function renderAttendance() {
                 date_of_joining: teacher.joining || null,
                 qualification: teacher.qualification || null,
                 experience: null,
-                photo_url: teacher.photo || null  // ✅ INCLUDE PHOTO URL (BASE64 or null)
+                photo_url: isRealTeacherPhoto(teacher.photo) ? teacher.photo : null
             };
             
             console.group('💾 SAVING TEACHER TO DATABASE');
@@ -65215,7 +65249,11 @@ function renderAttendance() {
         function showEditTeacherForm() {
             showLoader('Loading edit form...');
             document.getElementById("teacherProfileOverlay").classList.add("hidden");
-            const teacher = teachers.find(t => t.id === activeTeacherId && t.branch === selectedBranch);
+            const teacher = teachers.find(t =>
+                Number(t.id) === Number(activeTeacherId) ||
+                String(t.employee_id) === String(activeTeacherId) ||
+                String(t.id) === String(activeTeacherId)
+            );
             if (!teacher) {
                 hideLoader();
                 return;
@@ -65237,19 +65275,27 @@ function renderAttendance() {
 
         function closeEditTeacherForm() {
             document.getElementById("editTeacherForm").classList.add("hidden");
-            const teacher = teachers.find(t => t.id === activeTeacherId && t.branch === selectedBranch);
+            const teacher = teachers.find(t =>
+                Number(t.id) === Number(activeTeacherId) ||
+                String(t.employee_id) === String(activeTeacherId) ||
+                String(t.id) === String(activeTeacherId)
+            );
             if (teacher) showTeacherProfile(teacher);
         }
 
         function updateTeacher() {
             showLoader('Saving changes...');
-            const index = teachers.findIndex(t => t.id === activeTeacherId && t.branch === selectedBranch);
+            const index = teachers.findIndex(t =>
+                Number(t.id) === Number(activeTeacherId) ||
+                String(t.employee_id) === String(activeTeacherId) ||
+                String(t.id) === String(activeTeacherId)
+            );
             if (index === -1) {
                 hideLoader();
                 return;
             }
 
-            const updatedTeacher = teachers[index];
+            const updatedTeacher = { ...teachers[index] };
             updatedTeacher.name = document.getElementById("editTeacherName").value.trim();
             updatedTeacher.subjects = document.getElementById("editTeacherSubjects").value.split(',').map(s => s.trim()).filter(s => s !== '');
             updatedTeacher.email = document.getElementById("editTeacherEmail").value.trim();
@@ -65268,14 +65314,59 @@ function renderAttendance() {
                 finalizeUpdateTeacher();
             }
 
-            function finalizeUpdateTeacher() {
+            async function finalizeUpdateTeacher() {
                 teachers[index] = updatedTeacher;
                 localStorage.setItem("teachers", JSON.stringify(teachers));
                 syncSettingToRailway('teachers_data', teachers);
+
+                const t = updatedTeacher;
+                const teacherKey = (t.employee_id != null && String(t.employee_id).trim() !== '')
+                    ? String(t.employee_id).trim()
+                    : String(t.id);
+                let photoPayload = isRealTeacherPhoto(t.photo) ? t.photo : null;
+                if (!photoPayload && typeof t.photo_url === 'string' && t.photo_url.length > 0) {
+                    photoPayload = t.photo_url;
+                }
+
+                if (teacherKey) {
+                    try {
+                        const payload = {
+                            name: t.name || null,
+                            email: t.email || null,
+                            phone: t.phone || null,
+                            subject: Array.isArray(t.subjects) ? t.subjects.join(', ') : (t.subject || null),
+                            department: t.department || null,
+                            employee_id: t.employee_id != null ? String(t.employee_id).trim() : teacherKey,
+                            designation: t.designation || null,
+                            gender: t.gender || null,
+                            date_of_joining: t.date_of_joining || t.joining || null,
+                            qualification: t.qualification || null,
+                            experience: t.experience != null ? t.experience : null,
+                            photo_url: photoPayload
+                        };
+                        const res = await fetch(`${window.API_BASE}/teachers/${encodeURIComponent(teacherKey)}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        const data = await res.json();
+                        if (data.success && data.data) {
+                            teachers[index] = apiTeacherToApp(data.data);
+                            localStorage.setItem("teachers", JSON.stringify(teachers));
+                        } else if (!data.success) {
+                            console.error('Teacher PUT failed:', data.error);
+                            showMessageBox('Warning', 'Saved locally but server rejected update: ' + (data.error || 'Unknown error'));
+                        }
+                    } catch (err) {
+                        console.error('Teacher PUT request failed:', err);
+                        showMessageBox('Warning', 'Saved locally but could not reach server to sync photo.');
+                    }
+                }
+
                 hideLoader();
                 showMessageBox('Success', "Teacher details updated successfully!");
                 closeEditTeacherForm();
-                showTeacherProfile(updatedTeacher);
+                showTeacherProfile(teachers[index]);
                 renderTeacherDashboard();
                 renderTeacherTable();
             }
@@ -73258,6 +73349,7 @@ class NotificationManager_Extended_Internal {
 
 // Initialize notification manager with clean slate
 const notificationManager = new NotificationManager();
+notificationManager.getunreadcount = notificationManager.getUnreadCount.bind(notificationManager);
 // Clear any existing demo/test data for production use
 if (typeof notificationManager.clearAllData === 'function') notificationManager.clearAllData();
 
@@ -73924,12 +74016,12 @@ class NextGenNotifications {
         const hour = now.getHours();
         
         // Basic prediction: if unread notifications exist, preload content
-        if (notificationManager.getUnreadCount() > 0) {
+        if (typeof notificationManager.getUnreadCount === 'function' && notificationManager.getUnreadCount() > 0) {
             this.preloadNotificationContent();
         }
         
         // Suggest DND during typical inactive hours (11 PM to 7 AM)
-        if ((hour >= 23 || hour <= 7) && !notificationManager.settings.doNotDisturb) {
+        if ((hour >= 23 || hour <= 7) && notificationManager.settings && !notificationManager.settings.doNotDisturb) {
             this.suggestDoNotDisturb();
         }
     }
@@ -79314,9 +79406,9 @@ function initializeTeacherPortal() {
                     .then(data => {
                         let teachersData = null;
                         if (data && data.success && data.data && Array.isArray(data.data)) {
-                            teachersData = data.data;
+                            teachersData = data.data.map(apiTeacherToApp);
                         } else if (Array.isArray(data)) {
-                            teachersData = data;
+                            teachersData = data.map(apiTeacherToApp);
                         }
                         
                         if (teachersData) {
