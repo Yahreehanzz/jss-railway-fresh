@@ -3,6 +3,7 @@ const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
 const path = require('path');
+const os = require('os');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -723,6 +724,45 @@ async function initFacultyTables() {
 
 initFacultyTables();
 
+async function initQRTables() {
+    try {
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS qr_sessions (
+                id VARCHAR(64) PRIMARY KEY,
+                title VARCHAR(255) NOT NULL,
+                branch VARCHAR(120),
+                year VARCHAR(40),
+                expires_at TIMESTAMP NOT NULL,
+                geofence JSONB,
+                created_at TIMESTAMP DEFAULT NOW()
+            )
+        `);
+        console.log('✅ QR sessions table ready');
+    } catch (err) {
+        console.error('❌ QR sessions table initialization error:', err.message);
+    }
+
+    try {
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS qr_checkins (
+                id SERIAL PRIMARY KEY,
+                session_id VARCHAR(64) NOT NULL REFERENCES qr_sessions(id) ON DELETE CASCADE,
+                usn VARCHAR(50) NOT NULL,
+                student_name VARCHAR(255),
+                lat DOUBLE PRECISION,
+                lon DOUBLE PRECISION,
+                checked_in_at TIMESTAMP DEFAULT NOW(),
+                UNIQUE(session_id, usn)
+            )
+        `);
+        console.log('✅ QR check-ins table ready');
+    } catch (err) {
+        console.error('❌ QR check-ins table initialization error:', err.message);
+    }
+}
+
+initQRTables();
+
 // ============================================================
 // TEACHER ZONE — HOME HERO PORTAL PHOTO (base64 in TEXT column)
 // ============================================================
@@ -999,6 +1039,155 @@ app.delete('/api/notes/:noteId', async (req, res) => {
         res.json({ success: true, message: 'Note deleted' });
     } catch (e) {
         console.error('❌ DELETE /api/notes/:noteId ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// ============================================================
+// QR ATTENDANCE API
+// ============================================================
+
+app.get('/api/qr-sessions', async (req, res) => {
+    try {
+        const branch = req.query.branch ? String(req.query.branch) : null;
+        const result = await pool.query(
+            `SELECT s.id, s.title, s.branch, s.year, s.expires_at, s.created_at,
+                    COALESCE(COUNT(c.id), 0)::int AS checkin_count
+             FROM qr_sessions s
+             LEFT JOIN qr_checkins c ON c.session_id = s.id
+             WHERE ($1::text IS NULL OR s.branch = $1)
+             GROUP BY s.id
+             ORDER BY s.created_at DESC`,
+            [branch]
+        );
+        res.json({ success: true, sessions: result.rows });
+    } catch (e) {
+        console.error('❌ GET /api/qr-sessions ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+app.post('/api/qr-sessions', async (req, res) => {
+    try {
+        const { id, title, branch, year, expires_at, geofence } = req.body || {};
+        if (!id || !title || !expires_at) {
+            return res.status(400).json({ success: false, error: 'id, title, and expires_at are required' });
+        }
+        await pool.query(
+            `INSERT INTO qr_sessions (id, title, branch, year, expires_at, geofence)
+             VALUES ($1, $2, $3, $4, to_timestamp($5::double precision / 1000.0), $6::jsonb)
+             ON CONFLICT (id) DO UPDATE SET
+                 title = EXCLUDED.title,
+                 branch = EXCLUDED.branch,
+                 year = EXCLUDED.year,
+                 expires_at = EXCLUDED.expires_at,
+                 geofence = EXCLUDED.geofence`,
+            [String(id), String(title), branch || null, year || null, Number(expires_at), geofence ? JSON.stringify(geofence) : null]
+        );
+        res.status(201).json({ success: true, id });
+    } catch (e) {
+        console.error('❌ POST /api/qr-sessions ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+app.delete('/api/qr-sessions/:id', async (req, res) => {
+    try {
+        const result = await pool.query(`DELETE FROM qr_sessions WHERE id = $1 RETURNING id`, [req.params.id]);
+        if (result.rows.length === 0) return res.status(404).json({ success: false, error: 'Session not found' });
+        res.json({ success: true });
+    } catch (e) {
+        console.error('❌ DELETE /api/qr-sessions/:id ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+app.get('/api/qr-checkins/:sessionId', async (req, res) => {
+    try {
+        const result = await pool.query(
+            `SELECT usn, student_name, lat, lon, checked_in_at
+             FROM qr_checkins
+             WHERE session_id = $1
+             ORDER BY checked_in_at DESC`,
+            [req.params.sessionId]
+        );
+        res.json({ success: true, checkins: result.rows });
+    } catch (e) {
+        console.error('❌ GET /api/qr-checkins/:sessionId ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+app.post('/api/qr-checkins', async (req, res) => {
+    try {
+        const { session_id, usn, lat, lon } = req.body || {};
+        if (!session_id || !usn) {
+            return res.status(400).json({ success: false, error: 'session_id and usn are required' });
+        }
+
+        const sRes = await pool.query(
+            `SELECT id, geofence, expires_at FROM qr_sessions WHERE id = $1 LIMIT 1`,
+            [String(session_id)]
+        );
+        if (sRes.rows.length === 0) return res.status(404).json({ success: false, error: 'Session not found' });
+
+        const session = sRes.rows[0];
+        if (new Date(session.expires_at).getTime() < Date.now()) {
+            return res.status(410).json({ success: false, error: 'Session expired' });
+        }
+
+        const gf = session.geofence;
+        if (gf && lat != null && lon != null && gf.lat != null && gf.lon != null && gf.radius != null) {
+            const toRad = (d) => d * Math.PI / 180;
+            const R = 6371000;
+            const dLat = toRad(Number(lat) - Number(gf.lat));
+            const dLon = toRad(Number(lon) - Number(gf.lon));
+            const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(Number(gf.lat))) * Math.cos(toRad(Number(lat))) * Math.sin(dLon / 2) ** 2;
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            const distance = R * c;
+            if (distance > Number(gf.radius)) {
+                return res.status(403).json({ success: false, error: 'Outside geofence area' });
+            }
+        }
+
+        const student = await pool.query(`SELECT name FROM students WHERE usn = $1 LIMIT 1`, [String(usn)]);
+        const studentName = student.rows[0]?.name || null;
+
+        try {
+            const ins = await pool.query(
+                `INSERT INTO qr_checkins (session_id, usn, student_name, lat, lon)
+                 VALUES ($1, $2, $3, $4, $5)
+                 RETURNING id, session_id, usn, student_name, checked_in_at`,
+                [String(session_id), String(usn), studentName, lat ?? null, lon ?? null]
+            );
+            res.status(201).json({ success: true, ...ins.rows[0] });
+        } catch (insErr) {
+            if (insErr.code === '23505') {
+                return res.status(409).json({ success: false, error: 'Already checked in for this session' });
+            }
+            throw insErr;
+        }
+    } catch (e) {
+        console.error('❌ POST /api/qr-checkins ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+app.get('/api/server-ip', async (req, res) => {
+    try {
+        const port = Number(process.env.PORT || 3000);
+        const nets = os.networkInterfaces();
+        const ips = [];
+        for (const [name, addrs] of Object.entries(nets)) {
+            for (const a of addrs || []) {
+                if (a.family === 'IPv4' && !a.internal) {
+                    ips.push({ name, ip: a.address, port });
+                }
+            }
+        }
+        res.json({ success: true, ips });
+    } catch (e) {
+        console.error('❌ GET /api/server-ip ERROR:', e.message);
         res.status(500).json({ success: false, error: e.message });
     }
 });
