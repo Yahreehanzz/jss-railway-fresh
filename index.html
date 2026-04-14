@@ -79828,8 +79828,8 @@ const FACULTY_API_BASE = (typeof API_BASE !== 'undefined') ? API_BASE :
 
 async function loadFacultyFeeManagement() {
     try {
-        console.log('?? Loading faculty fee data from Railway...');
-        console.log('?? API_BASE:', FACULTY_API_BASE);
+        console.log('[Fees] Loading faculty fee data from Railway...');
+        console.log('[Fees] API_BASE:', FACULTY_API_BASE);
         
         // Fetch students AND fees data in parallel
         const [studentsRes, feesRes] = await Promise.all([
@@ -79838,15 +79838,15 @@ async function loadFacultyFeeManagement() {
         ]);
         
         const studentData = await studentsRes.json();
-        console.log('?? Students API Response:', studentData);
-        console.log('?? Fees Data from app_settings:', feesRes);
+        console.log('[Fees] Students API Response:', studentData);
+        console.log('[Fees] Fees Data from app_settings:', feesRes);
         
         if (studentData.success && Array.isArray(studentData.data)) {
             console.log(`? Found ${studentData.data.length} students in database`);
             
             // Get real fees data from Railway app_settings
             const realFees = (feesRes.success && feesRes.data) ? feesRes.data : {};
-            console.log('?? Real Fees Dictionary:', realFees);
+            console.log('[Fees] Real fees dictionary:', realFees);
             
             facultyFeeData = studentData.data.map(student => {
                 // Get fees from the real fees data (uploaded by Fees user)
@@ -79855,7 +79855,7 @@ async function loadFacultyFeeManagement() {
                 const paidFee = parseFloat(studentFees.paid || student.paidFee || student.paid_fee || 0);
                 const pending = Math.max(0, totalFee - paidFee);
                 
-                console.log(`?? ${student.name} (${student.usn}): Total=?${totalFee}, Paid=?${paidFee}, Pending=?${pending}`);
+                console.log(`[Fees] ${student.name} (${student.usn}): Total=₹${totalFee}, Paid=₹${paidFee}, Pending=₹${pending}`);
                 
                 return {
                     usn: student.usn,
@@ -79872,9 +79872,9 @@ async function loadFacultyFeeManagement() {
                 };
             });
             
-            console.log('?? Processed Data:', facultyFeeData);
+            console.log('[Fees] Processed data:', facultyFeeData);
         } else {
-            console.warn('?? No students found or invalid response:', studentData);
+            console.warn('[Fees] No students found or invalid response:', studentData);
             facultyFeeData = [];
         }
         
@@ -87323,7 +87323,7 @@ document.addEventListener('input', function(e) {
             const allFees = (feesRes.success && feesRes.data) ? feesRes.data : {};
             const studentFeeData = allFees[studentUSN] || { total: 0, paid: 0, history: [] };
             
-            console.log(`?? Loading real fees for ${studentUSN}:`, studentFeeData);
+            console.log(`[Fees] Loading real fees for ${studentUSN}:`, studentFeeData);
             
             document.getElementById('fmSfLoader').style.display = 'none';
 
@@ -87378,7 +87378,7 @@ document.addEventListener('input', function(e) {
                     const badgeClass = st === 'paid' ? 'fm-sf-badge-paid' : st === 'partial' ? 'fm-sf-badge-partial' : 'fm-sf-badge-pending';
                     
                     const dateObj = rec.date ? new Date(rec.date) : null;
-                    const dateStr = dateObj ? dateObj.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) : '?';
+                    const dateStr = dateObj ? dateObj.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) : '--';
                     const method = (rec.method || rec.payment_method || 'Cash').replace(/-/g,' ');
                     const amount = parseFloat(rec.amount) || 0;
                     
@@ -87387,8 +87387,8 @@ document.addEventListener('input', function(e) {
                     item.innerHTML = `
                         <div class="fm-sf-record-icon ${iconClass}"><i class="fas ${icon}"></i></div>
                         <div class="fm-sf-record-info">
-                            <div class="fm-sf-record-amount">?${fmt.format(amount)}</div>
-                            <div class="fm-sf-record-meta">${escFM(dateStr)} ? ${escFM(method)}</div>
+                            <div class="fm-sf-record-amount">₹${fmt.format(amount)}</div>
+                            <div class="fm-sf-record-meta">${escFM(dateStr)} • ${escFM(method)}</div>
                         </div>
                         <span class="fm-sf-badge ${badgeClass}">${escFM(st)}</span>
                     `;
@@ -87425,6 +87425,22 @@ document.addEventListener('input', function(e) {
         }
     };
 
+    async function fmRefreshRealtimeViews() {
+        try {
+            if (typeof loadFacultyFeeManagement === 'function') {
+                await loadFacultyFeeManagement();
+            }
+            if (typeof fmLoadStudents === 'function') {
+                const visibleModal = document.getElementById('fmStudentModal');
+                if (visibleModal && visibleModal.style.display !== 'none') {
+                    await fmLoadStudents();
+                }
+            }
+        } catch (e) {
+            console.warn('[Fees] Realtime refresh warning:', e.message);
+        }
+    }
+
     window.fmSfBackdropClick = function(e) {
         if (e.target === document.getElementById('fmSfBackdrop')) fmCloseStudentFee();
     };
@@ -87449,7 +87465,7 @@ document.addEventListener('input', function(e) {
         
         if (pendingDisplay) {
             const fmt = new Intl.NumberFormat('en-IN');
-            pendingDisplay.textContent = '?' + fmt.format(pending);
+            pendingDisplay.textContent = '₹' + fmt.format(pending);
         }
     };
 
@@ -87604,6 +87620,7 @@ document.addEventListener('input', function(e) {
             
             // Reload panel to show updated data
             await fmOpenStudentFee(s);
+            await fmRefreshRealtimeViews();
         } catch(err) {
             console.error('FM: save payment error:', err.message);
             console.error('Full error:', err);
@@ -87622,20 +87639,60 @@ document.addEventListener('input', function(e) {
         const s = fmCurrentStudent;
         if (!s) return;
 
-        // Post a pending fee flag to the DB for the fee-management team
+        const usn = s.usn || s.name;
+        const totalEl = document.getElementById('fmPayTotalInput');
+        const paidEl = document.getElementById('fmPayPaidInput');
+        const methodEl = document.getElementById('fmSfPayMethod');
+        const dateEl = document.getElementById('fmSfDueDate');
+        const total = Math.max(0, parseFloat(totalEl?.value || '0') || 0);
+        const paid = Math.max(0, parseFloat(paidEl?.value || '0') || 0);
+        const paymentDate = (dateEl && dateEl.value) ? dateEl.value : new Date().toISOString().split('T')[0];
+
         try {
-            await fetch(_API + '/fees', {
-                method : 'POST',
+            // Source of truth is app_settings/fees_data, so write there directly
+            const feesRes = await fetch(`${_API}/settings/fees_data`).then(r => r.json()).catch(() => ({ success: false, data: {} }));
+            const allFees = (feesRes.success && feesRes.data) ? feesRes.data : {};
+            const existing = allFees[usn] || {};
+            const history = Array.isArray(existing.history) ? existing.history : [];
+
+            if (paid > 0) {
+                const alreadyExists = history.some(h =>
+                    String(h.date) === String(paymentDate) &&
+                    Number(h.amount) === Number(paid)
+                );
+                if (!alreadyExists) {
+                    history.push({
+                        amount: Number(paid).toFixed(2),
+                        date: paymentDate,
+                        method: (methodEl && methodEl.value) ? methodEl.value : 'cash',
+                        status: paid >= total ? 'paid' : 'partial'
+                    });
+                }
+            }
+
+            allFees[usn] = {
+                total: Number(total).toFixed(2),
+                paid: Number(paid).toFixed(2),
+                history
+            };
+
+            const updateRes = await fetch(`${_API}/settings/fees_data`, {
+                method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body   : JSON.stringify({
-                    student_id     : s.id,
-                    amount         : 0,
-                    status         : 'pending',
-                    semester       : s.semester || null,
-                    payment_method : 'faculty-flagged'
-                })
+                body: JSON.stringify({ value: allFees })
             });
-        } catch(e) { /* best-effort */ }
+            if (!updateRes.ok) {
+                throw new Error(`Failed syncing fees_data: ${updateRes.status} ${updateRes.statusText}`);
+            }
+
+            await fmRefreshRealtimeViews();
+        } catch(e) {
+            console.error('Upload to Fee Management failed:', e);
+            if (window.showMessageBox) {
+                showMessageBox('Upload Failed', 'Could not upload to Fee Management: ' + e.message, 'error');
+            }
+            return;
+        }
 
         fmCloseStudentFee();
         if (window.showMessageBox) {
