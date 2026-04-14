@@ -162,6 +162,15 @@ pool.query(`
     )
 `).then(() => console.log('✅ Portal Settings table ready')).catch(e => console.error('⚠️ Portal settings table error:', e.message));
 
+// Initialize app_settings table for storing generic key/value data
+pool.query(`
+    CREATE TABLE IF NOT EXISTS app_settings (
+        key VARCHAR(100) PRIMARY KEY,
+        value JSONB,
+        updated_at TIMESTAMP DEFAULT NOW()
+    )
+`).then(() => console.log('✅ App Settings table ready')).catch(e => console.error('⚠️ App settings table error:', e.message));
+
 // ============================================================
 // API Routes
 // ============================================================
@@ -745,6 +754,12 @@ app.post('/api/save-payment', async (req, res) => {
             return res.status(400).json({ success: false, error: 'USN and amount required' });
         }
         
+        if (isNaN(amount) || amount <= 0) {
+            return res.status(400).json({ success: false, error: 'Amount must be a valid positive number' });
+        }
+        
+        console.log(`💾 Processing payment for USN: ${usn}, Amount: ${amount}`);
+        
         const result = await pool.query(
             `INSERT INTO student_payments (usn, student_id, amount, payment_method, installment_number, semester, notes, status) 
              VALUES ($1, $2, $3, $4, $5, $6, $7, 'completed') 
@@ -753,9 +768,43 @@ app.post('/api/save-payment', async (req, res) => {
         );
         
         console.log('✓ Payment saved:', result.rows[0]);
+        
+        // 🔄 REAL-TIME SYNC: Update student_fees with new payment
+        if (semester) {
+            try {
+                // Get current fee record
+                const feeRecord = await pool.query(
+                    `SELECT total_fee, paid_fee, pending_fee FROM student_fees WHERE usn = $1 AND semester = $2`,
+                    [usn, semester]
+                );
+                
+                if (feeRecord.rows.length > 0) {
+                    const total = parseFloat(feeRecord.rows[0].total_fee);
+                    const currentPaid = parseFloat(feeRecord.rows[0].paid_fee) || 0;
+                    const newPaid = currentPaid + parseFloat(amount);
+                    const newPending = Math.max(0, total - newPaid);
+                    const status = newPaid >= total ? 'paid' : (newPaid > 0 ? 'partial' : 'pending');
+                    
+                    // Update fees with new payment amount
+                    await pool.query(
+                        `UPDATE student_fees SET paid_fee = $1, pending_fee = $2, status = $3, updated_at = NOW() 
+                         WHERE usn = $4 AND semester = $5`,
+                        [newPaid, newPending, status, usn, semester]
+                    );
+                    
+                    console.log(`✅ Fee synced for ${usn}: Paid ₹${newPaid}, Pending ₹${newPending}, Status: ${status}`);
+                } else {
+                    console.warn(`⚠️ No fee record found for ${usn} semester ${semester} - will need manual sync`);
+                }
+            } catch (syncErr) {
+                console.warn('⚠️ Fee sync warning (not critical):', syncErr.message);
+            }
+        }
+        
         res.json({ success: true, data: result.rows[0] });
     } catch (e) {
         console.error('❌ POST /api/save-payment ERROR:', e.message);
+        console.error('Stack:', e.stack);
         res.status(500).json({ success: false, error: e.message });
     }
 });
@@ -1114,6 +1163,51 @@ app.delete('/api/portal-photo', async (req, res) => {
         res.json({ success: true, message: 'Photo removed successfully' });
     } catch (e) {
         console.error('❌ DELETE /api/portal-photo ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// ============================================================
+// SETTINGS API ENDPOINTS (for syncing app data)
+// ============================================================
+
+// GET setting by key
+app.get('/api/settings/:key', async (req, res) => {
+    try {
+        console.log('📖 GET /api/settings/' + req.params.key);
+        const result = await pool.query('SELECT value FROM app_settings WHERE key = $1', [req.params.key]);
+        
+        if (result.rows.length === 0) {
+            return res.json({ success: false, data: null });
+        }
+        
+        res.json({ success: true, data: result.rows[0].value });
+    } catch (e) {
+        console.error('❌ GET /api/settings ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// PUT setting by key (create or update)
+app.put('/api/settings/:key', async (req, res) => {
+    try {
+        console.log('💾 PUT /api/settings/' + req.params.key);
+        const { value } = req.body;
+        const dbJson = value === null || value === undefined
+            ? null
+            : JSON.stringify(value);
+
+        const result = await pool.query(
+            `INSERT INTO app_settings (key, value) VALUES ($1, $2::jsonb) 
+             ON CONFLICT (key) DO UPDATE SET value=$2::jsonb, updated_at=NOW() 
+             RETURNING *`,
+            [req.params.key, dbJson]
+        );
+        
+        console.log('✅ Setting saved! Key:', req.params.key);
+        res.json({ success: true, data: result.rows[0] });
+    } catch (e) {
+        console.error('❌ PUT /api/settings ERROR:', e.message);
         res.status(500).json({ success: false, error: e.message });
     }
 });

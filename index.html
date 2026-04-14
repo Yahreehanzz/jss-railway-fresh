@@ -87528,12 +87528,16 @@ document.addEventListener('input', function(e) {
                 })
             });
             
-            const dbSaveData = await dbSaveRes.json();
-            if (dbSaveData.success) {
-                console.log('✓ Payment saved to database:', dbSaveData.data);
-            } else {
-                console.warn('⚠️ Database save warning:', dbSaveData.error);
+            if (!dbSaveRes.ok) {
+                throw new Error(`Payment API error: ${dbSaveRes.status} ${dbSaveRes.statusText}`);
             }
+            
+            const dbSaveData = await dbSaveRes.json();
+            if (!dbSaveData.success) {
+                throw new Error(`Payment server error: ${dbSaveData.error}`);
+            }
+            
+            console.log('✓ Payment saved to database:', dbSaveData.data);
             
             // Fetch current fees data with fallback to localStorage
             let allFees = {};
@@ -87572,7 +87576,10 @@ document.addEventListener('input', function(e) {
                 body: JSON.stringify({ value: allFees })
             });
             
-            if (!updateRes.ok) throw new Error('API error');
+            if (!updateRes.ok) {
+                console.warn('⚠️ Fee sync warning (recoverable):', `${updateRes.status} ${updateRes.statusText}`);
+                // Don't throw - payment was already saved to database
+            }
 
             // Clear form
             totalEl.value = '';
