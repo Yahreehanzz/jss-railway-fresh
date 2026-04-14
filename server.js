@@ -684,6 +684,45 @@ async function initPaymentsTable() {
 
 initPaymentsTable();
 
+async function initFacultyTables() {
+    try {
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS faculty_user_credentials (
+                id SERIAL PRIMARY KEY,
+                teacher_id INTEGER NOT NULL,
+                username VARCHAR(120) NOT NULL,
+                password_hash TEXT NOT NULL,
+                gmail VARCHAR(255),
+                otp_code VARCHAR(20),
+                otp_sent_at TIMESTAMP,
+                is_setup_complete BOOLEAN DEFAULT false,
+                created_at TIMESTAMP DEFAULT NOW(),
+                updated_at TIMESTAMP DEFAULT NOW(),
+                UNIQUE(teacher_id, username)
+            )
+        `);
+        console.log('✅ Faculty user credentials table ready');
+    } catch (err) {
+        console.error('❌ Faculty user credentials table initialization error:', err.message);
+    }
+
+    try {
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS faculty_notes (
+                id SERIAL PRIMARY KEY,
+                teacher_id INTEGER NOT NULL,
+                note_text TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT NOW()
+            )
+        `);
+        console.log('✅ Faculty notes table ready');
+    } catch (err) {
+        console.error('❌ Faculty notes table initialization error:', err.message);
+    }
+}
+
+initFacultyTables();
+
 // ============================================================
 // TEACHER ZONE — HOME HERO PORTAL PHOTO (base64 in TEXT column)
 // ============================================================
@@ -732,6 +771,234 @@ app.delete('/api/portal-photo', async (req, res) => {
         res.json({ success: true, message: 'Photo removed successfully' });
     } catch (e) {
         console.error('❌ DELETE /api/portal-photo ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// ============================================================
+// FACULTY USER CREDENTIALS + FIRST TIME SETUP + NOTES
+// ============================================================
+
+app.get('/api/faculty-users/:teacher_id', async (req, res) => {
+    try {
+        const result = await pool.query(
+            `SELECT id, teacher_id, username, created_at, updated_at
+             FROM faculty_user_credentials
+             WHERE teacher_id = $1
+             ORDER BY created_at DESC`,
+            [req.params.teacher_id]
+        );
+        res.json({ success: true, data: result.rows });
+    } catch (e) {
+        console.error('❌ GET /api/faculty-users/:teacher_id ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+app.get('/api/faculty-users', async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT f.id, f.teacher_id, f.username, t.name AS teacher_name, t.designation, f.created_at, f.updated_at
+            FROM faculty_user_credentials f
+            LEFT JOIN teachers t ON t.id = f.teacher_id
+            ORDER BY f.created_at DESC
+        `);
+        res.json({ success: true, data: result.rows });
+    } catch (e) {
+        console.error('❌ GET /api/faculty-users ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+app.post('/api/faculty-users', async (req, res) => {
+    try {
+        const { teacher_id, username, password } = req.body;
+        if (!teacher_id || !username || !password) {
+            return res.status(400).json({ success: false, error: 'teacher_id, username, and password are required' });
+        }
+        const password_hash = Buffer.from(String(password)).toString('base64');
+        const result = await pool.query(
+            `INSERT INTO faculty_user_credentials (teacher_id, username, password_hash, is_setup_complete)
+             VALUES ($1, $2, $3, false)
+             RETURNING id, teacher_id, username, is_setup_complete, created_at`,
+            [teacher_id, String(username).trim(), password_hash]
+        );
+        res.status(201).json({ success: true, data: result.rows[0] });
+    } catch (e) {
+        if (e.code === '23505') {
+            return res.status(409).json({ success: false, error: 'Username already exists for this teacher' });
+        }
+        console.error('❌ POST /api/faculty-users ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+app.put('/api/faculty-users/:id', async (req, res) => {
+    try {
+        const { password } = req.body;
+        if (!password) return res.status(400).json({ success: false, error: 'password is required' });
+        const password_hash = Buffer.from(String(password)).toString('base64');
+        const result = await pool.query(
+            `UPDATE faculty_user_credentials
+             SET password_hash = $1, updated_at = NOW()
+             WHERE id = $2
+             RETURNING id, teacher_id, username, updated_at`,
+            [password_hash, req.params.id]
+        );
+        if (result.rows.length === 0) return res.status(404).json({ success: false, error: 'Faculty user not found' });
+        res.json({ success: true, data: result.rows[0] });
+    } catch (e) {
+        console.error('❌ PUT /api/faculty-users/:id ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+app.delete('/api/faculty-users/:id', async (req, res) => {
+    try {
+        const result = await pool.query(
+            `DELETE FROM faculty_user_credentials WHERE id = $1 RETURNING id, username`,
+            [req.params.id]
+        );
+        if (result.rows.length === 0) return res.status(404).json({ success: false, error: 'Faculty user not found' });
+        res.json({ success: true, data: result.rows[0] });
+    } catch (e) {
+        console.error('❌ DELETE /api/faculty-users/:id ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+app.get('/api/check-first-setup/:userId', async (req, res) => {
+    try {
+        const result = await pool.query(
+            `SELECT is_setup_complete FROM faculty_user_credentials WHERE id = $1`,
+            [req.params.userId]
+        );
+        if (result.rows.length === 0) return res.status(404).json({ success: false, error: 'User not found' });
+        res.json({ success: true, is_setup_complete: result.rows[0].is_setup_complete === true });
+    } catch (e) {
+        console.error('❌ GET /api/check-first-setup ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+app.post('/api/verify-faculty-password', async (req, res) => {
+    try {
+        const { userId, password } = req.body;
+        if (!userId || !password) return res.status(400).json({ success: false, error: 'userId and password required' });
+        const result = await pool.query(`SELECT password_hash FROM faculty_user_credentials WHERE id = $1`, [userId]);
+        if (result.rows.length === 0) return res.status(404).json({ success: false, error: 'User not found' });
+        const encoded = Buffer.from(String(password)).toString('base64');
+        const ok = encoded === result.rows[0].password_hash;
+        res.json({ success: ok, message: ok ? 'Password verified' : 'Invalid password' });
+    } catch (e) {
+        console.error('❌ POST /api/verify-faculty-password ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+app.post('/api/send-setup-otp', async (req, res) => {
+    try {
+        const { userId, email } = req.body;
+        if (!userId || !email) return res.status(400).json({ success: false, error: 'userId and email required' });
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        await pool.query(
+            `UPDATE faculty_user_credentials
+             SET otp_code = $1, otp_sent_at = NOW(), gmail = $2
+             WHERE id = $3`,
+            [otp, String(email).trim(), userId]
+        );
+        console.log(`📧 Setup OTP for user ${userId}: ${otp}`);
+        res.json({ success: true, message: 'OTP sent to Gmail (demo mode: check server logs)' });
+    } catch (e) {
+        console.error('❌ POST /api/send-setup-otp ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+app.post('/api/verify-setup-otp', async (req, res) => {
+    try {
+        const { userId, otp } = req.body;
+        if (!userId || !otp) return res.status(400).json({ success: false, error: 'userId and otp required' });
+        const result = await pool.query(
+            `SELECT otp_code, otp_sent_at FROM faculty_user_credentials WHERE id = $1`,
+            [userId]
+        );
+        if (result.rows.length === 0) return res.status(404).json({ success: false, error: 'User not found' });
+        const row = result.rows[0];
+        const ageMin = row.otp_sent_at ? (Date.now() - new Date(row.otp_sent_at).getTime()) / 60000 : 999;
+        if (ageMin > 10) return res.json({ success: false, message: 'OTP expired' });
+        if (String(row.otp_code) !== String(otp)) return res.json({ success: false, message: 'Invalid OTP' });
+        res.json({ success: true, message: 'OTP verified' });
+    } catch (e) {
+        console.error('❌ POST /api/verify-setup-otp ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+app.post('/api/complete-first-setup', async (req, res) => {
+    try {
+        const { userId, newPassword, email } = req.body;
+        if (!userId || !newPassword || !email) {
+            return res.status(400).json({ success: false, error: 'userId, newPassword, and email required' });
+        }
+        const passwordHash = Buffer.from(String(newPassword)).toString('base64');
+        const result = await pool.query(
+            `UPDATE faculty_user_credentials
+             SET password_hash = $1, gmail = $2, is_setup_complete = true, otp_code = NULL, otp_sent_at = NULL, updated_at = NOW()
+             WHERE id = $3
+             RETURNING id, username, gmail, is_setup_complete`,
+            [passwordHash, String(email).trim(), userId]
+        );
+        if (result.rows.length === 0) return res.status(404).json({ success: false, error: 'User not found' });
+        res.json({ success: true, data: result.rows[0] });
+    } catch (e) {
+        console.error('❌ POST /api/complete-first-setup ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+app.post('/api/save-note', async (req, res) => {
+    try {
+        const { teacherId, noteText } = req.body;
+        if (!teacherId || !noteText || !String(noteText).trim()) {
+            return res.status(400).json({ success: false, error: 'teacherId and noteText required' });
+        }
+        const result = await pool.query(
+            `INSERT INTO faculty_notes (teacher_id, note_text) VALUES ($1, $2)
+             RETURNING id, teacher_id, note_text, created_at`,
+            [teacherId, String(noteText).trim()]
+        );
+        res.json({ success: true, data: result.rows[0] });
+    } catch (e) {
+        console.error('❌ POST /api/save-note ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+app.get('/api/notes/:teacherId', async (req, res) => {
+    try {
+        const result = await pool.query(
+            `SELECT id, teacher_id, note_text, created_at
+             FROM faculty_notes
+             WHERE teacher_id = $1
+             ORDER BY created_at DESC
+             LIMIT 50`,
+            [req.params.teacherId]
+        );
+        res.json({ success: true, data: result.rows });
+    } catch (e) {
+        console.error('❌ GET /api/notes/:teacherId ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+app.delete('/api/notes/:noteId', async (req, res) => {
+    try {
+        const result = await pool.query(`DELETE FROM faculty_notes WHERE id = $1 RETURNING id`, [req.params.noteId]);
+        if (result.rows.length === 0) return res.status(404).json({ success: false, error: 'Note not found' });
+        res.json({ success: true, message: 'Note deleted' });
+    } catch (e) {
+        console.error('❌ DELETE /api/notes/:noteId ERROR:', e.message);
         res.status(500).json({ success: false, error: e.message });
     }
 });
