@@ -53079,15 +53079,15 @@ document.addEventListener('DOMContentLoaded', function() {
                             validCodeKey = childSnapshot.key;
                             console.log('[2FA] Code is valid and not expired');
                         } else {
-                            console.log('? Code expired or invalid timestamp. Age:', codeAge, 'ms');
+                            console.log('[DEBUG] Code expired or invalid timestamp. Age:', codeAge, 'ms');
                         }
                     } else {
-                        console.log('? Code mismatch. Expected (from DB):', data.code, 'Got (from user):', code);
+                        console.log('[DEBUG] Code mismatch. Expected (from DB):', data.code, 'Got (from user):', code);
                     }
                 });
                 
                 if (isValid && validCodeKey) {
-                    console.log('? Code valid, deleting from database');
+                    console.log('[DEBUG] Code valid, deleting from database');
                     // Delete the used code from Firebase
                     await firebaseDb.ref(`auth_codes/${validCodeKey}`).remove();
 
@@ -53110,7 +53110,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                     }, 650);
                 } else {
-                    console.log('? Invalid or expired code');
+                    console.log('[DEBUG] Invalid or expired code');
                     errorEl.textContent = 'Invalid or expired code. Please try again.';
                     
                     // Clear inputs
@@ -53126,7 +53126,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
             } catch (error) {
-                console.error('? 2FA verification error:', error);
+                console.error('[DEBUG] 2FA verification error:', error);
                 errorEl.textContent = 'Verification failed: ' + error.message;
                 if (verifyBtn) {
                     verifyBtn.classList.remove('verifying');
@@ -54415,7 +54415,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Save role to both session and local storage
             sessionStorage.setItem('facultyRole', _selectedFacultyRole);
             localStorage.setItem('facultyRole', _selectedFacultyRole);
-            console.log('? [DASHBOARD ROLE] Role saved:', _selectedFacultyRole);
+            console.log('[DEBUG] [DASHBOARD ROLE] Role saved:', _selectedFacultyRole);
             
             // Close dialog
             const overlay = document.getElementById('facultyRoleSelectionOverlay');
@@ -54480,7 +54480,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
             
-            console.log(`? Applied ${role} role access - ${allowedSections.length} sections visible`);
+            console.log([DEBUG] Applied ${role} role access - ${allowedSections.length} sections visible`);
         }
 
         // Apply access control on page load
@@ -54491,20 +54491,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 const userType = sessionStorage.getItem('selectedUserType') || localStorage.getItem('selectedUserType');
                 const isFacultyPage = document.getElementById('markStudentsSection') !== null;
                 
-                console.log('?? [INIT ROLE CHECK] savedRole:', savedRole, 'userType:', userType, 'isFacultyPage:', isFacultyPage);
-                console.log('?? [INIT ROLE CHECK] sessionStorage:', {
+                console.log('[DEBUG] [INIT ROLE CHECK] savedRole:', savedRole, 'userType:', userType, 'isFacultyPage:', isFacultyPage);
+                console.log('[DEBUG] [INIT ROLE CHECK] sessionStorage:', {
                     facultyRole: sessionStorage.getItem('facultyRole'),
                     selectedUserType: sessionStorage.getItem('selectedUserType')
                 });
-                console.log('?? [INIT ROLE CHECK] localStorage:', {
+                console.log('[DEBUG] [INIT ROLE CHECK] localStorage:', {
                     facultyRole: localStorage.getItem('facultyRole'),
                     selectedUserType: localStorage.getItem('selectedUserType')
                 });
-                console.log('?? [INIT ROLE CHECK] pathname:', window.location.pathname, 'href:', window.location.href);
+                console.log('[DEBUG] [INIT ROLE CHECK] pathname:', window.location.pathname, 'href:', window.location.href);
                 
                 // IMPORTANT: If role is already saved from landing page, apply it
                 if (savedRole) {
-                    console.log('? [ROLE FOUND] Applying', savedRole, 'access control');
+                    console.log('[DEBUG] [ROLE FOUND] Applying', savedRole, 'access control');
                     // Ensure both storage types have the role
                     sessionStorage.setItem('facultyRole', savedRole);
                     sessionStorage.setItem('selectedUserType', userType || 'teacher');
@@ -54520,19 +54520,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 const facultyUsername = sessionStorage.getItem('facultyUsername');
                 const fromFacultyLogin = userType === 'teacher' || facultyUsername;
                 
-                console.log('? [NO ROLE] facultyUsername:', facultyUsername, 'fromFacultyLogin:', fromFacultyLogin);
+                console.log('[DEBUG] [NO ROLE] facultyUsername:', facultyUsername, 'fromFacultyLogin:', fromFacultyLogin);
                 
                 // Show role selection for faculty users only
                 if (fromFacultyLogin) {
-                    console.log('?? [SHOW DIALOG] Displaying faculty role selection dialog');
+                    console.log('[DEBUG] [SHOW DIALOG] Displaying faculty role selection dialog');
                     setTimeout(() => {
                         // showFacultyRoleSelectionDialog(); // Disabled - removed left panel
                     }, 400);
                 } else {
-                    console.log('?? [NO FACULTY] Regular user - role selection not needed');
+                    console.log('[DEBUG] [NO FACULTY] Regular user - role selection not needed');
                 }
             } catch (err) {
-                console.error('? [INIT ERROR]', err);
+                console.error('[DEBUG] [INIT ERROR]', err);
             }
         }
 
@@ -57055,12 +57055,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 const branch = s.branch || 'NO_BRANCH';
                 branchCounts[branch] = (branchCounts[branch] || 0) + 1;
             });
-            console.log('?? Students by branch:', branchCounts);
-            console.log('?? Currently filtering by branch:', selectedBranch);
+            console.log('[DEBUG] Students by branch:', branchCounts);
+            console.log('[DEBUG] Currently filtering by branch:', selectedBranch);
             
             // Sample a student to see their full structure
             if (students.length > 0) {
-                console.log('?? Sample student object:', JSON.stringify(students[0], null, 2));
+                console.log('[DEBUG] Sample student object:', JSON.stringify(students[0], null, 2));
             }
             
             // Use requestAnimationFrame for smooth rendering
@@ -57083,7 +57083,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     return matchesBranch && matchesSearch && matchesYear;
                 });
                 
-                console.log(`? Filtered to ${filteredStudents.length} students for ${selectedBranch}`);
+                console.log([DEBUG] Filtered to ${filteredStudents.length} students for ${selectedBranch}`);
 
                 // Clear list efficiently
                 list.innerHTML = "";
@@ -57649,7 +57649,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         success++;
                         progressState.success = success;
                         addProgressItem(`${student.name}`, 'success');
-                        console.log(`? Created: ${student.name}`);
+                        console.log([DEBUG] Created: ${student.name}`);
                     } else {
                         failed++;
                         addProgressItem(`${student.name}`, 'error');
@@ -57704,8 +57704,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 
                 // Convert Excel rows to student objects
-                console.log('?? Row headers detected:', Object.keys(jsonData[0] || {}));
-                console.log('?? selectedBranch value before parsing:', selectedBranch);
+                console.log('[DEBUG] Row headers detected:', Object.keys(jsonData[0] || {}));
+                console.log('[DEBUG] selectedBranch value before parsing:', selectedBranch);
                 
                 const students = jsonData.map((row, idx) => {
                     // Try to detect branch from multiple sources
@@ -57713,7 +57713,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     const resolvedBranch = excelBranch ? String(excelBranch).trim() : (selectedBranch || 'MECHANICAL');
                     
                     if (idx === 0) {
-                        console.log(`?? Parse Example - Excel branch field: "${excelBranch}" | selectedBranch: "${selectedBranch}" | Final: "${resolvedBranch}"`);
+                        console.log([DEBUG] Parse Example - Excel branch field: "${excelBranch}" | selectedBranch: "${selectedBranch}" | Final: "${resolvedBranch}"`);
                     }
                     
                     return {
@@ -57915,7 +57915,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         success++;
                         progressState.success = success;
                         addProgressItem(`${student.name}`, 'success');
-                        console.log(`? Created: ${student.name}`);
+                        console.log([DEBUG] Created: ${student.name}`);
                     } else {
                         failed++;
                         addProgressItem(`${student.name}`, 'error');
@@ -57936,7 +57936,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 await new Promise(resolve => setTimeout(resolve, 150));
             }
             
-            console.log(`? Import complete: ${success} success, ${failed} failed`);
+            console.log([DEBUG] Import complete: ${success} success, ${failed} failed`);
             
             window.excelStudentsData = null;
             localStorage.removeItem('students');
@@ -58029,7 +58029,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
                 
-                console.log('? All students deleted from database');
+                console.log('[DEBUG] All students deleted from database');
                 showMessageBox('Success', '? All students have been deleted from the database.\n\nYou can now re-import with properly formatted Excel files.', 'success');
                 
                 // Clear cache and reload
@@ -58417,7 +58417,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         async function finalizeAddStudent(student) {
-            console.log('? finalizeAddStudent START', student.name, student.usn, 'branch:', student.branch, 'sem:', student.semester);
+            console.log('[DEBUG] finalizeAddStudent START', student.name, student.usn, 'branch:', student.branch, 'sem:', student.semester);
 
             // -- STEP 1: Save to DB FIRST (before any UI/localStorage work) --
             let savedToDb = false;
@@ -58447,9 +58447,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     marks:    {},
                     attendance: {}
                 };
-                console.log('?? Sending to DB:', JSON.stringify(payload));
+                console.log('[DEBUG] Sending to DB:', JSON.stringify(payload));
                 const dbUrl = `${API_BASE}/students`;
-                console.log('?? API URL:', dbUrl);
+                console.log('[DEBUG] API URL:', dbUrl);
 
                 // POST (new). On 409 conflict, PUT (update existing).
                 let res = await fetch(dbUrl, {
@@ -58457,20 +58457,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                console.log('?? POST status:', res.status);
+                console.log('[DEBUG] POST status:', res.status);
 
                 if (res.status === 409) {
-                    console.log('? USN already exists in DB ? running PUT update');
+                    console.log('[DEBUG] USN already exists in DB ? running PUT update');
                     res = await fetch(`${API_BASE}/students/${student.usn}`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
                     });
-                    console.log('?? PUT status:', res.status);
+                    console.log('[DEBUG] PUT status:', res.status);
                 }
 
                 const text = await res.text();
-                console.log('?? DB raw response:', text);
+                console.log('[DEBUG] DB raw response:', text);
                 let json = {};
                 try { json = JSON.parse(text); } catch(e) {}
                 savedToDb = res.ok && json.success !== false;
@@ -58478,7 +58478,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log(savedToDb ? '? DB save SUCCESS' : '? DB save FAILED: ' + dbError);
             } catch (dbErr) {
                 dbError = dbErr.message;
-                console.error('? DB fetch threw exception:', dbErr);
+                console.error('[DEBUG] DB fetch threw exception:', dbErr);
                 savedToDb = false;
             }
 
@@ -58525,10 +58525,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     showMessageBox(savedToDb ? 'Saved to Database' : 'Saved Locally', `${student.name} added.`, savedToDb ? 'success' : 'warning');
                 }
 
-                console.log(savedToDb ? '? Student saved to Railway DB' : '?? Student saved to localStorage only');
+                console.log(savedToDb ? 'Student saved to Railway DB' : 'Student saved to localStorage only');
 
             } catch (error) {
-                console.error('? CRITICAL ERROR in finalizeAddStudent:', error);
+                console.error('[DEBUG] CRITICAL ERROR in finalizeAddStudent:', error);
                 console.error('Error details:', {
                     message: error.message,
                     stack: error.stack,
@@ -60193,8 +60193,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
 
                 const student = students[studentIndex];
-                console.log('?? Saving attendance to Railway database for student:', student.usn);
-                console.log('?? Dates marked:', datesToMark);
+                console.log('[DEBUG] Saving attendance to Railway database for student:', student.usn);
+                console.log('[DEBUG] Dates marked:', datesToMark);
 
                 // -- Save attendance to Railway PostgreSQL via REST API ------
                 const railwayRes = await fetch(`${API_BASE}/students/${student.usn}`, {
@@ -60212,7 +60212,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (!railwayJson.success) {
                     throw new Error(railwayJson.error || 'Failed to save attendance to Railway database.');
                 }
-                console.log('? Attendance saved to Railway database successfully.');
+                console.log('[DEBUG] Attendance saved to Railway database successfully.');
 
                 // Mirror to localStorage for fast local reads
                 localStorage.setItem('students', JSON.stringify(students));
@@ -60237,10 +60237,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Re-render calendar with updated data
                 renderAttendanceCalendarPopup();
                 
-                console.log('? Attendance marked successfully:', status, 'for dates:', datesToMark);
+                console.log('[DEBUG] Attendance marked successfully:', status, 'for dates:', datesToMark);
 
             } catch (error) {
-                console.error('? Error setting attendance status:', error);
+                console.error('[DEBUG] Error setting attendance status:', error);
                 
                 if (loadingOverlay) {
                     loadingOverlay.classList.remove('ac-loading-overlay--visible');
@@ -60637,7 +60637,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                 }
 
-                console.log('?? Saving attendance to Railway database for student:', student.usn);
+                console.log('[DEBUG] Saving attendance to Railway database for student:', student.usn);
 
                 // -- Save attendance + leave reasons to Railway PostgreSQL via REST API --
                 const railwayRes = await fetch(`${API_BASE}/students/${student.usn}`, {
@@ -60655,7 +60655,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (!railwayJson.success) {
                     throw new Error(railwayJson.error || 'Failed to save attendance to Railway database.');
                 }
-                console.log('? Attendance saved to Railway database successfully.');
+                console.log('[DEBUG] Attendance saved to Railway database successfully.');
 
                 // Mirror to localStorage for fast local reads
                 localStorage.setItem('students', JSON.stringify(students));
@@ -60702,7 +60702,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }, 2000);
                 }
             } catch (error) {
-                console.error('? Error updating attendance:', error);
+                console.error('[DEBUG] Error updating attendance:', error);
                 
                 if (loadingOverlay) {
                     loadingOverlay.classList.remove('ac-loading-overlay--visible');
@@ -61546,7 +61546,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             });
                             const json = await res.json();
                             if (!json.success) console.warn('Bulk delete warning:', json.error);
-                            else console.log(`? Deleted ${json.deleted} student(s) from Railway DB`);
+                            else console.log([DEBUG] Deleted ${json.deleted} student(s) from Railway DB`);
                         } catch (dbErr) {
                             console.warn('Railway bulk-delete failed, trying branch wipe:', dbErr);
                             // Fallback: wipe entire branch from DB
@@ -64284,17 +64284,17 @@ function renderAttendance() {
         }
 
         function updateTeacherDeptPie() {
-            console.log('?? updateTeacherDeptPie() called');
+            console.log('[DEBUG] updateTeacherDeptPie() called');
             
             if (!window.Chart) {
-                console.warn('?? Chart.js not loaded yet, retrying...');
+                console.warn('[DEBUG] Chart.js not loaded yet, retrying...');
                 setTimeout(() => updateTeacherDeptPie(), 500);
                 return;
             }
             
             const ctx = document.getElementById('teacherDeptPie');
             if (!ctx) {
-                console.warn('?? Canvas element #teacherDeptPie not found');
+                console.warn('[DEBUG] Canvas element #teacherDeptPie not found');
                 return;
             }
 
@@ -64302,7 +64302,7 @@ function renderAttendance() {
             const ec = parseInt(document.getElementById('ecTeachersCount').textContent || '0', 10) || 0;
             const me = parseInt(document.getElementById('meTeachersCount').textContent || '0', 10) || 0;
 
-            console.log(`?? Teacher Distribution: CS=${cs}, EC=${ec}, ME=${me}`);
+            console.log([DEBUG] Teacher Distribution: CS=${cs}, EC=${ec}, ME=${me}`);
 
             const data = [cs, ec, me];
             const total = data.reduce((a,b) => a + b, 0);
@@ -66795,10 +66795,10 @@ function renderStudentResultsPopup(studentData) {
             
             // Use the globally stored student data
             if (!currentStudentData) {
-                console.error('? No student data available');
+                console.error('[DEBUG] No student data available');
                 return;
             }
-            console.log('? Using current student data:', currentStudentData.name);
+            console.log('[DEBUG] Using current student data:', currentStudentData.name);
             
             // Parse marks field if it's a JSON string (contains IA marks)
             let iaResults = {};
@@ -66825,7 +66825,7 @@ function renderStudentResultsPopup(studentData) {
             
             // Check if semester has data
             if (!semesterData || Object.keys(semesterData).length === 0) {
-                console.log('?? No data for semester:', semesterKey);
+                console.log('[DEBUG] No data for semester:', semesterKey);
                 iaContentArea.innerHTML = `
                     <div style="flex: 1; display: flex; align-items: center; justify-content: center; background: #FFF3CD; border: 2px dashed #FFEEBA; border-radius: 12px; padding: 40px; text-align: center;">
                         <div>
@@ -66868,10 +66868,10 @@ function renderStudentResultsPopup(studentData) {
                 }).join('');
             
             if (iaCards) {
-                console.log('? Displaying IA cards');
+                console.log('[DEBUG] Displaying IA cards');
                 iaContentArea.innerHTML = iaCards;
             } else {
-                console.log('?? No IA cards to display');
+                console.log('[DEBUG] No IA cards to display');
                 iaContentArea.innerHTML = `
                     <div style="flex: 1; display: flex; align-items: center; justify-content: center; background: #FFF3CD; border: 2px dashed #FFEEBA; border-radius: 12px; padding: 40px; text-align: center;">
                         <div>
@@ -66907,7 +66907,7 @@ function renderStudentResultsPopup(studentData) {
             
             try {
                 // Fetch student data from backend API
-                console.log('?? Fetching student data for USN:', usn);
+                console.log('[DEBUG] Fetching student data for USN:', usn);
                 
                 const response = await fetch(`/api/students/${usn}`);
                 
@@ -66926,12 +66926,12 @@ function renderStudentResultsPopup(studentData) {
                 
                 // Store student data globally for use in selectSemester
                 currentStudentData = studentData;
-                console.log('? Student data loaded:', studentData.name);
+                console.log('[DEBUG] Student data loaded:', studentData.name);
                 console.log('Student marks:', studentData.marks);
                 
             } catch (err) {
                 hideLoader();
-                console.error('? Error fetching student data:', err);
+                console.error('[DEBUG] Error fetching student data:', err);
                 showMessageBox('Error', `Failed to load student data: ${err.message}`);
                 return;
             }
@@ -67089,7 +67089,7 @@ function renderStudentResultsPopup(studentData) {
                 </style>
             `;
             document.body.appendChild(overlay);
-            console.log('? Results overlay appended to body');
+            console.log('[DEBUG] Results overlay appended to body');
             
             // Ensure any global loader is hidden
             const globalLoader = document.getElementById('loadingOverlay');
@@ -71417,7 +71417,7 @@ async function proceedToPublishAll() {
                     
                     // Save published results to database via API
                     if (Object.keys(publishedResults).length > 0) {
-                        console.log(`?? Publishing IA marks for ${student.name} (${studentUSN})...`);
+                        console.log([DEBUG] Publishing IA marks for ${student.name} (${studentUSN})...`);
                         
                         // Merge published results into internalAssessments
                         if (!internalAssessments[studentUSN]) internalAssessments[studentUSN] = {};
@@ -71440,7 +71440,7 @@ async function proceedToPublishAll() {
                             }
                             
                             updatedSuccessfully++;
-                            console.log(`? Successfully published marks for ${student.name}`);
+                            console.log([DEBUG] Successfully published marks for ${student.name}`);
                         } catch (apiError) {
                             console.error(`Error publishing marks for ${studentUSN}:`, apiError);
                             updateErrors.push(`Failed to publish marks for ${student.name}: ${apiError.message}`);
@@ -71449,14 +71449,14 @@ async function proceedToPublishAll() {
                 }
             }
             
-            console.log(`? Successfully published IA marks for ${updatedSuccessfully}/${studentsWithMarks} students`);
+            console.log([DEBUG] Successfully published IA marks for ${updatedSuccessfully}/${studentsWithMarks} students`);
             
             // Also save to localStorage for backup
             localStorage.setItem('internalAssessments', JSON.stringify(internalAssessments));
-            console.log('? All IA marks saved to database');
+            console.log('[DEBUG] All IA marks saved to database');
             
         } catch (error) {
-            console.error('? error loading data:', error);
+            console.error('[DEBUG] error loading data:', error);
             updateErrors.push(`database error: ${error.message}`);
         }
         
@@ -71626,7 +71626,7 @@ async function saveAllIAMarks() {
         // Also save to localStorage for offline access
         localStorage.setItem('internalAssessments', JSON.stringify(internalAssessments));
         
-        console.log('? IA marks saved to database:', studentUSN, activeIASemester, iaNumber);
+        console.log('[DEBUG] IA marks saved to database:', studentUSN, activeIASemester, iaNumber);
         hideLoader();
         showSuccessMessage('? IA marks saved successfully!');
         
@@ -72424,7 +72424,7 @@ async function confirmPublishIAMarks() {
                 renderDashboard();
             }
             
-            console.log('? IA marks published successfully to database!');
+            console.log('[DEBUG] IA marks published successfully to database!');
             
             // Close IA manager after successful publish
             setTimeout(function() {
@@ -75209,7 +75209,7 @@ function ensureSubjectsLoaded() {
                 'Internship / Project'
             ]
         };
-        console.log('? Subjects reloaded - total keys:', Object.keys(window.IASubjetsByYear).length);
+        console.log('[DEBUG] Subjects reloaded - total keys:', Object.keys(window.IASubjetsByYear).length);
     }
     return window.IASubjetsByYear;
 }
@@ -75381,32 +75381,32 @@ function generateSubjectCards(year, semester) {
         };
         
         const semesterLabel = semesterLabels[semester] || '';
-        console.log('?? Looking for subjects:', year, semester, 'Label:', semesterLabel);
+        console.log('[DEBUG] Looking for subjects:', year, semester, 'Label:', semesterLabel);
         
         // Build the correct key
         let fullKey = null;
         const subjects_obj = window.IASubjetsByYear || {};
         
         // List all available keys for debugging
-        console.log('?? Available keys in IASubjetsByYear:', Object.keys(subjects_obj));
+        console.log('[DEBUG] Available keys in IASubjetsByYear:', Object.keys(subjects_obj));
         
         // Find the matching key
         for (let key of Object.keys(subjects_obj)) {
             console.log('   Checking key:', key, 'Contains year?', key.includes(year), 'Contains sem?', key.includes(semesterLabel));
             if (key.includes(year) && key.includes(semesterLabel)) {
                 fullKey = key;
-                console.log('? Found matching key:', fullKey);
+                console.log('[DEBUG] Found matching key:', fullKey);
                 break;
             }
         }
         
         const subjects = fullKey ? subjects_obj[fullKey] : [];
         
-        console.log('? Subjects found:', subjects.length, subjects);
+        console.log('[DEBUG] Subjects found:', subjects.length, subjects);
         
         if (subjects.length === 0) {
             container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #6b7280;">No subjects found for this semester.</div>';
-            console.warn('? No subjects found for:', year, semester, 'Full key:', fullKey);
+            console.warn('[DEBUG] No subjects found for:', year, semester, 'Full key:', fullKey);
             return;
         }
         
@@ -75424,9 +75424,9 @@ function generateSubjectCards(year, semester) {
             container.appendChild(card);
         });
         
-        console.log(`? Generated ${subjects.length} subject cards`);
+        console.log([DEBUG] Generated ${subjects.length} subject cards`);
     } catch (error) {
-        console.error('? Error generating subject cards:', error);
+        console.error('[DEBUG] Error generating subject cards:', error);
         showMessageBox('Error', `Failed to load subjects: ${error.message}`);
     }
 }
@@ -75472,7 +75472,7 @@ function loadStudentsForMarking(subject) {
                     // Handle both array and object responses
                     const students = Array.isArray(response) ? response : (response.data || response.students || []);
                     window.students = students;
-                    console.log(`? Fetched ${students.length} students from API`);
+                    console.log([DEBUG] Fetched ${students.length} students from API`);
                     // Retry loading students for marking
                     loadStudentsForMarking(subject);
                 })
@@ -75525,9 +75525,9 @@ function loadStudentsForMarking(subject) {
         renderMarkingTable();
         updateMarkingProgress();
         
-        console.log(`? Loaded ${branchStudents.length} students for marking subject: ${subject}`);
+        console.log([DEBUG] Loaded ${branchStudents.length} students for marking subject: ${subject}`);
     } catch (error) {
-        console.error('? Error loading students for marking:', error);
+        console.error('[DEBUG] Error loading students for marking:', error);
         showMessageBox('Error', `Failed to load students: ${error.message}`);
     }
 }
@@ -79528,11 +79528,11 @@ document.addEventListener('DOMContentLoaded', function() {
             if (userType === 'admin') {
                 if (feesBtn) feesBtn.style.display = 'none';
                 if (feesPanel) feesPanel.style.display = 'none';
-                console.log('? FEES section hidden for admin');
+                console.log('[DEBUG] FEES section hidden for admin');
             } else {
                 if (feesBtn) feesBtn.style.display = '';
                 if (feesPanel) feesPanel.style.display = '';
-                console.log('? FEES section shown for non-admin');
+                console.log('[DEBUG] FEES section shown for non-admin');
             }
             
             if (userType === 'teacher') {
@@ -79667,15 +79667,15 @@ function initializeTeacherPortal() {
 function initializeTeacherManageSync() {
     // Define all functions FIRST, before using them
     window.loadTeacherManageData = async function loadTeacherManageData() {
-        console.log('?? [MAIN] loadTeacherManageData called');
+        console.log('[DEBUG] [MAIN] loadTeacherManageData called');
         
         // Ensure API_BASE is available
         if (!window.API_BASE) {
-            console.error('? API_BASE not yet defined, trying to find it...');
+            console.error('[DEBUG] API_BASE not yet defined, trying to find it...');
             // Try multiple times to find API_BASE
             for (let i = 0; i < 10; i++) {
                 if (window.API_BASE) {
-                    console.log('? Found API_BASE on attempt', i);
+                    console.log('[DEBUG] Found API_BASE on attempt', i);
                     break;
                 }
                 await new Promise(resolve => setTimeout(resolve, 100));
@@ -79683,39 +79683,39 @@ function initializeTeacherManageSync() {
         }
         
         if (!window.API_BASE) {
-            console.error('? API_BASE still not available!');
+            console.error('[DEBUG] API_BASE still not available!');
             return;
         }
         
-        console.log('?? Using API_BASE:', window.API_BASE);
+        console.log('[DEBUG] Using API_BASE:', window.API_BASE);
         
         try {
             // loadTeacherAttendanceData now fetches directly from API
             if (typeof window.loadTeacherAttendanceData === 'function') {
                 await window.loadTeacherAttendanceData();
-                console.log('? [MAIN] Loaded attendance data');
+                console.log('[DEBUG] [MAIN] Loaded attendance data');
             } else {
-                console.error('? [MAIN] window.loadTeacherAttendanceData function not found');
+                console.error('[DEBUG] [MAIN] window.loadTeacherAttendanceData function not found');
             }
             
             // Load leave data
             if (typeof window.loadTeacherLeaveData === 'function') {
                 await window.loadTeacherLeaveData();
-                console.log('? [MAIN] Loaded leave data');
+                console.log('[DEBUG] [MAIN] Loaded leave data');
             } else {
-                console.error('? [MAIN] window.loadTeacherLeaveData function not found');
+                console.error('[DEBUG] [MAIN] window.loadTeacherLeaveData function not found');
             }
         } catch (error) {
-            console.error('? [MAIN] Error:', error);
+            console.error('[DEBUG] [MAIN] Error:', error);
         }
     };
     
     // Now call the function using window object
     if (typeof window.loadTeacherManageData === 'function') {
-        console.log('? [INIT] Calling loadTeacherManageData()');
+        console.log('[DEBUG] [INIT] Calling loadTeacherManageData()');
         window.loadTeacherManageData();
     } else {
-        console.error('? [INIT] loadTeacherManageData is not available');
+        console.error('[DEBUG] [INIT] loadTeacherManageData is not available');
     }
     
     // Listen for storage changes from teacher-manage.html
@@ -79842,7 +79842,7 @@ async function loadFacultyFeeManagement() {
         console.log('[Fees] Fees Data from app_settings:', feesRes);
         
         if (studentData.success && Array.isArray(studentData.data)) {
-            console.log(`? Found ${studentData.data.length} students in database`);
+            console.log([DEBUG] Found ${studentData.data.length} students in database`);
             
             // Get real fees data from Railway app_settings
             const realFees = (feesRes.success && feesRes.data) ? feesRes.data : {};
@@ -79883,7 +79883,7 @@ async function loadFacultyFeeManagement() {
         updateFacultyFeeStats();
         
     } catch (error) {
-        console.error('? Error loading faculty fee data:', error);
+        console.error('[DEBUG] Error loading faculty fee data:', error);
         document.getElementById('fmEmptyState').style.display = 'block';
     }
 }
@@ -80724,7 +80724,7 @@ function updateFacultyFeeStats(students = facultyFeeData) {
 function sendReminderToStudent(usn, name, pendingAmount) {
     const message = `?? Reminder sent to ${name} (${usn})\n\n?? Pending Amount: ?${pendingAmount}\n\nMessage sent via WhatsApp & Email!`;
     
-    console.log(`?? Sending reminder to ${name}...`);
+    console.log([DEBUG] Sending reminder to ${name}...`);
     
     // Send reminder via API (WhatsApp & Email)
     try {
@@ -80740,10 +80740,10 @@ function sendReminderToStudent(usn, name, pendingAmount) {
             })
         })
         .then(r => r.json())
-        .then(j => console.log('? Reminder sent:', j))
-        .catch(err => console.warn('?? Reminder send failed (offline):', err));
+        .then(j => console.log('[DEBUG] Reminder sent:', j))
+        .catch(err => console.warn('[DEBUG] Reminder send failed (offline):', err));
     } catch (e) {
-        console.warn('?? Could not send reminder:', e);
+        console.warn('[DEBUG] Could not send reminder:', e);
     }
     
     // Show success notification
@@ -80815,13 +80815,13 @@ function selectFeeTimeRange(range) {
     // Re-render the student cards with filtered data
     renderFacultyFeeCards(filteredStudents);
     
-    console.log(`?? Filtered ${filteredStudents.length} records for range: ${range}`);
+    console.log([DEBUG] Filtered ${filteredStudents.length} records for range: ${range}`);
 }
 
 
 
 function switchTeacherManageTab(tab) {
-    console.log('?? [TAB_SWITCH] Switching to tab:', tab);
+    console.log('[DEBUG] [TAB_SWITCH] Switching to tab:', tab);
     
     // Update tab buttons
     document.querySelectorAll('.tm-tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -80833,18 +80833,18 @@ function switchTeacherManageTab(tab) {
     
     // Load data for the active tab
     if (tab === 'attendance') {
-        console.log('?? [TAB_SWITCH] Calling window.loadTeacherAttendanceData');
+        console.log('[DEBUG] [TAB_SWITCH] Calling window.loadTeacherAttendanceData');
         if (typeof window.loadTeacherAttendanceData === 'function') {
             window.loadTeacherAttendanceData();
         } else {
-            console.error('? window.loadTeacherAttendanceData not found');
+            console.error('[DEBUG] window.loadTeacherAttendanceData not found');
         }
     } else if (tab === 'leave') {
-        console.log('?? [TAB_SWITCH] Calling window.loadTeacherLeaveData');
+        console.log('[DEBUG] [TAB_SWITCH] Calling window.loadTeacherLeaveData');
         if (typeof window.loadTeacherLeaveData === 'function') {
             window.loadTeacherLeaveData();
         } else {
-            console.error('? window.loadTeacherLeaveData not found');
+            console.error('[DEBUG] window.loadTeacherLeaveData not found');
         }
     }
 }
@@ -80856,28 +80856,28 @@ window.loadTeacherAttendanceData = async function loadTeacherAttendanceData() {
     let records = [];
     
     try {
-        console.log('?? [ATTENDANCE] Fetching from API directly...');
+        console.log('[DEBUG] [ATTENDANCE] Fetching from API directly...');
         
         // Ensure API_BASE is available
         if (!window.API_BASE) {
-            console.error('? API_BASE not available in loadTeacherAttendanceData');
+            console.error('[DEBUG] API_BASE not available in loadTeacherAttendanceData');
             return;
         }
         
         // FETCH DIRECTLY FROM API - don't rely on localStorage sync
         const apiUrl = `${window.API_BASE}/settings/teacher_attendance`;
-        console.log('?? Fetching from:', apiUrl);
+        console.log('[DEBUG] Fetching from:', apiUrl);
         
         const response = await fetch(apiUrl);
-        console.log('?? API Response Status:', response.status);
+        console.log('[DEBUG] API Response Status:', response.status);
         
         if (!response.ok) {
-            console.error('? API Error:', response.status);
+            console.error('[DEBUG] API Error:', response.status);
             throw new Error(`API returned ${response.status}`);
         }
         
         const data = await response.json();
-        console.log('?? API Response:', JSON.stringify(data).substring(0, 200));
+        console.log('[DEBUG] API Response:', JSON.stringify(data).substring(0, 200));
         
         // Parse the response
         if (data && data.data) {
@@ -80903,10 +80903,10 @@ window.loadTeacherAttendanceData = async function loadTeacherAttendanceData() {
                 records = parsedData.records || [];
             }
             
-            console.log('? Extracted records:', records.length);
+            console.log('[DEBUG] Extracted records:', records.length);
         }
     } catch (error) {
-        console.error('? Error in loadTeacherAttendanceData:', error);
+        console.error('[DEBUG] Error in loadTeacherAttendanceData:', error);
         records = [];
     }
     
@@ -80914,16 +80914,16 @@ window.loadTeacherAttendanceData = async function loadTeacherAttendanceData() {
     const presentCount = records.filter(r => (r.status || '').toLowerCase() === 'present').length;
     const absentCount = records.filter(r => (r.status || '').toLowerCase() === 'absent').length;
     
-    console.log('?? Stats - Present:', presentCount, 'Absent:', absentCount, 'Total:', records.length);
+    console.log('[DEBUG] Stats - Present:', presentCount, 'Absent:', absentCount, 'Total:', records.length);
     
     // Update statistics in DOM
     const tmPresent = document.getElementById('tmTotalPresent');
     const tmAbsent = document.getElementById('tmTotalAbsent');
     const tmTotal = document.getElementById('tmTotalRecords');
     
-    if (tmPresent) { tmPresent.textContent = presentCount; console.log('? Updated Present count'); }
-    if (tmAbsent) { tmAbsent.textContent = absentCount; console.log('? Updated Absent count'); }
-    if (tmTotal) { tmTotal.textContent = records.length; console.log('? Updated Total count'); }
+    if (tmPresent) { tmPresent.textContent = presentCount; console.log('[DEBUG] Updated Present count'); }
+    if (tmAbsent) { tmAbsent.textContent = absentCount; console.log('[DEBUG] Updated Absent count'); }
+    if (tmTotal) { tmTotal.textContent = records.length; console.log('[DEBUG] Updated Total count'); }
     
     // Display records
     if (typeof window.displayTeacherAttendanceRecords === 'function') {
@@ -80940,7 +80940,7 @@ window.displayTeacherAttendanceRecords = function displayTeacherAttendanceRecord
     console.log('[DISPLAY_FUNC] Container element:', container);
     
     if (!container) {
-        console.error('? Container tmAttendanceList not found!');
+        console.error('[DEBUG] Container tmAttendanceList not found!');
         return;
     }
     
@@ -81011,27 +81011,27 @@ window.loadTeacherLeaveData = async function loadTeacherLeaveData() {
     let records = [];
     
     try {
-        console.log('?? [LEAVE] Fetching from API directly...');
+        console.log('[DEBUG] [LEAVE] Fetching from API directly...');
         
         // Ensure API_BASE is available
         if (!window.API_BASE) {
-            console.error('? API_BASE not available in loadTeacherLeaveData');
+            console.error('[DEBUG] API_BASE not available in loadTeacherLeaveData');
             return;
         }
         
         const apiUrl = `${window.API_BASE}/settings/teacher_leave`;
-        console.log('?? Fetching leave from:', apiUrl);
+        console.log('[DEBUG] Fetching leave from:', apiUrl);
         
         const response = await fetch(apiUrl);
-        console.log('?? Leave API Status:', response.status);
+        console.log('[DEBUG] Leave API Status:', response.status);
         
         if (!response.ok) {
-            console.error('? Leave API Error:', response.status);
+            console.error('[DEBUG] Leave API Error:', response.status);
             throw new Error(`API returned ${response.status}`);
         }
         
         const data = await response.json();
-        console.log('?? Leave API Response:', JSON.stringify(data).substring(0, 200));
+        console.log('[DEBUG] Leave API Response:', JSON.stringify(data).substring(0, 200));
         
         // Parse the response
         if (data && data.data) {
@@ -81056,10 +81056,10 @@ window.loadTeacherLeaveData = async function loadTeacherLeaveData() {
                 records = parsedData.records || [];
             }
             
-            console.log('? Extracted leave records:', records.length);
+            console.log('[DEBUG] Extracted leave records:', records.length);
         }
     } catch (error) {
-        console.error('? Error in loadTeacherLeaveData:', error);
+        console.error('[DEBUG] Error in loadTeacherLeaveData:', error);
         records = [];
     }
     
@@ -81068,16 +81068,16 @@ window.loadTeacherLeaveData = async function loadTeacherLeaveData() {
     const approvedCount = records.filter(r => r.status === 'approved').length;
     const rejectedCount = records.filter(r => r.status === 'rejected').length;
     
-    console.log('?? Leave Stats - Pending:', pendingCount, 'Approved:', approvedCount, 'Rejected:', rejectedCount);
+    console.log('[DEBUG] Leave Stats - Pending:', pendingCount, 'Approved:', approvedCount, 'Rejected:', rejectedCount);
     
     // Update statistics
     const tmPending = document.getElementById('tmPendingLeaves');
     const tmApproved = document.getElementById('tmApprovedLeaves');
     const tmRejected = document.getElementById('tmRejectedLeaves');
     
-    if (tmPending) { tmPending.textContent = pendingCount; console.log('? Updated Pending count'); }
-    if (tmApproved) { tmApproved.textContent = approvedCount; console.log('? Updated Approved count'); }
-    if (tmRejected) { tmRejected.textContent = rejectedCount; console.log('? Updated Rejected count'); }
+    if (tmPending) { tmPending.textContent = pendingCount; console.log('[DEBUG] Updated Pending count'); }
+    if (tmApproved) { tmApproved.textContent = approvedCount; console.log('[DEBUG] Updated Approved count'); }
+    if (tmRejected) { tmRejected.textContent = rejectedCount; console.log('[DEBUG] Updated Rejected count'); }
     
     // Display records
     if (typeof window.displayTeacherLeaveRecords === 'function') {
@@ -81092,7 +81092,7 @@ window.displayTeacherLeaveRecords = function displayTeacherLeaveRecords(records)
     const container = document.getElementById('tmLeaveList');
     
     if (!container) {
-        console.error('? Container tmLeaveList not found!');
+        console.error('[DEBUG] Container tmLeaveList not found!');
         return;
     }
     
@@ -81225,7 +81225,7 @@ async function updateLeaveStatus(leaveId, newStatus) {
                 .select();
             
             if (error) throw error;
-            console.log('? Leave status updated in database:', data);
+            console.log('[DEBUG] Leave status updated in database:', data);
         } else {
             // Fallback to localStorage
             const records = JSON.parse(localStorage.getItem('teacher_leave_records') || '[]');
@@ -81237,7 +81237,7 @@ async function updateLeaveStatus(leaveId, newStatus) {
                 records[recordIndex].updatedTime = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
                 localStorage.setItem('teacher_leave_records', JSON.stringify(records));
                 syncSettingToRailway('teacher_leave_records', records);
-                console.log('?? Leave status updated in localStorage');
+                console.log('[DEBUG] Leave status updated in localStorage');
             }
         }
         
@@ -81248,7 +81248,7 @@ async function updateLeaveStatus(leaveId, newStatus) {
         await loadTeacherLeaveData();
         
     } catch (error) {
-        console.error('? Error updating leave status:', error);
+        console.error('[DEBUG] Error updating leave status:', error);
         showMessageBox('Error', 'Error updating leave status. Please try again.');
     }
 }
@@ -81264,22 +81264,22 @@ function refreshTeacherManageData() {
         icon.style.transform = 'rotate(0deg)';
     }, 600);
     
-    console.log('?? REFRESH button clicked - loading data...');
+    console.log('[DEBUG] REFRESH button clicked - loading data...');
     // Reload data
     loadTeacherManageData();
 }
 
 // Test function to debug API call (call from console: testTeacherAttendanceAPI())
 window.testTeacherAttendanceAPI = async function() {
-    console.log('?? Testing teacher attendance API...');
+    console.log('[DEBUG] Testing teacher attendance API...');
     try {
         console.log('Fetching from:', `${window.API_BASE}/settings/teacher_attendance`);
         const res = await fetch(`${window.API_BASE}/settings/teacher_attendance`);
         console.log('API Status:', res.status);
         const data = await res.json();
-        console.log('? API Response:', data);
-        console.log('? Data field:', data.data);
-        console.log('? Data field type:', typeof data.data);
+        console.log('[DEBUG] API Response:', data);
+        console.log('[DEBUG] Data field:', data.data);
+        console.log('[DEBUG] Data field type:', typeof data.data);
         
         if (data.data) {
             if (typeof data.data === 'string') {
@@ -81296,7 +81296,7 @@ window.testTeacherAttendanceAPI = async function() {
         // Now force reload the display
         console.log('Now forcing reload...');
         await window.loadTeacherAttendanceData();
-        console.log('? Manual load complete!');
+        console.log('[DEBUG] Manual load complete!');
     } catch (e) {
         console.error('API Error:', e);
     }
@@ -81304,7 +81304,7 @@ window.testTeacherAttendanceAPI = async function() {
 
 // Shortcut - just load the data
 window.loadNow = function() {
-    console.log('?? Manual load triggered');
+    console.log('[DEBUG] Manual load triggered');
     if (typeof window.loadTeacherAttendanceData === 'function') {
         window.loadTeacherAttendanceData();
     } else {
@@ -83226,7 +83226,7 @@ Govt. Polytechnic, Beelagi`;
 
     // Open Fee Management Card View with Smooth Animation
     function openFeeManagementCard(type) {
-        console.log('?? Opening fee card:', type);
+        console.log('[DEBUG] Opening fee card:', type);
         
         // For general fee, open immediately
         if (type === 'general') {
@@ -83235,20 +83235,20 @@ Govt. Polytechnic, Beelagi`;
         }
         
         // For college fee, show modal first then load data
-        console.log('?? Current facultyFeeData:', facultyFeeData);
+        console.log('[DEBUG] Current facultyFeeData:', facultyFeeData);
         showSimpleModal(type);
         
         // Load data in background if not already loaded
         if (!facultyFeeData || facultyFeeData.length === 0) {
-            console.log('?? Data not loaded, loading in background...');
+            console.log('[DEBUG] Data not loaded, loading in background...');
             loadFacultyFeeManagement().catch(error => {
-                console.error('? Error loading data:', error);
+                console.error('[DEBUG] Error loading data:', error);
             });
         }
     }
     
     function showSimpleModal(type) {
-        console.log('?? Creating professional minimal modal...');
+        console.log('[DEBUG] Creating professional minimal modal...');
         
         // Remove any existing modal
         const existing = document.querySelector('.fee-management-modal');
@@ -83495,7 +83495,7 @@ Govt. Polytechnic, Beelagi`;
             setTimeout(() => populateGeneralFeeList(), 100);
         }
         
-        console.log('? Professional modal created');
+        console.log('[DEBUG] Professional modal created');
     }
     
     function populateCollegeFeeList() {
@@ -86389,24 +86389,24 @@ Govt. Polytechnic, Beelagi`;
         const attachAttendanceButtonListener = () => {
             const viewAttendanceBtn = document.getElementById('viewTodayAttendanceBtn');
             if (viewAttendanceBtn) {
-                console.log('? Found View Attendance button (by ID), attaching click handler');
+                console.log('[DEBUG] Found View Attendance button (by ID), attaching click handler');
                 
                 // Method 1: Direct event listener
                 viewAttendanceBtn.addEventListener('click', function(e) {
-                    console.log('?? View Attendance button clicked (addEventListener)!');
+                    console.log('[DEBUG] View Attendance button clicked (addEventListener)!');
                     e.preventDefault();
                     e.stopPropagation();
                     if (typeof window.openTodayAttendanceModal === 'function') {
                         window.openTodayAttendanceModal();
                     } else {
-                        console.error('? openTodayAttendanceModal function not found');
+                        console.error('[DEBUG] openTodayAttendanceModal function not found');
                         alert('Error: Modal function not loaded. Please refresh the page.');
                     }
                 }, true);
                 
                 // Method 2: Backup onclick property
                 viewAttendanceBtn.onclick = function(e) {
-                    console.log('?? View Attendance button clicked (onclick property)!');
+                    console.log('[DEBUG] View Attendance button clicked (onclick property)!');
                     e.preventDefault();
                     if (typeof window.openTodayAttendanceModal === 'function') {
                         window.openTodayAttendanceModal();
@@ -86414,22 +86414,22 @@ Govt. Polytechnic, Beelagi`;
                     return false;
                 };
                 
-                console.log('? Button handlers attached successfully');
+                console.log('[DEBUG] Button handlers attached successfully');
             } else {
-                console.warn('?? View Attendance button not found yet');
+                console.warn('[DEBUG] View Attendance button not found yet');
                 // Try again after a short delay
                 setTimeout(() => {
                     const btn = document.getElementById('viewTodayAttendanceBtn');
                     if (btn) {
-                        console.log('? Found View Attendance button (delayed), attaching click handler');
+                        console.log('[DEBUG] Found View Attendance button (delayed), attaching click handler');
                         btn.addEventListener('click', function(e) {
                             e.preventDefault();
                             e.stopPropagation();
-                            console.log('?? View Attendance button clicked!');
+                            console.log('[DEBUG] View Attendance button clicked!');
                             if (typeof window.openTodayAttendanceModal === 'function') {
                                 window.openTodayAttendanceModal();
                             } else {
-                                console.error('? openTodayAttendanceModal function not found');
+                                console.error('[DEBUG] openTodayAttendanceModal function not found');
                             }
                         }, true);
                     }
@@ -86881,13 +86881,13 @@ document.addEventListener('input', function(e) {
             statusEl.style.color = '#166534';
             statusEl.innerHTML = '<i class="fas fa-check-circle"></i> &nbsp; ? Successfully uploaded ' + courses.length + ' course(s) to faculty dashboard!';
             
-            console.log('? Courses uploaded to faculty:', courses);
+            console.log('[DEBUG] Courses uploaded to faculty:', courses);
             
             // Keep message visible for 5 seconds
             setTimeout(() => { statusEl.style.display = 'none'; }, 5000);
             
         } catch (error) {
-            console.error('? Upload error:', error);
+            console.error('[DEBUG] Upload error:', error);
             statusEl.style.display = 'block';
             statusEl.style.background = '#fee2e2';
             statusEl.style.border = '1px solid #fca5a5';
@@ -87488,7 +87488,7 @@ document.addEventListener('input', function(e) {
         
         // Store selected installment
         window.fmCurrentInstallment = num;
-        console.log(`?? Selected: ${num}${num === 1 ? 'st' : num === 2 ? 'nd' : 'rd'} Installment`);
+        console.log([DEBUG] Selected: ${num}${num === 1 ? 'st' : num === 2 ? 'nd' : 'rd'} Installment`);
     };
 
     // Auto-calculate pending balance
@@ -87616,7 +87616,7 @@ document.addEventListener('input', function(e) {
             // Show success message
             showMessageBox('✓ Payment Saved', 'Payment of ₹' + paid + ' has been recorded and saved to database!', 'success');
 
-            console.log(`? Fee data saved: Total ?${total}, Paid ?${paid} for ${studentUSN}`);
+            console.log([DEBUG] Fee data saved: Total ?${total}, Paid ?${paid} for ${studentUSN}`);
             
             // Reload panel to show updated data
             await fmOpenStudentFee(s);
