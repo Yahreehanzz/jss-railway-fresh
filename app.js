@@ -17,8 +17,8 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files
-app.use(express.static(path.join(__dirname), { maxAge: '1h' }));
+// ⭐ IMPORTANT: Register all API routes BEFORE static file serving
+// This ensures /api/* routes are not caught by the SPA fallback
 
 // Database Connection
 const pool = new Pool({
@@ -1216,6 +1216,12 @@ app.put('/api/settings/:key', async (req, res) => {
         res.status(500).json({ success: false, error: e.message });
     }
 });
+
+// ============================================================
+// Serve static files (CSS, JS, images, etc.)
+// Must be before SPA fallback
+// ============================================================
+app.use(express.static(path.join(__dirname), { maxAge: '1h' }));
 
 // ============================================================
 // SPA Fallback - MUST BE LAST
