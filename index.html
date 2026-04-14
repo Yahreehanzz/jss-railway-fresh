@@ -54480,7 +54480,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
             
-            console.log([DEBUG] Applied ${role} role access - ${allowedSections.length} sections visible`);
+            console.log(`[DEBUG] Applied ${role} role access - ${allowedSections.length} sections visible`);
         }
 
         // Apply access control on page load
@@ -57083,7 +57083,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     return matchesBranch && matchesSearch && matchesYear;
                 });
                 
-                console.log([DEBUG] Filtered to ${filteredStudents.length} students for ${selectedBranch}`);
+                console.log(`[DEBUG] Filtered to ${filteredStudents.length} students for ${selectedBranch}`);
 
                 // Clear list efficiently
                 list.innerHTML = "";
@@ -57649,7 +57649,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         success++;
                         progressState.success = success;
                         addProgressItem(`${student.name}`, 'success');
-                        console.log([DEBUG] Created: ${student.name}`);
+                        console.log(`[DEBUG] Created: ${student.name}`);
                     } else {
                         failed++;
                         addProgressItem(`${student.name}`, 'error');
@@ -57713,7 +57713,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     const resolvedBranch = excelBranch ? String(excelBranch).trim() : (selectedBranch || 'MECHANICAL');
                     
                     if (idx === 0) {
-                        console.log([DEBUG] Parse Example - Excel branch field: "${excelBranch}" | selectedBranch: "${selectedBranch}" | Final: "${resolvedBranch}"`);
+                        console.log(`[DEBUG] Parse Example - Excel branch field: "${excelBranch}" | selectedBranch: "${selectedBranch}" | Final: "${resolvedBranch}"`);
                     }
                     
                     return {
@@ -57915,7 +57915,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         success++;
                         progressState.success = success;
                         addProgressItem(`${student.name}`, 'success');
-                        console.log([DEBUG] Created: ${student.name}`);
+                        console.log(`[DEBUG] Created: ${student.name}`);
                     } else {
                         failed++;
                         addProgressItem(`${student.name}`, 'error');
@@ -57936,7 +57936,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 await new Promise(resolve => setTimeout(resolve, 150));
             }
             
-            console.log([DEBUG] Import complete: ${success} success, ${failed} failed`);
+            console.log(`[DEBUG] Import complete: ${success} success, ${failed} failed`);
             
             window.excelStudentsData = null;
             localStorage.removeItem('students');
@@ -61546,7 +61546,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             });
                             const json = await res.json();
                             if (!json.success) console.warn('Bulk delete warning:', json.error);
-                            else console.log([DEBUG] Deleted ${json.deleted} student(s) from Railway DB`);
+                            else console.log(`[DEBUG] Deleted ${json.deleted} student(s) from Railway DB`);
                         } catch (dbErr) {
                             console.warn('Railway bulk-delete failed, trying branch wipe:', dbErr);
                             // Fallback: wipe entire branch from DB
@@ -64302,7 +64302,7 @@ function renderAttendance() {
             const ec = parseInt(document.getElementById('ecTeachersCount').textContent || '0', 10) || 0;
             const me = parseInt(document.getElementById('meTeachersCount').textContent || '0', 10) || 0;
 
-            console.log([DEBUG] Teacher Distribution: CS=${cs}, EC=${ec}, ME=${me}`);
+            console.log(`[DEBUG] Teacher Distribution: CS=${cs}, EC=${ec}, ME=${me}`);
 
             const data = [cs, ec, me];
             const total = data.reduce((a,b) => a + b, 0);
@@ -71417,7 +71417,7 @@ async function proceedToPublishAll() {
                     
                     // Save published results to database via API
                     if (Object.keys(publishedResults).length > 0) {
-                        console.log([DEBUG] Publishing IA marks for ${student.name} (${studentUSN})...`);
+                        console.log(`[DEBUG] Publishing IA marks for ${student.name} (${studentUSN})...`);
                         
                         // Merge published results into internalAssessments
                         if (!internalAssessments[studentUSN]) internalAssessments[studentUSN] = {};
@@ -71440,7 +71440,7 @@ async function proceedToPublishAll() {
                             }
                             
                             updatedSuccessfully++;
-                            console.log([DEBUG] Successfully published marks for ${student.name}`);
+                            console.log(`[DEBUG] Successfully published marks for ${student.name}`);
                         } catch (apiError) {
                             console.error(`Error publishing marks for ${studentUSN}:`, apiError);
                             updateErrors.push(`Failed to publish marks for ${student.name}: ${apiError.message}`);
@@ -71449,7 +71449,7 @@ async function proceedToPublishAll() {
                 }
             }
             
-            console.log([DEBUG] Successfully published IA marks for ${updatedSuccessfully}/${studentsWithMarks} students`);
+            console.log(`[DEBUG] Successfully published IA marks for ${updatedSuccessfully}/${studentsWithMarks} students`);
             
             // Also save to localStorage for backup
             localStorage.setItem('internalAssessments', JSON.stringify(internalAssessments));
@@ -75424,7 +75424,7 @@ function generateSubjectCards(year, semester) {
             container.appendChild(card);
         });
         
-        console.log([DEBUG] Generated ${subjects.length} subject cards`);
+        console.log(`[DEBUG] Generated ${subjects.length} subject cards`);
     } catch (error) {
         console.error('[DEBUG] Error generating subject cards:', error);
         showMessageBox('Error', `Failed to load subjects: ${error.message}`);
@@ -75472,7 +75472,7 @@ function loadStudentsForMarking(subject) {
                     // Handle both array and object responses
                     const students = Array.isArray(response) ? response : (response.data || response.students || []);
                     window.students = students;
-                    console.log([DEBUG] Fetched ${students.length} students from API`);
+                    console.log(`[DEBUG] Fetched ${students.length} students from API`);
                     // Retry loading students for marking
                     loadStudentsForMarking(subject);
                 })
@@ -75525,7 +75525,7 @@ function loadStudentsForMarking(subject) {
         renderMarkingTable();
         updateMarkingProgress();
         
-        console.log([DEBUG] Loaded ${branchStudents.length} students for marking subject: ${subject}`);
+        console.log(`[DEBUG] Loaded ${branchStudents.length} students for marking subject: ${subject}`);
     } catch (error) {
         console.error('[DEBUG] Error loading students for marking:', error);
         showMessageBox('Error', `Failed to load students: ${error.message}`);
@@ -79842,7 +79842,7 @@ async function loadFacultyFeeManagement() {
         console.log('[Fees] Fees Data from app_settings:', feesRes);
         
         if (studentData.success && Array.isArray(studentData.data)) {
-            console.log([DEBUG] Found ${studentData.data.length} students in database`);
+            console.log(`[DEBUG] Found ${studentData.data.length} students in database`);
             
             // Get real fees data from Railway app_settings
             const realFees = (feesRes.success && feesRes.data) ? feesRes.data : {};
@@ -80724,7 +80724,7 @@ function updateFacultyFeeStats(students = facultyFeeData) {
 function sendReminderToStudent(usn, name, pendingAmount) {
     const message = `?? Reminder sent to ${name} (${usn})\n\n?? Pending Amount: ?${pendingAmount}\n\nMessage sent via WhatsApp & Email!`;
     
-    console.log([DEBUG] Sending reminder to ${name}...`);
+    console.log(`[DEBUG] Sending reminder to ${name}...`);
     
     // Send reminder via API (WhatsApp & Email)
     try {
@@ -80815,7 +80815,7 @@ function selectFeeTimeRange(range) {
     // Re-render the student cards with filtered data
     renderFacultyFeeCards(filteredStudents);
     
-    console.log([DEBUG] Filtered ${filteredStudents.length} records for range: ${range}`);
+    console.log(`[DEBUG] Filtered ${filteredStudents.length} records for range: ${range}`);
 }
 
 
@@ -87488,7 +87488,7 @@ document.addEventListener('input', function(e) {
         
         // Store selected installment
         window.fmCurrentInstallment = num;
-        console.log([DEBUG] Selected: ${num}${num === 1 ? 'st' : num === 2 ? 'nd' : 'rd'} Installment`);
+        console.log(`[DEBUG] Selected: ${num}${num === 1 ? 'st' : num === 2 ? 'nd' : 'rd'} Installment`);
     };
 
     // Auto-calculate pending balance
@@ -87616,7 +87616,7 @@ document.addEventListener('input', function(e) {
             // Show success message
             showMessageBox('✓ Payment Saved', 'Payment of ₹' + paid + ' has been recorded and saved to database!', 'success');
 
-            console.log([DEBUG] Fee data saved: Total ?${total}, Paid ?${paid} for ${studentUSN}`);
+            console.log(`[DEBUG] Fee data saved: Total ₹${total}, Paid ₹${paid} for ${studentUSN}`);
             
             // Reload panel to show updated data
             await fmOpenStudentFee(s);
