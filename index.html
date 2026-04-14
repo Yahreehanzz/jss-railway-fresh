@@ -87490,7 +87490,7 @@ document.addEventListener('input', function(e) {
         const total = parseFloat(totalEl.value);
         const paid = parseFloat(paidEl.value);
         
-        if (!total || isNaN(total) || total <= 0) {
+        if (isNaN(total) || total <= 0) {
             totalEl.style.borderColor = '#ef4444';
             totalEl.style.boxShadow = '0 0 0 3px rgba(239,68,68,0.18)';
             setTimeout(() => { totalEl.style.borderColor = ''; totalEl.style.boxShadow = ''; }, 2200);
@@ -87498,7 +87498,7 @@ document.addEventListener('input', function(e) {
             return;
         }
         
-        if (!paid || isNaN(paid) || paid < 0) {
+        if (isNaN(paid) || paid <= 0) {
             paidEl.style.borderColor = '#ef4444';
             paidEl.style.boxShadow = '0 0 0 3px rgba(239,68,68,0.18)';
             setTimeout(() => { paidEl.style.borderColor = ''; paidEl.style.boxShadow = ''; }, 2200);
