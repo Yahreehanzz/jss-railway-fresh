@@ -87515,6 +87515,9 @@ document.addEventListener('input', function(e) {
         try {
             // **NEW: Save payment to database via API**
             console.log('💾 Saving payment to database...');
+            console.log('📤 Request payload:', { usn: studentUSN, studentId: s.id, amount: paid, semester: s.semester });
+            console.log('🔗 API URL:', `${_API}/save-payment`);
+            
             const dbSaveRes = await fetch(`${_API}/save-payment`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -87528,8 +87531,12 @@ document.addEventListener('input', function(e) {
                 })
             });
             
+            console.log('📥 Response status:', dbSaveRes.status, dbSaveRes.statusText);
+            
             if (!dbSaveRes.ok) {
-                throw new Error(`Payment API error: ${dbSaveRes.status} ${dbSaveRes.statusText}`);
+                const errText = await dbSaveRes.text();
+                console.error('❌ API Response:', errText);
+                throw new Error(`Payment API error: ${dbSaveRes.status} ${dbSaveRes.statusText} - ${errText}`);
             }
             
             const dbSaveData = await dbSaveRes.json();
@@ -87598,12 +87605,13 @@ document.addEventListener('input', function(e) {
             // Reload panel to show updated data
             await fmOpenStudentFee(s);
         } catch(err) {
-            console.error('FM: save payment error', err);
+            console.error('FM: save payment error:', err.message);
+            console.error('Full error:', err);
             if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = '<i class="fas fa-save"></i> Save Payment'; }
             if (window.showMessageBox) {
                 showMessageBox(
                     'Error Saving Payment',
-                    'Could not save payment record. Please try again.',
+                    'Error: ' + err.message,
                     'error'
                 );
             }

@@ -748,13 +748,18 @@ app.delete('/api/notes/:noteId', async (req, res) => {
 // Save payment to database
 app.post('/api/save-payment', async (req, res) => {
     try {
+        console.log('🔵 POST /api/save-payment called');
+        console.log('📥 Request body:', req.body);
+        
         const { usn, studentId, amount, paymentMethod, installmentNumber, semester, notes } = req.body;
         
         if (!usn || !amount) {
+            console.warn('⚠️ Missing required fields: usn or amount');
             return res.status(400).json({ success: false, error: 'USN and amount required' });
         }
         
         if (isNaN(amount) || amount <= 0) {
+            console.warn('⚠️ Invalid amount:', amount);
             return res.status(400).json({ success: false, error: 'Amount must be a valid positive number' });
         }
         
