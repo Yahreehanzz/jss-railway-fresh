@@ -660,6 +660,30 @@ async function initPortalSettingsTable() {
 
 initPortalSettingsTable();
 
+async function initPaymentsTable() {
+    try {
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS student_payments (
+                id SERIAL PRIMARY KEY,
+                usn VARCHAR(50) NOT NULL,
+                student_id VARCHAR(100),
+                amount DECIMAL(10,2) NOT NULL,
+                payment_method VARCHAR(50) DEFAULT 'cash',
+                installment_number INTEGER,
+                semester VARCHAR(20),
+                notes TEXT,
+                status VARCHAR(20) DEFAULT 'completed',
+                payment_date TIMESTAMP DEFAULT NOW()
+            )
+        `);
+        console.log('✅ Student payments table ready');
+    } catch (err) {
+        console.error('❌ Student payments table initialization error:', err.message);
+    }
+}
+
+initPaymentsTable();
+
 // ============================================================
 // TEACHER ZONE — HOME HERO PORTAL PHOTO (base64 in TEXT column)
 // ============================================================
@@ -943,6 +967,80 @@ app.put('/api/settings/:key', async (req, res) => {
         res.json({ success: true, data: result.rows[0] });
     } catch (e) {
         console.error('❌ PUT /api/settings ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+// ============================================================
+// PAYMENT API ENDPOINTS
+// ============================================================
+
+app.post('/api/save-payment', async (req, res) => {
+    try {
+        const { usn, studentId, amount, paymentMethod, installmentNumber, semester, notes } = req.body;
+
+        if (!usn || amount === undefined || amount === null) {
+            return res.status(400).json({ success: false, error: 'USN and amount required' });
+        }
+
+        const amt = parseFloat(amount);
+        if (!Number.isFinite(amt) || amt <= 0) {
+            return res.status(400).json({ success: false, error: 'Amount must be a valid positive number' });
+        }
+
+        const result = await pool.query(
+            `INSERT INTO student_payments (usn, student_id, amount, payment_method, installment_number, semester, notes, status)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, 'completed')
+             RETURNING id, usn, amount, payment_date, status`,
+            [String(usn), studentId || null, amt, paymentMethod || 'cash', installmentNumber || null, semester || null, notes || null]
+        );
+
+        // Best-effort sync to student_fees table if present and matching record exists
+        if (semester) {
+            try {
+                const feeRecord = await pool.query(
+                    `SELECT total_fee, paid_fee FROM student_fees WHERE usn = $1 AND semester = $2`,
+                    [String(usn), String(semester)]
+                );
+
+                if (feeRecord.rows.length > 0) {
+                    const total = parseFloat(feeRecord.rows[0].total_fee || 0);
+                    const currentPaid = parseFloat(feeRecord.rows[0].paid_fee || 0);
+                    const newPaid = currentPaid + amt;
+                    const newPending = Math.max(0, total - newPaid);
+                    const status = newPaid >= total ? 'paid' : (newPaid > 0 ? 'partial' : 'pending');
+
+                    await pool.query(
+                        `UPDATE student_fees
+                         SET paid_fee = $1, pending_fee = $2, status = $3, updated_at = NOW()
+                         WHERE usn = $4 AND semester = $5`,
+                        [newPaid, newPending, status, String(usn), String(semester)]
+                    );
+                }
+            } catch (syncErr) {
+                console.warn('⚠️ Fee sync warning (not critical):', syncErr.message);
+            }
+        }
+
+        res.json({ success: true, data: result.rows[0] });
+    } catch (e) {
+        console.error('❌ POST /api/save-payment ERROR:', e.message);
+        res.status(500).json({ success: false, error: e.message });
+    }
+});
+
+app.get('/api/payment-history/:usn', async (req, res) => {
+    try {
+        const result = await pool.query(
+            `SELECT id, usn, amount, payment_date, payment_method, installment_number, semester, status
+             FROM student_payments
+             WHERE usn = $1
+             ORDER BY payment_date DESC`,
+            [req.params.usn]
+        );
+        res.json({ success: true, data: result.rows });
+    } catch (e) {
+        console.error('❌ GET /api/payment-history ERROR:', e.message);
         res.status(500).json({ success: false, error: e.message });
     }
 });
